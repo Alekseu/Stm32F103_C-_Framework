@@ -29,7 +29,7 @@ int main()
 	char t2[10];
 
 	Dma* _dma = new Dma();
-	_dma->Init(2);
+	_dma->Init(3);
 
 	_dma->MemCpy((char*)_flashMemory,t2,10);
 

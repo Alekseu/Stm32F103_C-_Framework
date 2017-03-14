@@ -47,38 +47,38 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 SECONDARY_FLASH += \
-F103_Framework.hex \
+RPS103_Firmware_DEV.hex \
 
 SECONDARY_SIZE += \
-F103_Framework.siz \
+RPS103_Firmware_DEV.siz \
 
 
 # All Target
-all: F103_Framework.elf secondary-outputs
+all: RPS103_Firmware_DEV.elf secondary-outputs
 
 # Tool invocations
-F103_Framework.elf: $(OBJS) $(USER_OBJS)
+RPS103_Firmware_DEV.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -O0 -fmessage-length=0 -ffunction-sections -fdata-sections  -g3 -T "E:\work\F103_Framework\ldscripts\F103\libs.ld" -T "E:\work\F103_Framework\ldscripts\F103\mem.ld" -T "E:\work\F103_Framework\ldscripts\F103\sections.ld" -Xlinker --gc-sections -Wl,-Map,"F103_Framework.map" -o "F103_Framework.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -O0 -fmessage-length=0 -ffunction-sections -fdata-sections  -g3 -T "E:\GitRepo\Stm32f103Framework\Stm32F103_C-_Framework\ldscripts\F103\libs.ld" -T "E:\GitRepo\Stm32f103Framework\Stm32F103_C-_Framework\ldscripts\F103\mem.ld" -T "E:\GitRepo\Stm32f103Framework\Stm32F103_C-_Framework\ldscripts\F103\sections.ld" -Xlinker --gc-sections -Wl,-Map,"RPS103_Firmware_DEV.map" -o "RPS103_Firmware_DEV.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-F103_Framework.hex: F103_Framework.elf
+RPS103_Firmware_DEV.hex: RPS103_Firmware_DEV.elf
 	@echo 'Invoking: Cross ARM GNU Create Flash Image'
-	arm-none-eabi-objcopy -O ihex "F103_Framework.elf"  "F103_Framework.hex"
+	arm-none-eabi-objcopy -O ihex "RPS103_Firmware_DEV.elf"  "RPS103_Firmware_DEV.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-F103_Framework.siz: F103_Framework.elf
+RPS103_Firmware_DEV.siz: RPS103_Firmware_DEV.elf
 	@echo 'Invoking: Cross ARM GNU Print Size'
-	arm-none-eabi-size --format=berkeley "F103_Framework.elf"
+	arm-none-eabi-size --format=berkeley "RPS103_Firmware_DEV.elf"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS) F103_Framework.elf
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS) RPS103_Firmware_DEV.elf
 	-@echo ' '
 
 secondary-outputs: $(SECONDARY_FLASH) $(SECONDARY_SIZE)

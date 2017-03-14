@@ -133,12 +133,12 @@ void DMA2_Channel3_IRQHandler(void) //rx
 	if (DMA2->ISR & DMA2_IT_TC3)
 	{
 		DMA2->IFCR =DMA2_IT_TC3;
-		Dma::pDma4->RecivedDmaComplete();
+		Dma::pDma2->RecivedDmaComplete();
 	}
 	if (DMA2->ISR & DMA2_IT_HT3)
 	{
 		DMA2->IFCR =DMA2_IT_HT3;
-		Dma::pDma4->HalfRecivedDmaComplete();
+		Dma::pDma2->HalfRecivedDmaComplete();
 	}
 }
 
@@ -180,7 +180,7 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 switch(channel)
  		 {
  		 case CHANNEL_1:
- 			 pDma0 = this;
+ 			 	 pDma0 = this;
  			      RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
  				  NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
  				  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
@@ -200,6 +200,16 @@ void DMA2_Channel5_IRQHandler(void) //tx
 				 NVIC_Init(&NVIC_InitStructure);
  		 	break;
 
+ 		 case CHANNEL_3:
+				 pDma2 = this;
+				 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;
+				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+				 NVIC_Init(&NVIC_InitStructure);
+ 			 break;
+
  		 }
  	 }
 
@@ -211,7 +221,9 @@ void DMA2_Channel5_IRQHandler(void) //tx
  	/*
  	 * ѕрием всего пакета по дма  (переопредел€емый метод, прерывание)
  	 */
- 	 void  Dma::RecivedDmaComplete(){}
+ 	 void  Dma::RecivedDmaComplete(){
+ 		 int a=0;
+ 	 }
 
  	/*
  	 * передача половины пакета дма (переопредел€емый метод, прерывание )
@@ -264,11 +276,30 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 			 DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
  		 			 DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
  		 			 DMA_Init(DMA1_Channel2, &DMA_InitStructure);
- 		 			 DMA_ClearFlag(DMA1_IT_TC1|DMA1_IT_HT1);
+ 		 			 DMA_ClearFlag(DMA1_IT_TC2|DMA1_IT_HT2);
  		 			 DMA_ITConfig(DMA1_Channel2, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
  		 			 DMA_Cmd(DMA1_Channel2,ENABLE);
-
  		 			 break;
+
+ 		 		 case CHANNEL_3:
+ 		 			 DMA_DeInit(DMA1_Channel3);
+ 		 			 DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)dst;//0x40013804;
+ 		 			 DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)src;
+ 		 			 DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+ 		 			 DMA_InitStructure.DMA_BufferSize = length;
+ 		 			 DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+ 		 			 DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Enable;
+ 		 			 DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+ 		 			 DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+ 		 			 DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+ 		 			 DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+ 		 			 DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+ 		 			 DMA_Init(DMA1_Channel3, &DMA_InitStructure);
+ 		 			 DMA_ClearFlag(DMA1_IT_TC3|DMA1_IT_HT3);
+ 		 			 DMA_ITConfig(DMA1_Channel3, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 DMA_Cmd(DMA1_Channel3,ENABLE);
+ 		 			 break;
+
 
  		 		 }
 
