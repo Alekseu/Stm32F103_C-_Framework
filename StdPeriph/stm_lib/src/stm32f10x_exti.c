@@ -249,7 +249,7 @@ ITStatus EXTI_GetITStatus(uint32_t EXTI_Line)
 void EXTI_ClearITPendingBit(uint32_t EXTI_Line)
 {
   /* Check the parameters */
-  assert_param(IS_EXTI_LINE(EXTI_Line));
+  //assert_param(IS_EXTI_LINE(EXTI_Line));
   
   EXTI->PR = EXTI_Line;
 }

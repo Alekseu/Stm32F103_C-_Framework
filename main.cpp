@@ -7,35 +7,61 @@
 #include "Driver/usart.h"
 #include "Driver/Dma.h"
 #include "Extention/operators.h"
+#include "Driver/Usb.h"
 
-class Test : public SerialPort, Dma
+extern "C"
 {
-public:
-	Test(unsigned char port, int baud): SerialPort(port,baud),Dma()
-	{
+	//#include "StdPeriph/usb/inc/usb_lib.h"
+//	#include "Driver/usb_com/usb_pwr.h"
+//	#include "Driver/usb_com/usb_istr.h"
+//	#include "Driver/usb_com/usb_desc.h"
+//	#include "Driver/usb_com/hw_config.h"
 
-	}
 
-	void HalfRecivedDmaComplete(){}
 
-};
+}
+
+//class Test : public SerialPort, Dma
+//{
+//public:
+//	Test(unsigned char port, int baud): SerialPort(port,baud),Dma()
+//	{
+//
+//	}
+//
+//	void HalfRecivedDmaComplete(){}
+//
+//};
 
 int main()
 {
-	Test* _port = new Test(_USART0,9600);
 
-	const char* _flashMemory = "HelloWorld";
-	char t[10];
-	char t2[10];
+	Usb com;
+	com.Init();
+//	Set_System();
+//	Set_USBClock();
+//	USB_Interrupts_Config();
+//    USB_Init();
+//    while (bDeviceState != CONFIGURED)
+//    {
+//    }
 
-	Dma* _dma = new Dma();
-	_dma->Init(3);
+//	Test* _port = new Test(_USART0,9600);
 
-	_dma->MemCpy((char*)_flashMemory,t2,10);
+//	const char* _flashMemory = "HelloWorld";
+//	char t[10];
+//	char t2[10];
+//
+//	Dma* _dma = new Dma();
+//	_dma->Init(3);
+//
+//	_dma->MemCpy((char*)_flashMemory,t2,10);
 
 	int a=0;
 	while(1){
 		a++;
+		com.SendData("Test");
+		_delay_ms(1500);
 	};
 
 	return 0;
