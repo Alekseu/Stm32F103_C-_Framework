@@ -14,34 +14,7 @@
 #define USB_DISCONNECT_PIN	GPIO_Pin_10
 #define USB_DISCONNECT  GPIOA
 
-#define USB_DEVICE_DESCRIPTOR_TYPE              0x01
-#define USB_CONFIGURATION_DESCRIPTOR_TYPE       0x02
-#define USB_STRING_DESCRIPTOR_TYPE              0x03
-#define USB_INTERFACE_DESCRIPTOR_TYPE           0x04
-#define USB_ENDPOINT_DESCRIPTOR_TYPE            0x05
 
-#define VIRTUAL_COM_PORT_DATA_SIZE              64
-#define VIRTUAL_COM_PORT_INT_SIZE               8
-
-#define VIRTUAL_COM_PORT_SIZ_DEVICE_DESC        18
-#define VIRTUAL_COM_PORT_SIZ_CONFIG_DESC        67
-#define VIRTUAL_COM_PORT_SIZ_STRING_LANGID      4
-#define VIRTUAL_COM_PORT_SIZ_STRING_VENDOR      38
-#define VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT     50
-#define VIRTUAL_COM_PORT_SIZ_STRING_SERIAL      26
-
-#define STANDARD_ENDPOINT_DESC_SIZE             0x09
-
-
-#define SEND_ENCAPSULATED_COMMAND   0x00
-#define GET_ENCAPSULATED_RESPONSE   0x01
-#define SET_COMM_FEATURE            0x02
-#define GET_COMM_FEATURE            0x03
-#define CLEAR_COMM_FEATURE          0x04
-#define SET_LINE_CODING             0x20
-#define GET_LINE_CODING             0x21
-#define SET_CONTROL_LINE_STATE      0x22
-#define SEND_BREAK                  0x23
 
 extern "C"
 {
@@ -77,10 +50,13 @@ class Usb
 
 	ONE_DESCRIPTOR Device_Descriptor;
 	ONE_DESCRIPTOR Config_Descriptor;
-	ONE_DESCRIPTOR String_Descriptor[4];
+	ONE_DESCRIPTOR String_Descriptor[5];
 
-	unsigned char RxBuffer[32];
-	unsigned char TxBuffer[32];
+	unsigned char RxBuffer[257];
+	unsigned char TxBuffer[257];
+
+	unsigned int _txBytes;
+	unsigned int _rxBytes;
 
 	bool tr=true;
 
@@ -111,19 +87,21 @@ class Usb
 
 	static uint8_t* LineCodingStamp(uint16_t t);
 
-	virtual int  SendDataToUsb();
-	virtual void RecivedFromUsb(unsigned int rx);
+	virtual void  SendDataToUsb(unsigned char endpoint);
+	virtual void RecivedFromUsb(unsigned int endpoint);
 
 
 
 	bool Init();
-	void SendData(const char* data);
-	//char* ReadData();
+	void SendData(const char* data, int length);
+	int ReadData(char* mass);
+
+
+	static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 
 	private:
 	GPIO_InitTypeDef GPIO_InitStructure;
-	unsigned int _txBytes;
-	unsigned int _rxBytes;
+
 
 };
 

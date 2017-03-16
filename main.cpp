@@ -8,6 +8,7 @@
 #include "Driver/Dma.h"
 #include "Extention/operators.h"
 #include "Driver/Usb.h"
+#include "Driver/Blinker.h"
 
 extern "C"
 {
@@ -33,10 +34,14 @@ extern "C"
 //
 //};
 
+char _data[256];
+Blinker _leds;
+Usb com;
+
 int main()
 {
 
-	Usb com;
+	_leds.Init();
 	com.Init();
 //	Set_System();
 //	Set_USBClock();
@@ -57,11 +62,21 @@ int main()
 //
 //	_dma->MemCpy((char*)_flashMemory,t2,10);
 
+
+
 	int a=0;
 	while(1){
 		a++;
-		com.SendData("Test");
-		_delay_ms(1500);
+		_leds.On(1);
+		memset(_data,0,256);
+		int l = com.ReadData(_data);
+		if(l>0)
+		{
+			com.SendData(_data,l);
+		}
+		_delay_ms(150);
+		_leds.Off(1);
+		_delay_ms(150);
 	};
 
 	return 0;

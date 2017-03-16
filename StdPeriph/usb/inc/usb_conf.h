@@ -47,6 +47,7 @@
 /* EP1  */
 /* tx buffer base address */
 #define ENDP1_TXADDR        (0xC0)
+#define ENDP2_RXADDR        (0x100)
 #define ENDP2_TXADDR        (0x100)
 #define ENDP3_RXADDR        (0x110)
 
@@ -70,21 +71,8 @@
 
 /* CTR service routines */
 /* associated to defined endpoints */
-/*#define  EP1_IN_Callback   NOP_Process*/
-/*#define  EP2_IN_Callback   NOP_Process*/
-#define  EP3_IN_Callback   NOP_Process
-#define  EP4_IN_Callback   NOP_Process
-#define  EP5_IN_Callback   NOP_Process
-#define  EP6_IN_Callback   NOP_Process
-#define  EP7_IN_Callback   NOP_Process
 
-#define  EP1_OUT_Callback   NOP_Process
-#define  EP2_OUT_Callback   NOP_Process
-/*#define  EP3_OUT_Callback   NOP_Process*/
-#define  EP4_OUT_Callback   NOP_Process
-#define  EP5_OUT_Callback   NOP_Process
-#define  EP6_OUT_Callback   NOP_Process
-#define  EP7_OUT_Callback   NOP_Process
+
 
 #endif /* __USB_CONF_H */
 
