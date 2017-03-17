@@ -41,6 +41,7 @@ class Dma
 	DMA_InitTypeDef   DMA_InitStructure;
 	NVIC_InitTypeDef  NVIC_InitStructure;
 	unsigned char _channel;
+	bool configured = false;
 public:
 
 	static Dma* pDma0;
@@ -63,6 +64,8 @@ public:
 
 
 	void Init(unsigned char channel );
+
+	void InitPherif(void* pherif);
 
 	/*
 	 * Приаем половины пакета по дма (переопределяемый метод, прерывание)
@@ -98,7 +101,10 @@ public:
 	/*
 	 * пнуть дма на передачу
 	 */
-	void WriteArrayDma(char* array, int length);
+	void WriteArrayDma(unsigned char* array, int length);
+
+
+	void StartTransmitArrayDmaCircle(unsigned char* src,  char* dst, int length);
 
 
 

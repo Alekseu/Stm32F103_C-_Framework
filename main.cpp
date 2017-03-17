@@ -10,6 +10,8 @@
 #include "Driver/Usb.h"
 #include "Driver/Blinker.h"
 
+#include "Driver/singleLed/SL.h"
+
 extern "C"
 {
 	//#include "StdPeriph/usb/inc/usb_lib.h"
@@ -17,32 +19,23 @@ extern "C"
 //	#include "Driver/usb_com/usb_istr.h"
 //	#include "Driver/usb_com/usb_desc.h"
 //	#include "Driver/usb_com/hw_config.h"
-
-
-
 }
 
-//class Test : public SerialPort, Dma
-//{
-//public:
-//	Test(unsigned char port, int baud): SerialPort(port,baud),Dma()
-//	{
-//
-//	}
-//
-//	void HalfRecivedDmaComplete(){}
-//
-//};
 
 char _data[256];
 Blinker _leds;
 Usb com;
+SL _sl;
 
 int main()
 {
 
 	_leds.Init();
-	com.Init();
+	//com.Init();
+
+	_sl.Width = 5;
+	_sl.Height = 5;
+	_sl.SLInit();
 //	Set_System();
 //	Set_USBClock();
 //	USB_Interrupts_Config();

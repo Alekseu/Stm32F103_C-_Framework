@@ -31,21 +31,7 @@ extern "C"
 			1
 	};
 
-	typedef struct
-	{
-		uint32_t bitrate;
-		uint8_t format;
-		uint8_t paritytype;
-		uint8_t datatype;
-	}LINE_CODING;
 
-	LINE_CODING linecoding =
-	{
-			115200, /* baud rate*/
-			0x00,   /* stop bits-1*/
-			0x00,   /* parity - none*/
-			0x08    /* no. of bits 8*/
-	};
 
 	void EP1_IN_Callback (void)
 	{
@@ -310,36 +296,57 @@ void (*pEpInt_OUT[7])(void) =
 #define SET_CONTROL_LINE_STATE      0x22
 #define SEND_BREAK                  0x23
 
+Usb::Usb()
+{
+	RxBuffer=0;
+	TxBuffer=0;
+	RxBufferSize=32;
+	TxBufferSize = 32;
+	TxBytes = 0;
+	RxBytes = 0;
+	TypeUsb = VirtualComPort;
+	bDeviceState = UNCONNECTED;
 
+}
 
 bool Usb::Init()
 {
 	pUsb = this;
-	bDeviceState = UNCONNECTED;
 
+	RxBuffer = new unsigned char[RxBufferSize];
+	TxBuffer = new unsigned char[TxBufferSize];
 
-//	Device_Descriptor.Descriptor = (uint8_t*)SomeDev_DeviceDescriptor;//_Virtual_Com_Port_Device_Descriptor;
-//	Device_Descriptor.Descriptor_Size = SomeDev_SIZ_DEVICE_DESC;//VIRTUAL_COM_PORT_SIZ_DEVICE_DESC;
-//
-//	Config_Descriptor.Descriptor =(uint8_t*)SomeDev_ConfigDescriptor;//_Virtual_Com_Port_ConfigDescriptor;
-//	Config_Descriptor.Descriptor_Size = SomeDev_SIZ_CONFIG_DESC;//VIRTUAL_COM_PORT_SIZ_CONFIG_DESC;
-//
-//	String_Descriptor[0] = {(uint8_t*)SomeDev_StringLangID};//Virtual_Com_Port_StringLangID, VIRTUAL_COM_PORT_SIZ_STRING_LANGID};
-//	String_Descriptor[1] = {(uint8_t*)SomeDev_StringVendor};//Virtual_Com_Port_StringVendor, VIRTUAL_COM_PORT_SIZ_STRING_VENDOR};
-//	String_Descriptor[2] = {(uint8_t*)SomeDev_StringProduct};//Virtual_Com_Port_StringProduct, VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT};
-//	String_Descriptor[3] = {(uint8_t*)SomeDev_StringSerial};//Virtual_Com_Port_StringSerial, VIRTUAL_COM_PORT_SIZ_STRING_SERIAL};
-//	String_Descriptor[4] = {(uint8_t*)SomeDev_StringInterface};
+	switch(TypeUsb)
+	{
+	case VirtualComPort:
+		Device_Descriptor.Descriptor = (uint8_t*)_Virtual_Com_Port_Device_Descriptor;
+		Device_Descriptor.Descriptor_Size = VIRTUAL_COM_PORT_SIZ_DEVICE_DESC;
 
-	Device_Descriptor.Descriptor = (uint8_t*)_Virtual_Com_Port_Device_Descriptor;
-	Device_Descriptor.Descriptor_Size = VIRTUAL_COM_PORT_SIZ_DEVICE_DESC;
+		Config_Descriptor.Descriptor =(uint8_t*)_Virtual_Com_Port_ConfigDescriptor;
+		Config_Descriptor.Descriptor_Size = VIRTUAL_COM_PORT_SIZ_CONFIG_DESC;
 
-	Config_Descriptor.Descriptor =(uint8_t*)_Virtual_Com_Port_ConfigDescriptor;
-	Config_Descriptor.Descriptor_Size = VIRTUAL_COM_PORT_SIZ_CONFIG_DESC;
+		String_Descriptor[0] = {(uint8_t*)Virtual_Com_Port_StringLangID, VIRTUAL_COM_PORT_SIZ_STRING_LANGID};
+		String_Descriptor[1] = {(uint8_t*)Virtual_Com_Port_StringVendor, VIRTUAL_COM_PORT_SIZ_STRING_VENDOR};
+		String_Descriptor[2] = {(uint8_t*)Virtual_Com_Port_StringProduct, VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT};
+		String_Descriptor[3] = {(uint8_t*)Virtual_Com_Port_StringSerial, VIRTUAL_COM_PORT_SIZ_STRING_SERIAL};
+		break;
+	case HumanInterfaceDevice:
+		Device_Descriptor.Descriptor = (uint8_t*)SomeDev_DeviceDescriptor;
+		Device_Descriptor.Descriptor_Size = SomeDev_SIZ_DEVICE_DESC;
 
-	String_Descriptor[0] = {(uint8_t*)Virtual_Com_Port_StringLangID, VIRTUAL_COM_PORT_SIZ_STRING_LANGID};
-	String_Descriptor[1] = {(uint8_t*)Virtual_Com_Port_StringVendor, VIRTUAL_COM_PORT_SIZ_STRING_VENDOR};
-	String_Descriptor[2] = {(uint8_t*)Virtual_Com_Port_StringProduct, VIRTUAL_COM_PORT_SIZ_STRING_PRODUCT};
-	String_Descriptor[3] = {(uint8_t*)Virtual_Com_Port_StringSerial, VIRTUAL_COM_PORT_SIZ_STRING_SERIAL};
+		Config_Descriptor.Descriptor =(uint8_t*)SomeDev_ConfigDescriptor;
+		Config_Descriptor.Descriptor_Size = SomeDev_SIZ_CONFIG_DESC;
+
+		String_Descriptor[0] = {(uint8_t*)SomeDev_StringLangID};
+		String_Descriptor[1] = {(uint8_t*)SomeDev_StringVendor};
+		String_Descriptor[2] = {(uint8_t*)SomeDev_StringProduct};
+		String_Descriptor[3] = {(uint8_t*)SomeDev_StringSerial};
+		String_Descriptor[4] = {(uint8_t*)SomeDev_StringInterface};
+		break;
+	case MassStorageDevice:
+		break;
+	}
+
 
 	//set system
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT, ENABLE);
@@ -392,7 +399,6 @@ bool Usb::Init()
 	User_Standard_Requests.User_SetDeviceFeature = UsbSetDeviceFeature;
 	User_Standard_Requests.User_SetDeviceAddress = UsbSetDeviceAddress;
 
-	//SetDeviceProperty(&Device_Property);
 	USB_Init(&Device_Property,&User_Standard_Requests);
 
 	int timeout = 1500;
@@ -609,7 +615,6 @@ void Usb::UsbInit()
 	 }
  }
 
-
  void Usb::UsbGetConfiguration()
  {
 
@@ -633,6 +638,7 @@ void Usb::UsbInit()
  {
 
  }
+
  void  Usb::UsbSetInterface()
  {
 
@@ -663,43 +669,46 @@ void Usb::UsbInit()
 	 Usb::pUsb-> bDeviceState = ADDRESSED;
  }
 
-
+ // прерывания конечных точек тут прийдется править код под свои нужды либо в классе наследнике определять свою логику
  void Usb::SendDataToUsb(unsigned char endpoint)
  {
 	 if(endpoint == 0)
 	 {
-		 UserToPMABufferCopy(Usb::pUsb->TxBuffer, ENDP1_TXADDR, _txBytes);
-		 SetEPTxCount(ENDP1, _txBytes);
+		 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
+		 SetEPTxCount(ENDP1, TxBytes);
 		 SetEPTxValid(ENDP1);
 	 }
 	 else
 	 {
-		 UserToPMABufferCopy(Usb::pUsb->TxBuffer, ENDP1_TXADDR, _txBytes);
-		 SetEPTxCount(ENDP1, _txBytes);
+		 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
+		 SetEPTxCount(ENDP1, TxBytes);
 		 SetEPTxValid(ENDP1);
-		 _txBytes=0;
+		 TxBytes=0;
 	 }
  }
 
+ // прерывания конечных точек тут прийдется править код под свои нужды либо в классе наследнике определять свою логику
  void Usb::RecivedFromUsb(unsigned int endpoint)
  {
-	 int rx = USB_SIL_Read(EP3_OUT, Usb::pUsb->RxBuffer+_rxBytes);
-	  SetEPRxValid(ENDP3);
-	 _rxBytes+= rx;
+	 if(RxBytes+VIRTUAL_COM_PORT_DATA_SIZE>RxBufferSize) RxBytes =0;
+	 int rx = USB_SIL_Read(EP3_OUT, RxBuffer+RxBytes);
+	 SetEPRxValid(ENDP3);
+	 RxBytes+= rx;
  }
+
 
  void Usb::SendData(const char* data, int length)
  {
+	 if(TxBytes+length>TxBufferSize) TxBytes=0;
 	 memcpy(TxBuffer,data, strlen(data));
-	 _txBytes = strlen(data);
+	 TxBytes = strlen(data);
  }
-
 
  int Usb::ReadData(char* mass)
  {
-	 int length = _rxBytes;
-	 memcpy(mass,RxBuffer,_rxBytes);
-	 _rxBytes=0;
+	 int length = RxBytes;
+	 memcpy(mass,RxBuffer,RxBytes);
+	 RxBytes=0;
 	 return length;
  }
 
@@ -707,31 +716,12 @@ void Usb::UsbInit()
  {
 	 if (t == 0)
 	 {
-		 pInformation->Ctrl_Info.Usb_wLength = sizeof(linecoding);
+		 pInformation->Ctrl_Info.Usb_wLength = sizeof(Linecoding);
 		 return NULL;
 	 }
-	 return(uint8_t *)&linecoding;
+	 return(uint8_t *)&Usb::pUsb->Linecoding;
  }
 
- void Usb::IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len)
- {
-   uint8_t idx = 0;
 
-   for( idx = 0 ; idx < len ; idx ++)
-   {
-     if( ((value >> 28)) < 0xA )
-     {
-       pbuf[ 2* idx] = (value >> 28) + '0';
-     }
-     else
-     {
-       pbuf[2* idx] = (value >> 28) + 'A' - 10;
-     }
-
-     value = value << 4;
-
-     pbuf[ 2* idx + 1] = 0;
-   }
- }
 
 

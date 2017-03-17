@@ -8,25 +8,32 @@
 #ifndef DRIVER_USB_H_
 #define DRIVER_USB_H_
 
-
+//TODO Возможно необходимо разнести по разным классам - классы usb устройств
 
 #define RCC_APB2Periph_GPIO_DISCONNECT RCC_APB2Periph_GPIOA
 #define USB_DISCONNECT_PIN	GPIO_Pin_10
 #define USB_DISCONNECT  GPIOA
 
 
-
 extern "C"
 {
 	#include "../StdPeriph/usb/inc/usb_lib.h"
 	#include "../StdPeriph/usb/inc/usb_conf.h"
-
 	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
 	#include "../StdPeriph/stm_lib/inc/misc.h"
 
 }
+
+typedef struct
+	{
+		uint32_t bitrate;
+		uint8_t format;
+		uint8_t paritytype;
+		uint8_t datatype;
+	}LINE_CODING;
+
 
 typedef enum _DEVICE_STATE
 {
@@ -38,28 +45,46 @@ typedef enum _DEVICE_STATE
   CONFIGURED
 } DEVICE_STATE;
 
+
+typedef enum _Usbtype
+{
+	VirtualComPort,
+	HumanInterfaceDevice,
+	MassStorageDevice
+} UsbType;
+
+
 class Usb
 {
 	public:
 	static Usb* pUsb;
+
 	USER_STANDARD_REQUESTS User_Standard_Requests;
 	DEVICE_PROP Device_Property;
 	DEVICE Device_Table;
-	__IO uint32_t bDeviceState;
+	uint32_t bDeviceState;
 	uint8_t Request = 0;
 
 	ONE_DESCRIPTOR Device_Descriptor;
 	ONE_DESCRIPTOR Config_Descriptor;
 	ONE_DESCRIPTOR String_Descriptor[5];
 
-	unsigned char RxBuffer[257];
-	unsigned char TxBuffer[257];
+	UsbType TypeUsb;
 
-	unsigned int _txBytes;
-	unsigned int _rxBytes;
+	unsigned int RxBufferSize;
+	unsigned int TxBufferSize;
 
-	bool tr=true;
+	unsigned char* RxBuffer;
+	unsigned char* TxBuffer;
 
+	unsigned int TxBytes;
+	unsigned int RxBytes;
+
+	// if use vcp
+	LINE_CODING Linecoding;
+
+
+	Usb();
 	virtual ~Usb(){}
 
 	//device property
@@ -77,27 +102,27 @@ class Usb
 	//standart requests
 	static void UsbGetConfiguration();
 	static void UsbSetConfiguration();
-	static void  UsbGetInterface();
-	static void  UsbSetInterface();
+	static void UsbGetInterface();
+	static void UsbSetInterface();
 	static void UsbGetStatus();
 	static void UsbClearFeature();
 	static void UsbSetEndPointFeature();
 	static void UsbSetDeviceFeature();
 	static void UsbSetDeviceAddress();
 
+	//for vcp
 	static uint8_t* LineCodingStamp(uint16_t t);
 
+	//endpoint events
 	virtual void  SendDataToUsb(unsigned char endpoint);
 	virtual void RecivedFromUsb(unsigned int endpoint);
 
 
-
 	bool Init();
+
 	void SendData(const char* data, int length);
 	int ReadData(char* mass);
 
-
-	static void IntToUnicode (uint32_t value , uint8_t *pbuf , uint8_t len);
 
 	private:
 	GPIO_InitTypeDef GPIO_InitStructure;

@@ -959,9 +959,9 @@ void TIM_DMAConfig(TIM_TypeDef* TIMx, uint16_t TIM_DMABase, uint16_t TIM_DMABurs
 void TIM_DMACmd(TIM_TypeDef* TIMx, uint16_t TIM_DMASource, FunctionalState NewState)
 { 
   /* Check the parameters */
-  assert_param(IS_TIM_LIST9_PERIPH(TIMx));
-  assert_param(IS_TIM_DMA_SOURCE(TIM_DMASource));
-  assert_param(IS_FUNCTIONAL_STATE(NewState));
+//  assert_param(IS_TIM_LIST9_PERIPH(TIMx));
+//  assert_param(IS_TIM_DMA_SOURCE(TIM_DMASource));
+//  assert_param(IS_FUNCTIONAL_STATE(NewState));
   
   if (NewState != DISABLE)
   {
@@ -2258,7 +2258,7 @@ void TIM_SelectMasterSlaveMode(TIM_TypeDef* TIMx, uint16_t TIM_MasterSlaveMode)
 void TIM_SetCounter(TIM_TypeDef* TIMx, uint16_t Counter)
 {
   /* Check the parameters */
-  assert_param(IS_TIM_ALL_PERIPH(TIMx));
+ // assert_param(IS_TIM_ALL_PERIPH(TIMx));
   /* Set the Counter Register value */
   TIMx->CNT = Counter;
 }
