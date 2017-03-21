@@ -412,13 +412,12 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 					DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
  		 					DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
  		 					DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
- 		 					DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+ 		 					DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
  		 					DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
  		 					DMA_Init(DMA1_Channel2, &DMA_InitStructure);
  		 					DMA_ClearFlag(DMA1_IT_TC2|DMA1_IT_HT2);
- 		 					DMA_ITConfig(DMA1_Channel2, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 					DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
  		 					DMA_Cmd(DMA1_Channel2,ENABLE);
-
  		 			break;
  		 		}
  	}

@@ -11,6 +11,8 @@
 #include "Driver/Blinker.h"
 
 #include "Driver/singleLed/SL.h"
+#include "Communication/CommandProcessor.h"
+#include <string.h>
 
 extern "C"
 {
@@ -24,18 +26,37 @@ extern "C"
 
 char _data[256];
 Blinker _leds;
+CommandProcessor* _command;
 Usb com;
 SL _sl;
 
-int main()
+void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
 {
 
+	if(com==SetBuffer)
+	{
+		memcpy(_sl.VideoBuffer,data,length);
+		_command->SendCommand(com,(char*)0,0);
+	}
+}
+
+
+int main()
+{
+	_command = new CommandProcessor(_USART1,19200);
 	_leds.Init();
 	//com.Init();
 
-	_sl.Width = 5;
-	_sl.Height = 5;
+	_sl.Width = 32;
+	_sl.Height = 16;
 	_sl.SLInit();
+
+	_command->Width = 32;
+	_command->Hieght = 16;
+	_command->UseDMA = false;
+	_command->OnCommand = OnProcessCommand;
+	_command->Init();
+
 //	Set_System();
 //	Set_USBClock();
 //	USB_Interrupts_Config();
@@ -61,12 +82,12 @@ int main()
 	while(1){
 		a++;
 		_leds.On(1);
-		memset(_data,0,256);
-		int l = com.ReadData(_data);
-		if(l>0)
-		{
-			com.SendData(_data,l);
-		}
+//		memset(_data,0,256);
+//		int l = com.ReadData(_data);
+//		if(l>0)
+//		{
+//			com.SendData(_data,l);
+//		}
 		_delay_ms(150);
 		_leds.Off(1);
 		_delay_ms(150);

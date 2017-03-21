@@ -34,4 +34,5 @@ StdPeriph/newlib \
 StdPeriph/cmsis_boot \
 Extention \
 Driver \
+Communication \
 

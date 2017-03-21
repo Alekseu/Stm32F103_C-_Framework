@@ -14,6 +14,7 @@ RM := rm -rf
 -include StdPeriph/cmsis_boot/subdir.mk
 -include Extention/subdir.mk
 -include Driver/subdir.mk
+-include Communication/subdir.mk
 -include subdir.mk
 -include objects.mk
 

@@ -6,16 +6,19 @@
 CPP_SRCS += \
 ../Driver/Dma.cpp \
 ../Driver/Usb.cpp \
+../Driver/timer.cpp \
 ../Driver/usart.cpp 
 
 OBJS += \
 ./Driver/Dma.o \
 ./Driver/Usb.o \
+./Driver/timer.o \
 ./Driver/usart.o 
 
 CPP_DEPS += \
 ./Driver/Dma.d \
 ./Driver/Usb.d \
+./Driver/timer.d \
 ./Driver/usart.d 
 
 
