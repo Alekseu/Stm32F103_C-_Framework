@@ -14,9 +14,11 @@
 #include "Communication/CommandProcessor.h"
 #include <string.h>
 
+#include "Extention/MemoryManager.h"
+
 extern "C"
 {
-	//#include "StdPeriph/usb/inc/usb_lib.h"
+//#include "StdPeriph/usb/inc/usb_lib.h"
 //	#include "Driver/usb_com/usb_pwr.h"
 //	#include "Driver/usb_com/usb_istr.h"
 //	#include "Driver/usb_com/usb_desc.h"
@@ -43,9 +45,32 @@ void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
 
 int main()
 {
+
+
+	MemoryManager mem((uint32_t)0x60000000,0x80000);
+
+	ErrorStatus t = mem.Init();
+
+	char* array = new (&mem) char[130];
+
+	memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
+
+	mem.ShowMemory();
+
+//	char* array = (char*)mem.Malloc(150);
+//
+//	memcpy(array,"Hello world !!!!",strlen("Hello world !!!!"));
+//
+//	mem.ShowMemory();
+//
+//	mem.Free(array);
+//
+//	mem.ShowMemory();
+
 	_command = new CommandProcessor(_USART1,19200);
 	_leds.Init();
-	//com.Init();
+	com.TypeUsb = HumanInterfaceDevice;
+	com.Init();
 
 	_sl.Width = 32;
 	_sl.Height = 16;

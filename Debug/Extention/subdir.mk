@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../Extention/MemoryManager.cpp \
 ../Extention/delay.cpp \
 ../Extention/operators.cpp 
 
 OBJS += \
+./Extention/MemoryManager.o \
 ./Extention/delay.o \
 ./Extention/operators.o 
 
 CPP_DEPS += \
+./Extention/MemoryManager.d \
 ./Extention/delay.d \
 ./Extention/operators.d 
 

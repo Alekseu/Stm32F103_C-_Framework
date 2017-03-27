@@ -14,6 +14,7 @@ C_SRCS += \
 ../StdPeriph/stm_lib/src/stm32f10x_dma.c \
 ../StdPeriph/stm_lib/src/stm32f10x_exti.c \
 ../StdPeriph/stm_lib/src/stm32f10x_flash.c \
+../StdPeriph/stm_lib/src/stm32f10x_fsmc.c \
 ../StdPeriph/stm_lib/src/stm32f10x_gpio.c \
 ../StdPeriph/stm_lib/src/stm32f10x_i2c.c \
 ../StdPeriph/stm_lib/src/stm32f10x_iwdg.c \
@@ -37,6 +38,7 @@ OBJS += \
 ./StdPeriph/stm_lib/src/stm32f10x_dma.o \
 ./StdPeriph/stm_lib/src/stm32f10x_exti.o \
 ./StdPeriph/stm_lib/src/stm32f10x_flash.o \
+./StdPeriph/stm_lib/src/stm32f10x_fsmc.o \
 ./StdPeriph/stm_lib/src/stm32f10x_gpio.o \
 ./StdPeriph/stm_lib/src/stm32f10x_i2c.o \
 ./StdPeriph/stm_lib/src/stm32f10x_iwdg.o \
@@ -60,6 +62,7 @@ C_DEPS += \
 ./StdPeriph/stm_lib/src/stm32f10x_dma.d \
 ./StdPeriph/stm_lib/src/stm32f10x_exti.d \
 ./StdPeriph/stm_lib/src/stm32f10x_flash.d \
+./StdPeriph/stm_lib/src/stm32f10x_fsmc.d \
 ./StdPeriph/stm_lib/src/stm32f10x_gpio.d \
 ./StdPeriph/stm_lib/src/stm32f10x_i2c.d \
 ./StdPeriph/stm_lib/src/stm32f10x_iwdg.d \
