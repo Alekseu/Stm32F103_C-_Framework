@@ -9,7 +9,7 @@
 #include<string.h>
 
 
-MemoryManager::MemoryManager(unsigned int StartAddr, unsigned int length)
+MemoryManager::MemoryManager(uint32_t StartAddr, unsigned int length)
 {
 	_baseAddr = StartAddr;
 	_sramLength = length;
@@ -83,7 +83,7 @@ ErrorStatus MemoryManager::Init()
 	  ErrorStatus ret_wert=ERROR;
 	  uint16_t oldwert,istwert;
 	//init gpio fsmc
-
+	  RCC->APB2ENR |=RCC_APB2Periph_AFIO;
 	 RCC->APB2ENR |= RCC_APB2Periph_GPIOA;
 			 RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
 			 RCC->APB2ENR |= RCC_APB2Periph_GPIOC;
@@ -93,16 +93,12 @@ ErrorStatus MemoryManager::Init()
 		 GPIO_InitTypeDef GPIO_InitStructure;
 
 
-		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 |
-		                               GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 |
-		                               GPIO_Pin_11 | GPIO_Pin_12| GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12| GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 		 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 		 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 		 GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_7 | GPIO_Pin_8 |
-		          GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 |
-		          GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 		 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 		 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 		 GPIO_Init(GPIOE, &GPIO_InitStructure);
@@ -118,9 +114,9 @@ ErrorStatus MemoryManager::Init()
 			 FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
 
 			 RCC->AHBENR |= RCC_AHBPeriph_FSMC;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 15;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 15;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 255;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 7;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 5;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 15;
 				 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 15;
 				 FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 0;
 				 FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
@@ -147,17 +143,17 @@ ErrorStatus MemoryManager::Init()
 			 /* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
 			 FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 
-			 oldwert=SRAM_Read(0x00);
+			 oldwert=SRAM_Read(0x01);
 			  SRAM_Write(0x00,0x5A3C);
-			  istwert=SRAM_Read(0x00);
-			  SRAM_Write(0x00,oldwert);
-			  if(istwert==0x5A3C) ret_wert=SUCCESS; // RAM vorhanden
+			  istwert=SRAM_Read(0x01);
+			  SRAM_Write(0x01,oldwert);
+			  if(istwert==0x5A3C) ret_wert=SUCCESS;
 
 			if(ret_wert==SUCCESS)
 			{
 				int i,j;
 				    mem_block_s *head=0;
-				    unsigned int addr;
+				    uint32_t addr;
 
 				    addr = _baseAddr;
 
@@ -283,7 +279,57 @@ void MemoryManager::Free(void* obj)
 
 void MemoryManager::ShowMemory()
 {
+	 int i;
+	    int block_size;
+	    int block_cnt[MEM_TBL_MAX];
+	    int usedSize=0, totalSize=0;
+	    mem_block_s *head;
 
+	    if(!MemHeapHasBeenInitialised )
+	            return;
+
+	    memset(block_cnt, 0, sizeof(block_cnt));
+
+	    head = _memInfoTbl[0].wm_head;
+	    i=0;
+	    block_size = head->block_size;
+
+	    while( head->ptr !=0)
+	    {
+	        if(head->used == MEM_USED )
+	        {
+	            block_cnt[i]++;
+	            usedSize +=head->block_size;
+	        }
+	        usedSize += sizeof(mem_block_s);
+
+	        totalSize += (head->block_size+ sizeof(mem_block_s));
+
+	        /* change next memory block */
+	        head = ( mem_block_s *)head->next;
+	        if( block_size != head->block_size)
+	        {
+	            block_size = head->block_size;
+	            i++;
+	        }
+	    }
+
+	    usedSize += sizeof(mem_block_s);
+	    totalSize+= sizeof(mem_block_s);
+
+	    //dprintf("----Memory Information----\n");
+
+	    for(i=0; i<MEM_TBL_MAX; i++) {
+	        //printf("block %d used=%d/%d (max %d)\n",
+	        //            memInfoTbl[i].block_size, block_cnt[i],
+	         //           memInfoTbl[i].num_max,
+	         //           memInfoTbl[i].calc[CALC_MAX]);
+	    }
+
+	   // printf("used memory=%d\n",usedSize);
+	   // printf("free memory=%d\n",totalSize-usedSize);
+	   // printf("total memory=%d\n",totalSize);
+	   // printf("--------------------------\n");
 }
 
 

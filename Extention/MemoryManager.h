@@ -49,12 +49,12 @@ typedef struct _INFO_TBL_S
     int calc[2];
 } info_TBL;
 
-#define MEM_TBL_MAX   7 // (sizeof(_memInfoTbl)/sizeof(struct _INFO_TBL_S))
+#define MEM_TBL_MAX   7
 
 class MemoryManager
 {
 public:
-	MemoryManager(unsigned int StartAddr, unsigned int length);
+	MemoryManager(uint32_t StartAddr, unsigned int length);
 
 	ErrorStatus Init();
 
@@ -65,8 +65,8 @@ public:
 	void ShowMemory();
 
 private:
-	info_TBL _memInfoTbl[10];
-	unsigned int _baseAddr;
+	info_TBL _memInfoTbl[MEM_TBL_MAX];
+	uint32_t _baseAddr;
 	unsigned int _sramLength;
 	bool MemHeapHasBeenInitialised;
 

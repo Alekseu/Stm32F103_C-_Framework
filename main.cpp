@@ -29,6 +29,7 @@ extern "C"
 char _data[256];
 Blinker _leds;
 CommandProcessor* _command;
+
 Usb com;
 SL _sl;
 
@@ -52,20 +53,23 @@ int main()
 	ErrorStatus t = mem.Init();
 
 	char* array = new (&mem) char[130];
+	if(array!=0)
+	{
 
-	memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
+		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
 
-	mem.ShowMemory();
+		mem.ShowMemory();
 
-//	char* array = (char*)mem.Malloc(150);
+//		char* array = (char*)mem.Malloc(150);
 //
-//	memcpy(array,"Hello world !!!!",strlen("Hello world !!!!"));
+//		memcpy(array,"Hello world !!!!",strlen("Hello world !!!!"));
+
+//		mem.ShowMemory();
 //
-//	mem.ShowMemory();
+//		mem.Free(array);
 //
-//	mem.Free(array);
-//
-//	mem.ShowMemory();
+//		mem.ShowMemory();
+	}
 
 	_command = new CommandProcessor(_USART1,19200);
 	_leds.Init();
