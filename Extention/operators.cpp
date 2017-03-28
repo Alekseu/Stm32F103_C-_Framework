@@ -61,3 +61,26 @@ void operator delete[] (void* ptr,  MemoryManager* mem)
 	mem->Free(ptr);
 }
 
+//playcement
+void* operator new (size_t size, MemPool* mem)
+{
+	void* ret;
+	ret = mem->malloc(size);
+	return ret;
+}
+void* operator new[] (size_t size,  MemPool* mem)
+{
+	void* ret;
+		ret = mem->malloc(size);
+		return ret;
+}
+
+void operator delete (void* ptr, MemPool* mem )
+{
+	mem->free(ptr);
+}
+void operator delete[] (void* ptr,  MemPool* mem)
+{
+	mem->free(ptr);
+}
+

@@ -47,29 +47,36 @@ void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
 int main()
 {
 
+	MemPool pool((void*)0x60000000,0x80000);
 
-	MemoryManager mem((uint32_t)0x60000000,0x80000);
+	char* array = (char*)pool.malloc(130);
 
-	ErrorStatus t = mem.Init();
-
-	char* array = new (&mem) char[130];
 	if(array!=0)
 	{
-
 		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
-
-		mem.ShowMemory();
-
-//		char* array = (char*)mem.Malloc(150);
-//
-//		memcpy(array,"Hello world !!!!",strlen("Hello world !!!!"));
-
-//		mem.ShowMemory();
-//
-//		mem.Free(array);
-//
-//		mem.ShowMemory();
 	}
+//	MemoryManager mem((uint32_t)0x60000000,0x80000);
+//
+//	ErrorStatus t = mem.Init();
+//
+//	char* array = new (&mem) char[130];
+//	if(array!=0)
+//	{
+//
+//		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
+//
+//		mem.ShowMemory();
+//
+////		char* array = (char*)mem.Malloc(150);
+////
+////		memcpy(array,"Hello world !!!!",strlen("Hello world !!!!"));
+//
+////		mem.ShowMemory();
+////
+////		mem.Free(array);
+////
+////		mem.ShowMemory();
+//	}
 
 	_command = new CommandProcessor(_USART1,19200);
 	_leds.Init();

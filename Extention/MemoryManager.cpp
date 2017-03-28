@@ -8,8 +8,9 @@
 #include "MemoryManager.h"
 #include<string.h>
 
+#include "delay.h"
 
-MemoryManager::MemoryManager(uint32_t StartAddr, unsigned int length)
+MemoryManager::MemoryManager(unsigned long StartAddr, unsigned int length)
 {
 	_baseAddr = StartAddr;
 	_sramLength = length;
@@ -63,18 +64,6 @@ MemoryManager::MemoryManager(uint32_t StartAddr, unsigned int length)
 		_memInfoTbl[7].calc[0] =0;
 		_memInfoTbl[7].calc[1] =0;
 
-//	= {
-//
-//	 {36,  LENGTH_36_NUM  , 0, {0,0} },
-//	 {52,  LENGTH_52_NUM  , 0, {0,0} },
-//	 {64,  LENGTH_64_NUM  , 0, {0,0} },
-//	 {128, LENGTH_128_NUM , 0, {0,0} },
-//	 {132, LENGTH_132_NUM , 0, {0,0} },
-//	 {256, LENGTH_256_NUM , 0, {0,0} },
-//	 {512, LENGTH_512_NUM , 0, {0,0} },
-//	 {640, LENGTH_640_NUM , 0, {0,0} },
-//	 {1536,LENGTH_1536_NUM, 0, {0,0} },
-//	};
 }
 
 
@@ -82,14 +71,12 @@ ErrorStatus MemoryManager::Init()
 {
 	  ErrorStatus ret_wert=ERROR;
 	  uint16_t oldwert,istwert;
-	//init gpio fsmc
-	  RCC->APB2ENR |=RCC_APB2Periph_AFIO;
-	 RCC->APB2ENR |= RCC_APB2Periph_GPIOA;
+
 			 RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
-			 RCC->APB2ENR |= RCC_APB2Periph_GPIOC;
+
 			 RCC->APB2ENR |= RCC_APB2Periph_GPIOD;
 			 RCC->APB2ENR |= RCC_APB2Periph_GPIOE;
-			 RCC->APB2ENR |= RCC_APB2Periph_GPIOG;
+
 		 GPIO_InitTypeDef GPIO_InitStructure;
 
 
@@ -114,11 +101,11 @@ ErrorStatus MemoryManager::Init()
 			 FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
 
 			 RCC->AHBENR |= RCC_AHBPeriph_FSMC;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 7;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 5;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 15;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 15;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 0;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 25;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 25;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 512;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 25;
+				 FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 2;
 				 FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
 				 FSMC_NORSRAMTimingInitStructure.FSMC_AccessMode = FSMC_AccessMode_A;
 
@@ -142,12 +129,22 @@ ErrorStatus MemoryManager::Init()
 
 			 /* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
 			 FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
-
-			 oldwert=SRAM_Read(0x01);
+for(int i=0;i<_sramLength;i++)
+{
+			// oldwert=SRAM_Read(0x00);
 			  SRAM_Write(0x00,0x5A3C);
-			  istwert=SRAM_Read(0x01);
-			  SRAM_Write(0x01,oldwert);
-			  if(istwert==0x5A3C) ret_wert=SUCCESS;
+			  istwert=SRAM_Read(0x00);
+			  //SRAM_Write(0x01,oldwert);
+			  if(istwert==0x5A3C)
+				  {
+				  ret_wert=SUCCESS;
+
+				  }
+			  else
+			  {
+				  break;
+			  }
+}
 
 			if(ret_wert==SUCCESS)
 			{
@@ -174,6 +171,7 @@ ErrorStatus MemoryManager::Init()
 				            	ret_wert=ERROR;
 				                return ret_wert;
 				            }
+
 				        }
 				    }
 				    head->ptr = 0;
