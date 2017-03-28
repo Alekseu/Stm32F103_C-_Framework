@@ -7,6 +7,15 @@
 
 #ifndef EXTENTION_MEMORYPOOL_H_
 #define EXTENTION_MEMORYPOOL_H_
+
+extern "C"
+{
+	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_fsmc.h"
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+}
+
 /*
  * Простенький менеджер памяти без горбатого :)))
  */
@@ -33,8 +42,8 @@ private:
 
   unsigned int  _baseAddr;
 
-  void SRAM_Write(unsigned int adr, unsigned int wert);
-  unsigned int SRAM_Read(unsigned int adr);
+  void SRAM_Write(uint32_t adr, uint16_t wert);
+  uint32_t SRAM_Read(uint32_t adr);
 
   MemPoolBlock *findFreeBlock(SIZE_T minsize);
   MemPoolBlock *findBlockFromPtr(void const *ptr);

@@ -6,13 +6,6 @@
  */
 #include "MemoryPool.h"
 
-extern "C"
-{
-	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_fsmc.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-}
 
  MemPool::MemPool(void *buffer, SIZE_T bufferLength) : m_blocks((MemPoolBlock *)buffer)
  {
@@ -51,10 +44,10 @@ extern "C"
 	 FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
 
 	 RCC->AHBENR |= RCC_AHBPeriph_FSMC;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 25;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 25;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 512;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 25;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 35;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 35;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 600;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 35;
 	 FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 2;
 	 FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
 	 FSMC_NORSRAMTimingInitStructure.FSMC_AccessMode = FSMC_AccessMode_A;
@@ -80,16 +73,15 @@ extern "C"
 	 /* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
 	 FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 
-			 for(int i=0;i<bufferLength;i++)
+			 for(int i=1;i<bufferLength;i++)
 			 {
 				 // oldwert=SRAM_Read(0x00);
-				 SRAM_Write(0x00,0x5A3C);
-				 istwert=SRAM_Read(0x00);
+				 SRAM_Write(i,0x5A3C);
+				 istwert=SRAM_Read(i);
 				 //SRAM_Write(0x01,oldwert);
 				 if(istwert==0x5A3C)
 				 {
 					 ret_wert=SUCCESS;
-
 				 }
 				 else
 				 {
@@ -186,22 +178,22 @@ SIZE_T  MemPool::getLargestFreeBlock() {
 }
 
 
-void MemPool::SRAM_Write(unsigned int adr, unsigned int wert)
+void MemPool::SRAM_Write(uint32_t adr, uint16_t wert)
 	{
 	  // adresse muss um 1bit nach links verschoben werden
 	  adr=adr<<1;
 
-	  *(unsigned int *) (_baseAddr + adr) = wert;
+	  *(uint32_t *) (_baseAddr + adr) = wert;
 	}
 
-unsigned int MemPool::SRAM_Read(unsigned int adr)
+uint32_t MemPool::SRAM_Read(uint32_t adr)
 	{
 	  uint16_t ret_wert=0;
 
 	  // adresse muss um 1bit nach links verschoben werden
 	  adr=adr<<1;
 
-	  ret_wert=*(__IO unsigned int*) (_baseAddr + adr);
+	  ret_wert=*(__IO uint32_t*) (_baseAddr + adr);
 
 	  return(ret_wert);
 	}

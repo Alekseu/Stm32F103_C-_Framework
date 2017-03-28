@@ -14,26 +14,21 @@
 void* operator new(size_t size)
 {
 	return malloc(size);
-	//return _pool.malloc(size);
 }
 
 void* operator new[](size_t size)
 {
 	return  malloc(size);
-	//return _pool.malloc(size);
-
 }
 
  void operator delete (void* p)
 {
 	 free(p);
-	// _pool.free(p);
 }
 
 void operator delete[](void* p)
 {
 	free(p);
-	// _pool.free(p);
 }
 
 

@@ -69,118 +69,119 @@ MemoryManager::MemoryManager(unsigned long StartAddr, unsigned int length)
 
 ErrorStatus MemoryManager::Init()
 {
-	  ErrorStatus ret_wert=ERROR;
-	  uint16_t oldwert,istwert;
+	ErrorStatus ret_wert=ERROR;
+	uint16_t oldwert,istwert;
 
-			 RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
+	RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
 
-			 RCC->APB2ENR |= RCC_APB2Periph_GPIOD;
-			 RCC->APB2ENR |= RCC_APB2Periph_GPIOE;
+	RCC->APB2ENR |= RCC_APB2Periph_GPIOD;
+	RCC->APB2ENR |= RCC_APB2Periph_GPIOE;
 
-		 GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitTypeDef GPIO_InitStructure;
 
 
-		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12| GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-		 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-		 GPIO_Init(GPIOD, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12| GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
-		 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-		 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		 GPIO_Init(GPIOE, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
 
-		 GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-		 GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-		 GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-		 GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 
 	//init fsmc
 
-		 FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
-			 FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
+	FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
+	FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
 
-			 RCC->AHBENR |= RCC_AHBPeriph_FSMC;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 25;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 25;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 512;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 25;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 2;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
-				 FSMC_NORSRAMTimingInitStructure.FSMC_AccessMode = FSMC_AccessMode_A;
+	RCC->AHBENR |= RCC_AHBPeriph_FSMC;
+	FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 25;
+	FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 25;
+	FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 1024;
+	FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 25;
+	FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 2;
+	FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
+	FSMC_NORSRAMTimingInitStructure.FSMC_AccessMode = FSMC_AccessMode_A;
 
-				 FSMC_NORSRAMInitStructure.FSMC_Bank = FSMC_Bank1_NORSRAM1;
-				 FSMC_NORSRAMInitStructure.FSMC_DataAddressMux = FSMC_DataAddressMux_Enable;
-				 FSMC_NORSRAMInitStructure.FSMC_MemoryType = FSMC_MemoryType_PSRAM;
-				 FSMC_NORSRAMInitStructure.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;
-				 FSMC_NORSRAMInitStructure.FSMC_BurstAccessMode = FSMC_BurstAccessMode_Disable;
-				 FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Disable;
-				 FSMC_NORSRAMInitStructure.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low;
+	FSMC_NORSRAMInitStructure.FSMC_Bank = FSMC_Bank1_NORSRAM1;
+	FSMC_NORSRAMInitStructure.FSMC_DataAddressMux = FSMC_DataAddressMux_Enable;
+	FSMC_NORSRAMInitStructure.FSMC_MemoryType = FSMC_MemoryType_PSRAM;
+	FSMC_NORSRAMInitStructure.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_16b;
+	FSMC_NORSRAMInitStructure.FSMC_BurstAccessMode = FSMC_BurstAccessMode_Disable;
+	FSMC_NORSRAMInitStructure.FSMC_AsynchronousWait = FSMC_AsynchronousWait_Disable;
+	FSMC_NORSRAMInitStructure.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low;
 
-				 FSMC_NORSRAMInitStructure.FSMC_WrapMode = FSMC_WrapMode_Disable;
-				 FSMC_NORSRAMInitStructure.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;
-				 FSMC_NORSRAMInitStructure.FSMC_WriteOperation = FSMC_WriteOperation_Enable;
-				 FSMC_NORSRAMInitStructure.FSMC_WaitSignal = FSMC_WaitSignal_Disable;
-				 FSMC_NORSRAMInitStructure.FSMC_ExtendedMode = FSMC_ExtendedMode_Disable;
-				 FSMC_NORSRAMInitStructure.FSMC_WriteBurst = FSMC_WriteBurst_Disable;
-				 FSMC_NORSRAMInitStructure.FSMC_ReadWriteTimingStruct = &FSMC_NORSRAMTimingInitStructure;
-				 FSMC_NORSRAMInitStructure.FSMC_WriteTimingStruct = &FSMC_NORSRAMTimingInitStructure;
-			 FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
+	FSMC_NORSRAMInitStructure.FSMC_WrapMode = FSMC_WrapMode_Disable;
+	FSMC_NORSRAMInitStructure.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;
+	FSMC_NORSRAMInitStructure.FSMC_WriteOperation = FSMC_WriteOperation_Enable;
+	FSMC_NORSRAMInitStructure.FSMC_WaitSignal = FSMC_WaitSignal_Disable;
+	FSMC_NORSRAMInitStructure.FSMC_ExtendedMode = FSMC_ExtendedMode_Disable;
+	FSMC_NORSRAMInitStructure.FSMC_WriteBurst = FSMC_WriteBurst_Disable;
+	FSMC_NORSRAMInitStructure.FSMC_ReadWriteTimingStruct = &FSMC_NORSRAMTimingInitStructure;
+	FSMC_NORSRAMInitStructure.FSMC_WriteTimingStruct = &FSMC_NORSRAMTimingInitStructure;
+	FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
 
-			 /* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
-			 FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
-for(int i=0;i<_sramLength;i++)
-{
-			// oldwert=SRAM_Read(0x00);
-			  SRAM_Write(0x00,0x5A3C);
-			  istwert=SRAM_Read(0x00);
-			  //SRAM_Write(0x01,oldwert);
-			  if(istwert==0x5A3C)
-				  {
-				  ret_wert=SUCCESS;
+	/* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
+	FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 
-				  }
-			  else
-			  {
-				  break;
-			  }
-}
+	for(int i=1;i<_sramLength;i++)
+	{
 
-			if(ret_wert==SUCCESS)
+		SRAM_Write(i,0x5A3C);
+		istwert=SRAM_Read(i);
+
+		if(istwert==0x5A3C)
+		{
+			ret_wert=SUCCESS;
+
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if(ret_wert==SUCCESS)
+	{
+		int i,j;
+		mem_block_s *head=0;
+		uint32_t addr;
+
+		addr = _baseAddr;
+
+		for(i=0; i<MEM_TBL_MAX; i++)
+		{
+			head = (mem_block_s *)addr;
+			_memInfoTbl[i].wm_head = head;
+			for(j=0;j<_memInfoTbl[i].num_max; j++)
 			{
-				int i,j;
-				    mem_block_s *head=0;
-				    uint32_t addr;
+				head->used =MEM_NO_USED;
+				head->block_size = _memInfoTbl[i].block_size;
+				head->ptr = (char *)(addr + sizeof(mem_block_s));
+				addr += (_memInfoTbl[i].block_size + sizeof(mem_block_s));
+				head->next =(char *)addr;
+				head = (mem_block_s *)head->next;
+				if(head >  (mem_block_s *)((_baseAddr+_sramLength)-0x10))
+				{
+					ret_wert=ERROR;
+					return ret_wert;
+				}
 
-				    addr = _baseAddr;
-
-				    for(i=0; i<MEM_TBL_MAX; i++)
-				    {
-				        head = (mem_block_s *)addr;
-				        _memInfoTbl[i].wm_head = head;
-				        for(j=0;j<_memInfoTbl[i].num_max; j++)
-				        {
-				            head->used =MEM_NO_USED;
-				            head->block_size = _memInfoTbl[i].block_size;
-				            head->ptr = (char *)(addr + sizeof(mem_block_s));
-				            addr += (_memInfoTbl[i].block_size + sizeof(mem_block_s));
-				            head->next =(char *)addr;
-				            head = (mem_block_s *)head->next;
-				            if(head >  (mem_block_s *)((_baseAddr+_sramLength)-0x10))
-				            {
-				            	ret_wert=ERROR;
-				                return ret_wert;
-				            }
-
-				        }
-				    }
-				    head->ptr = 0;
-				    head->block_size = 0;
-				    head->next = (char*)_baseAddr;
-
-				    MemHeapHasBeenInitialised=true;
 			}
-			return ret_wert;
+		}
+		head->ptr = 0;
+		head->block_size = 0;
+		head->next = (char*)_baseAddr;
+
+		MemHeapHasBeenInitialised=true;
+	}
+	return ret_wert;
 }
 
 void* MemoryManager::Malloc(unsigned int size)

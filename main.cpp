@@ -46,15 +46,20 @@ void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
 
 int main()
 {
-
 	MemPool pool((void*)0x60000000,0x80000);
 
-	char* array = (char*)pool.malloc(130);
+	char* array = new(&pool) char[128];
 
 	if(array!=0)
 	{
 		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
 	}
+	char* array1 = new(&pool) char[128];
+	char* array2 = new(&pool) char[128];
+
+	operator delete[](array,&pool);
+	operator delete[](array1,&pool);
+	operator delete[](array2,&pool);
 //	MemoryManager mem((uint32_t)0x60000000,0x80000);
 //
 //	ErrorStatus t = mem.Init();
@@ -80,7 +85,7 @@ int main()
 
 	_command = new CommandProcessor(_USART1,19200);
 	_leds.Init();
-	com.TypeUsb = HumanInterfaceDevice;
+	com.TypeUsb = VirtualComPort;
 	com.Init();
 
 	_sl.Width = 32;
@@ -118,12 +123,12 @@ int main()
 	while(1){
 		a++;
 		_leds.On(1);
-//		memset(_data,0,256);
-//		int l = com.ReadData(_data);
-//		if(l>0)
-//		{
-//			com.SendData(_data,l);
-//		}
+		memset(_data,0,256);
+		int l = com.ReadData(_data);
+		if(l>0)
+		{
+			com.SendData(_data,l);
+		}
 		_delay_ms(150);
 		_leds.Off(1);
 		_delay_ms(150);
