@@ -42,6 +42,7 @@ extern "C"
   {
     //trace_puts(__func__);
     abort();
+
   }
 }
 

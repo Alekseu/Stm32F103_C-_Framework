@@ -4,6 +4,8 @@
  *  Created on: 09 марта 2017 г.
  *      Author: Alekseu
  */
+
+#include "Driver/nvic.h"
 #include "Driver/usart.h"
 #include "Driver/Dma.h"
 #include "Extention/operators.h"
@@ -19,6 +21,7 @@
 #include "Extention/LinkedList.h"
 #include "Extention/RingBuffer.h"
 
+
 extern "C"
 {
 //#include "StdPeriph/usb/inc/usb_lib.h"
@@ -29,48 +32,63 @@ extern "C"
 }
 
 
-char _data[256];
+
+//char _data[256];
 Blinker _leds;
-CommandProcessor* _command;
+//CommandProcessor* _command;
+//
+//Usb com;
+//SL _sl;
 
-Usb com;
-SL _sl;
-
-void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
+//void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
+//{
+//
+//	if(com==SetBuffer)
+//	{
+//		memcpy(_sl.VideoBuffer,data,length);
+//		_command->SendCommand(com,(char*)0,0);
+//	}
+//}
+//typedef void reset__(void);
+//reset__* reset_ = 0;
+int a;
+void SysTickHandler(void)
 {
-
-	if(com==SetBuffer)
-	{
-		memcpy(_sl.VideoBuffer,data,length);
-		_command->SendCommand(com,(char*)0,0);
-	}
+	a++;
 }
-
 
 int main()
 {
+	InterruptController::RemapToRam();
+	InterruptController::SetHandler(SysTick_IRQn,SysTickHandler);
+
+	RCC_ClocksTypeDef RCC_Clocks;
+		RCC_GetClocksFreq(&RCC_Clocks);
+		SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+
+
 	//MemPool pool((void*)0x60000001,0x80000);
-	MemoryManager mem((uint32_t)0x60000000,0x0FFFFF);
-	mem.Init();
-
-	char* array = new char[128];
-
-	if(array!=0)
-	{
-		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
-	}
-	char* array1 = new char[128];
-	char* array2 = new char[128];
-
-	 delete[] array;
-	 delete[] array1;
-	 delete[] array1;
-
-	LList<char>* _list = new LList<char>();
-	for(int i=0;i<10;i++)
-	{
-		_list->add(i+1);
-	}
+//	MemoryManager mem((uint32_t)0x60000000,0x0FFFFF);
+//	mem.Init();
+//
+//	char* array = new char[128];
+//
+//	if(array!=0)
+//	{
+//		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
+//	}
+//	char* array1 = new char[128];
+//	char* array2 = new char[128];
+//
+//	 delete[] array;
+//	 delete[] array1;
+//	 delete[] array1;
+//
+//	LList<char>* _list = new LList<char>();
+//	for(int i=0;i<10;i++)
+//	{
+//		_list->add(i+1);
+//	}
 
 //	MemoryManager mem((uint32_t)0x60000000,0x80000);
 //
@@ -96,7 +114,7 @@ int main()
 //	}
 
 //	_command = new CommandProcessor(_USART1,19200);
-//	_leds.Init();
+	_leds.Init();
 //	com.TypeUsb = VirtualComPort;
 //	com.Init();
 

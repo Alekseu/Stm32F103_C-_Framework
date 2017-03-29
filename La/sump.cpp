@@ -5,16 +5,17 @@
  *      Author: user
  */
 
+
 #include "sump.h"
 #include "ramblocks.h"
 #include "la_sampling.h"
 //#include "usbd_cdc_core.h"
-#include "nvic.h"
+#include "../Driver/nvic.h"
 
-#include "../Drivers/StdPeriph/include/stm32f4xx.h"
-#include "../Drivers/StdPeriph/include/stm32f4xx_rcc.h"
-#include "../Drivers/StdPeriph/include/stm32f4xx_usart.h"
-#include "../Drivers/StdPeriph/include/stm32f4xx_gpio.h"
+#include "../StdPeriph/cmsis_boot/stm32f10x.h"
+#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
+#include "../StdPeriph/stm_lib/inc/stm32f10x_usart.h"
 
 typedef void (*SumpByteTXFunction)(uint8_t data);
 typedef void (*SumpBufferTXFunction)(uint8_t *data, int count);
@@ -22,7 +23,7 @@ typedef void (*SumpBufferTXFunction)(uint8_t *data, int count);
 static SumpByteTXFunction byteTXFunc = 0;
 static SumpBufferTXFunction bufferTXFunc = 0;
 
-static char metaData[] _AHBRAM
+static char metaData[]
      = {SUMP_META_NAME, 'L', 'o', 'g', 'i', 'c', ' ', 'a', 'n', 'a', 'l','y', 'z', 'e', 'r', 0,
 		SUMP_META_FPGA_VERSION, 'N', 'o', 'F', 'P', 'G', 'A', ' ', ':', '(', 0,
 		SUMP_META_CPU_VERSION, 'V', 'e', 'r', 'y', ' ','b' ,'e', 't', 'a', 0,
@@ -64,24 +65,24 @@ void SetupDemoTimer()
 //	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 //	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
-	USART_Init(USART2, &USART_InitStructure);
-	USART_Cmd(USART2, ENABLE);
+//	USART_Init(USART2, &USART_InitStructure);
+//	USART_Cmd(USART2, ENABLE);
 	//USART2->CR1 = USART_cr1
 	//USART2->BRR = 100;
 
-	RCC_APB1PeriphClockCmd(RCC_APB1ENR_TIM2EN, ENABLE);
-	TIM2->CR1 = TIM_CR1_URS;
-	TIM2->ARR = 19999;
-	TIM2->PSC = 2;
-	TIM2->CR2 = 0;
-	TIM2->DIER = TIM_DIER_UIE;
-	TIM2->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
-	TIM2->CCR1 = 100;
-	TIM2->EGR = TIM_EGR_UG;
-	TIM2->CCER = TIM_CCER_CC1E;
-	TIM2->SR &= ~TIM_SR_UIF;
-	InterruptController::EnableChannel(TIM2_IRQn, 2, 0, DemoUSARTIrq);
-	TIM2->CR1 = TIM_CR1_URS | TIM_CR1_CEN;
+//	RCC_APB1PeriphClockCmd(RCC_APB1ENR_TIM2EN, ENABLE);
+//	TIM2->CR1 = TIM_CR1_URS;
+//	TIM2->ARR = 19999;
+//	TIM2->PSC = 2;
+//	TIM2->CR2 = 0;
+//	TIM2->DIER = TIM_DIER_UIE;
+//	TIM2->CCMR1 = TIM_CCMR1_OC1M_1 | TIM_CCMR1_OC1M_2;
+//	TIM2->CCR1 = 100;
+//	TIM2->EGR = TIM_EGR_UG;
+//	TIM2->CCER = TIM_CCER_CC1E;
+//	TIM2->SR &= ~TIM_SR_UIF;
+//	InterruptController::EnableChannel(TIM2_IRQn, 2, 0, DemoUSARTIrq);
+//	TIM2->CR1 = TIM_CR1_URS | TIM_CR1_CEN;
 
 	/* Connect TIM3 pins to AF2 */
 	//GPIO_PinAFConfig(GPIOA, GPIO_PinSource0, GPIO_AF_TIM2);
@@ -92,9 +93,9 @@ void SetupDemoTimer()
 static uint8_t num = 0;
 static void DemoUSARTIrq()
 {
-	TIM2->SR &= ~TIM_SR_UIF;
-	if(USART2->SR & USART_SR_TXE)
-		USART2->DR = num++;
+//	TIM2->SR &= ~TIM_SR_UIF;
+//	if(USART2->SR & USART_SR_TXE)
+//		USART2->DR = num++;
 }
 
 int SumpIsShortCommand(uint8_t command)

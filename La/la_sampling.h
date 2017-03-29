@@ -8,7 +8,7 @@
 #ifndef LA_SAMPLING_H_
 #define LA_SAMPLING_H_
 
-#include "nvic.h"
+#include "../Driver/nvic.h"
 
 #define MAX_SAMPLING_RAM (24*1024)
 //#define MAX_RLE_SAMPLE_COUNT	(64)

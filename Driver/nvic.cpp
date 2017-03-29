@@ -13,24 +13,30 @@ const int32_t isrCount = 0x100;
 //Таблица прерываний должна быть выравнена на 0x100 <BUG>байт</BUG> СЛОВ!!! а не байт
 //static InterruptHandler __attribute__((aligned(0x400))) isrTable[isrCount];
 #ifdef CFG_LINKER_HAS_ISR_SECTION
-//Section ".isr_section" should be located at the start of RAM (or at least aligned to 0x400 for STM32F2XX)
 static InterruptHandler __attribute__((section(".isr_section"))) isrTable[isrCount];
 #else
-static InterruptHandler __attribute__((aligned(0x400)))  isrTable[isrCount];
+static InterruptHandler __attribute__((aligned(0x200)))  isrTable[isrCount];
 #endif
-//static int32_t DefaultInterruptHandlerHints[isrCount];
-//static void* parameterTable[isrCount];
+
 
 void DefaultHandler()
 {
-	while(true);
+	int a=0;
+	throw 5;
+	while(true)
+	{
+
+	}
 }
 
 void InterruptController::RemapToRam()
 {
-	for(int i = 0; i < isrCount; i++)
-		isrTable[i] = ((InterruptHandler*)0)[i];
-	SCB->VTOR = NVIC_VectTab_RAM | ((reinterpret_cast<uint32_t>(isrTable) - 0x20000000));
+	isrTable[0]=((InterruptHandler*)0)[0];
+	isrTable[1]=((InterruptHandler*)0)[1];
+	for(int i = 2; i < isrCount; i++){
+		isrTable[i] =  DefaultHandler;
+	}
+	NVIC_SetVectorTable(NVIC_VectTab_RAM,(uint32_t)&isrTable);
 }
 
 bool InterruptController::SetHandler(IRQn_Type channel, InterruptHandler handler)

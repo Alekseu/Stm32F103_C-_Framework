@@ -12,6 +12,7 @@ RM := rm -rf
 -include StdPeriph/stm_lib/src/subdir.mk
 -include StdPeriph/newlib/subdir.mk
 -include StdPeriph/cmsis_boot/subdir.mk
+-include La/subdir.mk
 -include Extention/subdir.mk
 -include Driver/subdir.mk
 -include Communication/subdir.mk
@@ -62,7 +63,7 @@ all: Stm32F103_Firmware_DEV.elf secondary-outputs
 Stm32F103_Firmware_DEV.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -O0 -fmessage-length=0 -ffunction-sections -fdata-sections  -g3 -T "D:\GitRepositories\GitHub\Stm32F103_C-_Framework\ldscripts\F103\libs.ld" -T "D:\GitRepositories\GitHub\Stm32F103_C-_Framework\ldscripts\F103\mem.ld" -T "D:\GitRepositories\GitHub\Stm32F103_C-_Framework\ldscripts\F103\sections.ld" -Xlinker --gc-sections -Wl,-Map,"Stm32F103_Firmware_DEV.map" -o "Stm32F103_Firmware_DEV.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -O0 -fmessage-length=0 -ffunction-sections -fdata-sections  -g3 -T "E:\GitRepo\Stm32F103_C-_Framework\ldscripts\F103\libs.ld" -T "E:\GitRepo\Stm32F103_C-_Framework\ldscripts\F103\mem.ld" -T "E:\GitRepo\Stm32F103_C-_Framework\ldscripts\F103\sections.ld" -Xlinker --gc-sections -Wl,-Map,"Stm32F103_Firmware_DEV.map" -o "Stm32F103_Firmware_DEV.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
