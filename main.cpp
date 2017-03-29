@@ -5,24 +5,23 @@
  *      Author: Alekseu
  */
 
-#include "Driver/nvic.h"
-#include "Driver/usart.h"
-#include "Driver/Dma.h"
-#include "Extention/operators.h"
-#include "Driver/Usb.h"
-#include "Driver/Blinker.h"
-
-#include "Communication/CommandProcessor.h"
-#include <string.h>
-
-#include "Extention/MemoryManager.h"
-#include "Extention/MemoryPool.h"
-#include "Extention/LinkedList.h"
-#include "Extention/RingBuffer.h"
+#include "main.h"
 
 
+void Overclocking(void) // Разгон микроконтроллера.
+{
 
-Blinker _leds;
+  RCC_SYSCLKConfig(RCC_SYSCLKSource_HSE); // Выбираем источником такторования
+  RCC_PLLCmd(DISABLE); // Выключаем умножитель.
+  RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_CFGR_PLLMULL16); // На сколько будем умножать частоту.
+  RCC_PLLCmd(ENABLE); // Включаем умножитель.
+  while ((RCC->CR & RCC_CR_PLLRDY) == 0);     // Ждем запуска умножителя.
+  RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK); // Выбираем источником тактирования умножитель.
+
+  SystemCoreClockUpdate(); // Вычисление тактовой частоты ядра.
+}
+
+
 //CommandProcessor* _command;
 //
 //Usb com;
@@ -39,21 +38,12 @@ Blinker _leds;
 //}
 //typedef void reset__(void);
 //reset__* reset_ = 0;
-int a;
-void SysTickHandler(void)
-{
-	a++;
-}
 
 int main()
 {
 	InterruptController::RemapToRam();
-	InterruptController::SetHandler(SysTick_IRQn,SysTickHandler);
-
-	RCC_ClocksTypeDef RCC_Clocks;
-		RCC_GetClocksFreq(&RCC_Clocks);
-		SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
-
+	_leds.Init();
+	Overclocking();
 
 	//MemPool pool((void*)0x60000001,0x80000);
 //	MemoryManager mem((uint32_t)0x60000000,0x0FFFFF);
@@ -102,7 +92,7 @@ int main()
 //	}
 
 //	_command = new CommandProcessor(_USART1,19200);
-	_leds.Init();
+	//
 //	com.TypeUsb = VirtualComPort;
 //	com.Init();
 
@@ -137,16 +127,16 @@ int main()
 
 
 
-	int a=0;
+
 	while(1){
-		a++;
+
 		_leds.On(1);
-//		memset(_data,0,256);
-//		int l = com.ReadData(_data);
-//		if(l>0)
-//		{
-//			com.SendData(_data,l);
-//		}
+////		memset(_data,0,256);
+////		int l = com.ReadData(_data);
+////		if(l>0)
+////		{
+////			com.SendData(_data,l);
+////		}
 		_delay_ms(150);
 		_leds.Off(1);
 		_delay_ms(150);

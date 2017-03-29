@@ -10,7 +10,7 @@
 
 //#include "stm32f10x.h"
 //#include "peripheral.h"
-#include "../StdPeriph/stm_lib/inc/misc.h"
+#include "../../StdPeriph/stm_lib/inc/misc.h"
 
 #define AIRCR_VECTKEY_MASK		((uint32_t)0x05FA0000)
 #define AIRCR_SYSRESETREQ		((uint32_t)0x00000004)

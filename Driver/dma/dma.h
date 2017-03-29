@@ -8,9 +8,9 @@
 #ifndef DRIVER_DMA_H_
 #define DRIVER_DMA_H_
 
-#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-#include "../StdPeriph/stm_lib/inc/stm32f10x_dma.h"
-#include "../StdPeriph/stm_lib/inc/misc.h"
+#include "../../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+#include "../../StdPeriph/stm_lib/inc/stm32f10x_dma.h"
+#include "../../StdPeriph/stm_lib/inc/misc.h"
 
 /*
  * Внимание использовать дма нужно осторожно, что-бы каналы не пересикались с разной

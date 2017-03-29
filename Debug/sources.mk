@@ -33,6 +33,10 @@ StdPeriph/stm_lib/src \
 StdPeriph/newlib \
 StdPeriph/cmsis_boot \
 Extention \
-Driver \
+Driver/usb \
+Driver/usart \
+Driver/timer \
+Driver/nvic \
+Driver/dma \
 Communication \
 

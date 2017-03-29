@@ -7,11 +7,10 @@
 
 #ifndef TIMER_H_
 #define TIMER_H_
-//#include <avr/interrupt.h>
+
 #include <string.h>
 #include <stdint.h>
 
-//extern "C" void TIMER0_OVF_vect(void) __attribute__ ((signal));
 
 typedef void CallBack(void);
 

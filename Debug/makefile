@@ -13,7 +13,11 @@ RM := rm -rf
 -include StdPeriph/newlib/subdir.mk
 -include StdPeriph/cmsis_boot/subdir.mk
 -include Extention/subdir.mk
--include Driver/subdir.mk
+-include Driver/usb/subdir.mk
+-include Driver/usart/subdir.mk
+-include Driver/timer/subdir.mk
+-include Driver/nvic/subdir.mk
+-include Driver/dma/subdir.mk
 -include Communication/subdir.mk
 -include subdir.mk
 -include objects.mk

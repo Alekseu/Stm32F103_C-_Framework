@@ -4,20 +4,20 @@
  *  Created on: 15 марта 2017 г.
  *      Author: hudienko_a
  */
-#include "Usb.h"
-#include "../Extention/delay.h"
+#include "usb.h"
+#include "../../Extention/delay.h"
 #include <string.h>
 
-#include "Descriptors.h"
+#include "descriptors.h"
 
 Usb *Usb::pUsb = 0;
 
 extern "C"
 {
-	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-	#include "../StdPeriph/stm_lib/inc/misc.h"
+//	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
+//	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
+//	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+//	#include "../StdPeriph/stm_lib/inc/misc.h"
 	extern __IO BOOL fSuspendEnabled;  /* true when suspend is possible */
 
 	__IO uint16_t wIstr;  /* ISTR register last read value */

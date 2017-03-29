@@ -4,24 +4,12 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../Driver/Dma.cpp \
-../Driver/Usb.cpp \
-../Driver/nvic.cpp \
-../Driver/timer.cpp \
 ../Driver/usart.cpp 
 
 OBJS += \
-./Driver/Dma.o \
-./Driver/Usb.o \
-./Driver/nvic.o \
-./Driver/timer.o \
 ./Driver/usart.o 
 
 CPP_DEPS += \
-./Driver/Dma.d \
-./Driver/Usb.d \
-./Driver/nvic.d \
-./Driver/timer.d \
 ./Driver/usart.d 
 
 

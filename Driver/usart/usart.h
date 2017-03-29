@@ -8,13 +8,17 @@
 #ifndef USART_H_
 #define USART_H_
 
-#include "../Extention/delay.h"
-#include "../Extention/Extention.h"
-#include "../StdPeriph/cmsis_boot/stm32f10x.h"
-#include "../StdPeriph/stm_lib/inc/stm32f10x_usart.h"
-#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
-#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-#include "../StdPeriph/stm_lib/inc/misc.h"
+#include "../../Extention/delay.h"
+#include "../../Extention/Extention.h"
+
+extern "C"
+{
+#include "../../StdPeriph/cmsis_boot/stm32f10x.h"
+#include "../../StdPeriph/stm_lib/inc/stm32f10x_usart.h"
+#include "../../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
+#include "../../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+#include "../../StdPeriph/stm_lib/inc/misc.h"
+}
 
 #define BUFFER_SIZE 32
 

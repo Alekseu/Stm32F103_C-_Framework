@@ -4,13 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../StdPeriph/cmsis_boot/startup.c 
+../StdPeriph/cmsis_boot/startup.c \
+../StdPeriph/cmsis_boot/system_stm32f10x.c 
 
 OBJS += \
-./StdPeriph/cmsis_boot/startup.o 
+./StdPeriph/cmsis_boot/startup.o \
+./StdPeriph/cmsis_boot/system_stm32f10x.o 
 
 C_DEPS += \
-./StdPeriph/cmsis_boot/startup.d 
+./StdPeriph/cmsis_boot/startup.d \
+./StdPeriph/cmsis_boot/system_stm32f10x.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

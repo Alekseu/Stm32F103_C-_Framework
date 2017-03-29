@@ -8,10 +8,10 @@
 #ifndef COMMUNICATION_COMMANDPROCESSOR_H_
 #define COMMUNICATION_COMMANDPROCESSOR_H_
 
-#include "../Driver/usart.h"
+#include "../Driver/usart/usart.h"
 
 #include "CommandsEnum.h"
-#include "../Driver/timer.h"
+#include "../Driver/timer/timer.h"
 
 #include <string.h>
 

@@ -4,7 +4,7 @@
  *  Created on: 09 марта 2017 г.
  *      Author: Alekseu
  */
-#include "Dma.h"
+#include "dma.h"
 
 Dma *Dma::pDma0 = 0;
 Dma *Dma::pDma1 = 0;

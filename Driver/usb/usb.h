@@ -17,12 +17,12 @@
 
 extern "C"
 {
-	#include "../StdPeriph/usb/inc/usb_lib.h"
-	#include "../StdPeriph/usb/inc/usb_conf.h"
-	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
-	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-	#include "../StdPeriph/stm_lib/inc/misc.h"
+	#include "../../StdPeriph/usb/inc/usb_lib.h"
+	#include "../../StdPeriph/usb/inc/usb_conf.h"
+	#include "../../StdPeriph/cmsis_boot/stm32f10x.h"
+	#include "../../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
+	#include "../../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+	#include "../../StdPeriph/stm_lib/inc/misc.h"
 
 }
 

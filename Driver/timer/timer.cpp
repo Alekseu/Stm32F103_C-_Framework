@@ -5,10 +5,10 @@
  *      Author: YVShvets
  */
 
-#include "Timer.h"
-#include "../StdPeriph/cmsis_boot/stm32f10x.h"
-#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-#include "../StdPeriph/stm_lib/inc/misc.h"
+#include "timer.h"
+#include "../../StdPeriph/cmsis_boot/stm32f10x.h"
+#include "../../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+#include "../../StdPeriph/stm_lib/inc/misc.h"
 
 
 Timer* Timer::pObject = 0;
