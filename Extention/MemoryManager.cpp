@@ -8,74 +8,28 @@
 #include "MemoryManager.h"
 #include<string.h>
 
-#include "delay.h"
+
+MemoryManager* MemoryManager::MemoryManObj=0;
 
 MemoryManager::MemoryManager(unsigned long StartAddr, unsigned int length)
 {
+	MemoryManObj = this;
 	_baseAddr = StartAddr;
 	_sramLength = length;
-	MemHeapHasBeenInitialised = false;
-
-		_memInfoTbl[0].block_size = 32;
-		_memInfoTbl[0].num_max = LENGTH_36_NUM;
-		_memInfoTbl[0].wm_head =0;
-		_memInfoTbl[0].calc[0] =0;
-		_memInfoTbl[0].calc[1] =0;
-
-		_memInfoTbl[1].block_size = 52;
-		_memInfoTbl[1].num_max = LENGTH_52_NUM;
-		_memInfoTbl[1].wm_head =0;
-		_memInfoTbl[1].calc[0] =0;
-		_memInfoTbl[1].calc[1] =0;
-
-		_memInfoTbl[2].block_size = 64;
-		_memInfoTbl[2].num_max = LENGTH_64_NUM;
-		_memInfoTbl[2].wm_head =0;
-		_memInfoTbl[2].calc[0] =0;
-		_memInfoTbl[2].calc[1] =0;
-
-		_memInfoTbl[3].block_size = 128;
-		_memInfoTbl[3].num_max = LENGTH_128_NUM;
-		_memInfoTbl[3].wm_head =0;
-		_memInfoTbl[3].calc[0] =0;
-		_memInfoTbl[3].calc[1] =0;
-
-		_memInfoTbl[4].block_size = 256;
-		_memInfoTbl[4].num_max = LENGTH_256_NUM;
-		_memInfoTbl[4].wm_head =0;
-		_memInfoTbl[4].calc[0] =0;
-		_memInfoTbl[4].calc[1] =0;
-
-		_memInfoTbl[5].block_size = 512;
-		_memInfoTbl[5].num_max = LENGTH_512_NUM;
-		_memInfoTbl[5].wm_head =0;
-		_memInfoTbl[5].calc[0] =0;
-		_memInfoTbl[5].calc[1] =0;
-
-		_memInfoTbl[6].block_size = 640;
-		_memInfoTbl[6].num_max = LENGTH_640_NUM;
-		_memInfoTbl[6].wm_head =0;
-		_memInfoTbl[6].calc[0] =0;
-		_memInfoTbl[6].calc[1] =0;
-
-		_memInfoTbl[7].block_size = 1536;
-		_memInfoTbl[7].num_max = LENGTH_1536_NUM;
-		_memInfoTbl[7].wm_head =0;
-		_memInfoTbl[7].calc[0] =0;
-		_memInfoTbl[7].calc[1] =0;
-
 }
 
 
 ErrorStatus MemoryManager::Init()
 {
 	ErrorStatus ret_wert=ERROR;
-	uint16_t oldwert,istwert;
 
+	RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
 	RCC->APB2ENR |= RCC_APB2Periph_GPIOB;
 
 	RCC->APB2ENR |= RCC_APB2Periph_GPIOD;
 	RCC->APB2ENR |= RCC_APB2Periph_GPIOE;
+
+	RCC->AHBENR |= RCC_AHBPeriph_FSMC;
 
 	GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -85,7 +39,17 @@ ErrorStatus MemoryManager::Init()
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1;
+	GPIO_InitStructure.GPIO_Mode =GPIO_Mode_AF_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+	//8bit mode
+//	GPIO_SetBits(GPIOE,GPIO_Pin_1);//NBH =1
+//	GPIO_ResetBits(GPIOE,GPIO_Pin_0);//NBL=0
+
+
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_7 | GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_Init(GPIOE, &GPIO_InitStructure);
@@ -100,12 +64,13 @@ ErrorStatus MemoryManager::Init()
 	FSMC_NORSRAMInitTypeDef  FSMC_NORSRAMInitStructure;
 	FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
 
-	RCC->AHBENR |= RCC_AHBPeriph_FSMC;
-	FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 25;
-	FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 25;
-	FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 1024;
-	FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 25;
-	FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 2;
+	FSMC_NORSRAMDeInit(FSMC_Bank1_NORSRAM1);
+
+	FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 15;
+	FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 15;
+	FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 255;
+	FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 15;
+	FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 16;
 	FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
 	FSMC_NORSRAMTimingInitStructure.FSMC_AccessMode = FSMC_AccessMode_A;
 
@@ -125,229 +90,98 @@ ErrorStatus MemoryManager::Init()
 	FSMC_NORSRAMInitStructure.FSMC_WriteBurst = FSMC_WriteBurst_Disable;
 	FSMC_NORSRAMInitStructure.FSMC_ReadWriteTimingStruct = &FSMC_NORSRAMTimingInitStructure;
 	FSMC_NORSRAMInitStructure.FSMC_WriteTimingStruct = &FSMC_NORSRAMTimingInitStructure;
+
 	FSMC_NORSRAMInit(&FSMC_NORSRAMInitStructure);
 
 	/* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
 	FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 
-	for(int i=1;i<_sramLength;i++)
+
+	uint8_t* tmp = (uint8_t*)_baseAddr;
+
+	uint32_t length = _sramLength;
+
+	uint16_t oldwert,istwert;
+
+	for(short i=0;i<(length);i++)
 	{
 
-		SRAM_Write(i,0x5A3C);
+		SRAM_Write(i,i);
 		istwert=SRAM_Read(i);
+//		tmp[i] = i;
+//		istwert = tmp[i];
 
-		if(istwert==0x5A3C)
+		if(istwert==i)
 		{
 			ret_wert=SUCCESS;
-
 		}
 		else
 		{
-			break;
+			int a=0;
+			ret_wert = ERROR;
+			//break;
 		}
 	}
 
 	if(ret_wert==SUCCESS)
 	{
-		int i,j;
-		mem_block_s *head=0;
-		uint32_t addr;
+		_blocks = (DataBlock*)_baseAddr;
+		_lastAddr = (_baseAddr+sizeof(DataBlock));
+		((DataBlock*)_lastAddr)->size =0;
+		((DataBlock*)_lastAddr)->Next = 0;
+		((DataBlock*)_lastAddr)->alloc = false;
 
-		addr = _baseAddr;
+//		uint16_t next = (uint16_t)((uint32_t*)&_blocks->Next);
+//		uint32_t addr = _baseAddr+next;
 
-		for(i=0; i<MEM_TBL_MAX; i++)
-		{
-			head = (mem_block_s *)addr;
-			_memInfoTbl[i].wm_head = head;
-			for(j=0;j<_memInfoTbl[i].num_max; j++)
-			{
-				head->used =MEM_NO_USED;
-				head->block_size = _memInfoTbl[i].block_size;
-				head->ptr = (char *)(addr + sizeof(mem_block_s));
-				addr += (_memInfoTbl[i].block_size + sizeof(mem_block_s));
-				head->next =(char *)addr;
-				head = (mem_block_s *)head->next;
-				if(head >  (mem_block_s *)((_baseAddr+_sramLength)-0x10))
-				{
-					ret_wert=ERROR;
-					return ret_wert;
-				}
+		((DataBlock*)_baseAddr)->Next = _lastAddr;
+		((DataBlock*)_baseAddr)->size =0;
+		((DataBlock*)_baseAddr)->alloc = false;
 
-			}
-		}
-		head->ptr = 0;
-		head->block_size = 0;
-		head->next = (char*)_baseAddr;
-
-		MemHeapHasBeenInitialised=true;
 	}
 	return ret_wert;
 }
 
 void* MemoryManager::Malloc(unsigned int size)
 {
-	 void *pwtReturn = 0;
-	    int i;
-	    mem_block_s *head;
-
-	    if(!MemHeapHasBeenInitialised )
-	            goto done_exit;
-
-	    for(i=0; i<MEM_TBL_MAX; i++)
-	    {
-	        if(size <= _memInfoTbl[i].block_size)
-	        {
-	            head = _memInfoTbl[i].wm_head;
-	            uint32_t ptr = (uint32_t)(&head->ptr);
-	            head = _memInfoTbl[i].wm_head;
-					while(ptr)
-					{
-						if(head->used == MEM_NO_USED)
-						{
-							head->used = MEM_USED;
-							pwtReturn = head->ptr;
-							goto done;
-						}
-						head = (  mem_block_s *)head->next;
-					}
-	            goto done;
-
-	        }
-	    }
-	 done:
-
-
-	    if(pwtReturn)
-	    {
-	        for(i=0; i<MEM_TBL_MAX; i++)
-	        {
-	            if(_memInfoTbl[i].block_size == head->block_size)
-	            {
-
-	                _memInfoTbl[i].calc[CALC_CNT]++;
-	                if(_memInfoTbl[i].calc[CALC_CNT] > _memInfoTbl[i].calc[CALC_MAX] )
-	                    _memInfoTbl[i].calc[CALC_MAX]=_memInfoTbl[i].calc[CALC_CNT];
-	                break;
-	            }
-	        }
-	    }
-	  done_exit:
-	    return pwtReturn;
+	DataBlock* _curBlock = _blocks;
+	while(_curBlock->alloc)
+	{
+		uint32_t cur_block = (uint32_t)_curBlock;
+		_curBlock = (DataBlock*)_curBlock->Next;
+		_lastAddr = cur_block+sizeof(DataBlock)+_curBlock->size;
+	}
+	_curBlock-> size = size;
+	_curBlock->alloc = true;
+	uint32_t addr = _baseAddr+((uint16_t)(_curBlock->Next))<<1;
+	*(uint32_t*)(addr) = _lastAddr;
+	//*(uint32_t*)(_baseAddr+((uint16_t)(*_curBlock->Next))<<1) = _lastAddr;//(DataBlock*)(_lastAddr+sizeof(DataBlock)+size);
+	return _curBlock->Data;
 }
 
 
 void MemoryManager::Free(void* obj)
 {
-	 mem_block_s *head;
-	    char fault=0;
 
-
-	    if( ( obj == 0 ) || (!MemHeapHasBeenInitialised) )
-	        goto done;
-
-	    if( (obj < (void*)_baseAddr) && (obj > (void*)(_baseAddr+_sramLength)) )
-	    {
-	        goto done;
-	    }
-
-	    head = (mem_block_s*)obj-sizeof(mem_block_s);
-
-
-	    if(head->used)
-	        head->used = MEM_NO_USED;
-	    else
-	    {
-	        fault=1;
-	    }
-
-
-	    if(fault)
-	        goto done;
-	    int i;
-	    for(i=0;i<MEM_TBL_MAX;i++)
-	    {
-	        if(_memInfoTbl[i].block_size == head->block_size)
-	        {
-	            _memInfoTbl[i].calc[CALC_CNT]--;
-	            goto done;
-	        }
-	    }
-	 done:;
 }
 
 
 void MemoryManager::ShowMemory()
 {
-	 int i;
-	    int block_size;
-	    int block_cnt[MEM_TBL_MAX];
-	    int usedSize=0, totalSize=0;
-	    mem_block_s *head;
 
-	    if(!MemHeapHasBeenInitialised )
-	            return;
-
-	    memset(block_cnt, 0, sizeof(block_cnt));
-
-	    head = _memInfoTbl[0].wm_head;
-	    i=0;
-	    block_size = head->block_size;
-
-	    while( head->ptr !=0)
-	    {
-	        if(head->used == MEM_USED )
-	        {
-	            block_cnt[i]++;
-	            usedSize +=head->block_size;
-	        }
-	        usedSize += sizeof(mem_block_s);
-
-	        totalSize += (head->block_size+ sizeof(mem_block_s));
-
-	        /* change next memory block */
-	        head = ( mem_block_s *)head->next;
-	        if( block_size != head->block_size)
-	        {
-	            block_size = head->block_size;
-	            i++;
-	        }
-	    }
-
-	    usedSize += sizeof(mem_block_s);
-	    totalSize+= sizeof(mem_block_s);
-
-	    //dprintf("----Memory Information----\n");
-
-	    for(i=0; i<MEM_TBL_MAX; i++) {
-	        //printf("block %d used=%d/%d (max %d)\n",
-	        //            memInfoTbl[i].block_size, block_cnt[i],
-	         //           memInfoTbl[i].num_max,
-	         //           memInfoTbl[i].calc[CALC_MAX]);
-	    }
-
-	   // printf("used memory=%d\n",usedSize);
-	   // printf("free memory=%d\n",totalSize-usedSize);
-	   // printf("total memory=%d\n",totalSize);
-	   // printf("--------------------------\n");
 }
 
 
-void MemoryManager::SRAM_Write(uint32_t adr, uint16_t wert)
-	{
-	  // adresse muss um 1bit nach links verschoben werden
-	  adr=adr<<1;
-
-	  *(uint16_t *) (_baseAddr + adr) = wert;
-	}
+void MemoryManager::SRAM_Write(uint32_t adr, uint32_t wert)
+{
+	*(volatile uint16_t*)(_baseAddr |(adr <<1) )=wert;
+}
 
 uint16_t MemoryManager::SRAM_Read(uint32_t adr)
 	{
-	  uint16_t ret_wert=0;
+	  uint32_t ret_wert=0;
 
-	  // adresse muss um 1bit nach links verschoben werden
-	  adr=adr<<1;
-
-	  ret_wert=*(__IO uint16_t*) (_baseAddr + adr);
+	  ret_wert=*(__IO uint16_t*) (_baseAddr|(adr<<1));
 
 	  return(ret_wert);
 	}

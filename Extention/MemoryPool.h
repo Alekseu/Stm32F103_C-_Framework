@@ -23,12 +23,13 @@ extern "C"
  struct MemPoolBlock {
      MemPoolBlock *next;
      SIZE_T size;   // size not including this structure. This is a multiple of sizeof(MemPoolBlock)
-     unsigned char alloc; // 0 = free, 1 = allocated
+    bool alloc; // 0 = free, 1 = allocated
    };
 
 class MemPool {
 public:
 
+	 static MemPool* PoolObj;
 
   MemPool(void *buffer, SIZE_T bufferLength);
 
@@ -41,6 +42,9 @@ public:
 private:
 
   unsigned int  _baseAddr;
+  unsigned int _objectsCounter;
+
+
 
   void SRAM_Write(uint32_t adr, uint16_t wert);
   uint32_t SRAM_Read(uint32_t adr);
@@ -50,6 +54,7 @@ private:
   void mergeFreeBlocks();
 
   MemPoolBlock *m_blocks;
+  MemPoolBlock *_lastBlock;
 };
 
 #endif /* EXTENTION_MEMORYPOOL_H_ */

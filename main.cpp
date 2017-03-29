@@ -15,6 +15,9 @@
 #include <string.h>
 
 #include "Extention/MemoryManager.h"
+#include "Extention/MemoryPool.h"
+#include "Extention/LinkedList.h"
+#include "Extention/RingBuffer.h"
 
 extern "C"
 {
@@ -46,20 +49,29 @@ void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
 
 int main()
 {
-	MemPool pool((void*)0x60000000,0x80000);
+	//MemPool pool((void*)0x60000001,0x80000);
+	MemoryManager mem((uint32_t)0x60000000,0x0FFFFF);
+	mem.Init();
 
-	char* array = new(&pool) char[128];
+	char* array = new char[128];
 
 	if(array!=0)
 	{
 		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
 	}
-	char* array1 = new(&pool) char[128];
-	char* array2 = new(&pool) char[128];
+	char* array1 = new char[128];
+	char* array2 = new char[128];
 
-	operator delete[](array,&pool);
-	operator delete[](array1,&pool);
-	operator delete[](array2,&pool);
+	 delete[] array;
+	 delete[] array1;
+	 delete[] array1;
+
+	LList<char>* _list = new LList<char>();
+	for(int i=0;i<10;i++)
+	{
+		_list->add(i+1);
+	}
+
 //	MemoryManager mem((uint32_t)0x60000000,0x80000);
 //
 //	ErrorStatus t = mem.Init();
@@ -83,20 +95,20 @@ int main()
 ////		mem.ShowMemory();
 //	}
 
-	_command = new CommandProcessor(_USART1,19200);
-	_leds.Init();
-	com.TypeUsb = VirtualComPort;
-	com.Init();
+//	_command = new CommandProcessor(_USART1,19200);
+//	_leds.Init();
+//	com.TypeUsb = VirtualComPort;
+//	com.Init();
 
-	_sl.Width = 32;
-	_sl.Height = 16;
-	_sl.SLInit();
-
-	_command->Width = 32;
-	_command->Hieght = 16;
-	_command->UseDMA = false;
-	_command->OnCommand = OnProcessCommand;
-	_command->Init();
+//	_sl.Width = 32;
+//	_sl.Height = 16;
+//	_sl.SLInit();
+//
+//	_command->Width = 32;
+//	_command->Hieght = 16;
+//	_command->UseDMA = false;
+//	_command->OnCommand = OnProcessCommand;
+//	_command->Init();
 
 //	Set_System();
 //	Set_USBClock();
@@ -123,12 +135,12 @@ int main()
 	while(1){
 		a++;
 		_leds.On(1);
-		memset(_data,0,256);
-		int l = com.ReadData(_data);
-		if(l>0)
-		{
-			com.SendData(_data,l);
-		}
+//		memset(_data,0,256);
+//		int l = com.ReadData(_data);
+//		if(l>0)
+//		{
+//			com.SendData(_data,l);
+//		}
 		_delay_ms(150);
 		_leds.Off(1);
 		_delay_ms(150);

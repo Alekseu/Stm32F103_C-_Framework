@@ -6,11 +6,14 @@
  */
 #include "MemoryPool.h"
 
+MemPool *MemPool::PoolObj = 0;
 
- MemPool::MemPool(void *buffer, SIZE_T bufferLength) : m_blocks((MemPoolBlock *)buffer)
+
+ MemPool::MemPool(void *buffer, SIZE_T bufferLength)
  {
-
+	 PoolObj = this;
 	 _baseAddr = (unsigned int)buffer;
+
 	 //init fsmc
 	 ErrorStatus ret_wert=ERROR;
 	 uint16_t oldwert,istwert;
@@ -44,10 +47,10 @@
 	 FSMC_NORSRAMTimingInitTypeDef  FSMC_NORSRAMTimingInitStructure;
 
 	 RCC->AHBENR |= RCC_AHBPeriph_FSMC;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 35;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 35;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 600;
-	 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 35;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressSetupTime = 20;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_AddressHoldTime = 20;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_DataSetupTime = 512;
+	 FSMC_NORSRAMTimingInitStructure.FSMC_BusTurnAroundDuration = 20;
 	 FSMC_NORSRAMTimingInitStructure.FSMC_CLKDivision = 2;
 	 FSMC_NORSRAMTimingInitStructure.FSMC_DataLatency = 0;
 	 FSMC_NORSRAMTimingInitStructure.FSMC_AccessMode = FSMC_AccessMode_A;
@@ -73,12 +76,11 @@
 	 /* - BANK 1 (of NOR/SRAM Bank 0~3) is enabled */
 	 FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
 
-			 for(int i=1;i<bufferLength;i++)
+			 for(int i=0;i<bufferLength;i++)
 			 {
-				 // oldwert=SRAM_Read(0x00);
 				 SRAM_Write(i,0x5A3C);
 				 istwert=SRAM_Read(i);
-				 //SRAM_Write(0x01,oldwert);
+				 SRAM_Write(i,0x00);
 				 if(istwert==0x5A3C)
 				 {
 					 ret_wert=SUCCESS;
@@ -88,18 +90,25 @@
 					 break;
 				 }
 			 }
+		if(ret_wert==ERROR)
+		{
+			return;
+		}
 
 
   bufferLength -= bufferLength % sizeof(MemPoolBlock);
-
+  m_blocks = (MemPoolBlock *)_baseAddr;
   m_blocks->next = 0;
-  m_blocks->alloc = 0;
+
   m_blocks->size = bufferLength - sizeof(MemPoolBlock);
+  m_blocks->alloc = false;
+  _objectsCounter=0;
 }
 
 MemPoolBlock * MemPool::findFreeBlock(SIZE_T minsize) {
+
   for (MemPoolBlock *curblk = m_blocks; curblk; curblk = curblk->next)
-    if ((curblk->alloc == 0) && curblk->size >= minsize)
+    if ((!curblk->alloc) && curblk->size >= minsize)
       return curblk;
   return 0;
 }
@@ -119,17 +128,17 @@ void * MemPool::malloc(SIZE_T size) {
   MemPoolBlock *freeblk = findFreeBlock(size);
   if (freeblk) {
 
-	  unsigned char *ptr = (unsigned char *)(freeblk + 1);
+	  unsigned char *ptr = (((unsigned char *)freeblk) + 1);
     if (freeblk->size > size + sizeof(MemPoolBlock))
     {
-      MemPoolBlock *newblk = freeblk + 1 + size / sizeof(MemPoolBlock);
-      newblk->next = freeblk->next;
+      MemPoolBlock *newblk = (MemPoolBlock *)(((unsigned char *)freeblk) + 1 + size / sizeof(MemPoolBlock));
+      newblk->next = 0;
       newblk->alloc = 0;
       newblk->size = freeblk->size - size - sizeof(MemPoolBlock);
       freeblk->next = newblk;
       freeblk->size = size;
     }
-    freeblk->alloc = 1;
+    freeblk->alloc = true;
 
     return ptr;
   } else

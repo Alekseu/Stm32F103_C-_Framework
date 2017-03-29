@@ -102,7 +102,7 @@
 void FSMC_NORSRAMDeInit(uint32_t FSMC_Bank)
 {
   /* Check the parameter */
-  assert_param(IS_FSMC_NORSRAM_BANK(FSMC_Bank));
+  //assert_param(IS_FSMC_NORSRAM_BANK(FSMC_Bank));
   
   /* FSMC_Bank1_NORSRAM1 */
   if(FSMC_Bank == FSMC_Bank1_NORSRAM1)
@@ -129,7 +129,7 @@ void FSMC_NORSRAMDeInit(uint32_t FSMC_Bank)
 void FSMC_NANDDeInit(uint32_t FSMC_Bank)
 {
   /* Check the parameter */
-  assert_param(IS_FSMC_NAND_BANK(FSMC_Bank));
+ // assert_param(IS_FSMC_NAND_BANK(FSMC_Bank));
   
   if(FSMC_Bank == FSMC_Bank2_NAND)
   {
