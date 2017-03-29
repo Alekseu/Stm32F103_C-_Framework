@@ -22,7 +22,7 @@ static InterruptHandler __attribute__((aligned(0x200)))  isrTable[isrCount];
 void DefaultHandler()
 {
 	int a=0;
-	throw 5;
+
 	while(true)
 	{
 

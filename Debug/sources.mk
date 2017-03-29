@@ -32,7 +32,6 @@ StdPeriph/usb/src \
 StdPeriph/stm_lib/src \
 StdPeriph/newlib \
 StdPeriph/cmsis_boot \
-La \
 Extention \
 Driver \
 Communication \

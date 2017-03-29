@@ -12,7 +12,6 @@
 #include "Driver/Usb.h"
 #include "Driver/Blinker.h"
 
-#include "Driver/singleLed/SL.h"
 #include "Communication/CommandProcessor.h"
 #include <string.h>
 
@@ -22,18 +21,7 @@
 #include "Extention/RingBuffer.h"
 
 
-extern "C"
-{
-//#include "StdPeriph/usb/inc/usb_lib.h"
-//	#include "Driver/usb_com/usb_pwr.h"
-//	#include "Driver/usb_com/usb_istr.h"
-//	#include "Driver/usb_com/usb_desc.h"
-//	#include "Driver/usb_com/hw_config.h"
-}
 
-
-
-//char _data[256];
 Blinker _leds;
 //CommandProcessor* _command;
 //
