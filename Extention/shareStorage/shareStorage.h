@@ -8,6 +8,7 @@
 #ifndef EXTENTION_SHARESTORAGE_SHARESTORAGE_H_
 #define EXTENTION_SHARESTORAGE_SHARESTORAGE_H_
 
+#define STORAGE_COUNT 100
 
 struct PTR
 {
@@ -19,6 +20,7 @@ struct PTR
 {
 public:
 	static ShareStorage* SSObj;
+
 	ShareStorage();
 
 	int Add(void* obj);
@@ -34,7 +36,7 @@ public:
 	void* getObj(int index);
 
 private:
-	PTR _ptrs[200];
+	PTR _ptrs[STORAGE_COUNT];
 };
 
 

@@ -7,7 +7,7 @@
 
 #include "main.h"
 
-#include "Extention/SPtr.h"
+#include "Extention/sPtr.h"
 
 void Overclocking(void) // Разгон микроконтроллера.
 {
@@ -45,18 +45,17 @@ unsigned char place[4096];
 int main()
 {
 	ShareStorage _storage;
+
 	InterruptController::RemapToRam();
 	_leds.Init();
 	//Overclocking();
 
-//	MemPool pool((void*)place,4096);
 	MemoryManager mem(place,4096);
 	mem.RemovedElementsAutoCollectCount =5;
 	mem.UsingShareStorage = true;
 	mem.Init();
-//
-	char* array = new char[128];
 
+	char* array = new char[128];
 	if(array!=0)
 	{
 		memcpy(array,"array !",strlen("array !"));
@@ -73,6 +72,7 @@ int main()
 	{
 		memcpy(array2,"array2 !",strlen("array2 !"));
 	}
+
 
 	 delete[] array;
 
@@ -93,11 +93,8 @@ int main()
 	 delete[] array2;
 	 delete[] array3;
 
-	// CommandProcessor* _command = new CommandProcessor(_USART1,19200);
 	 mem.Collect();
 	 mem.Collect();
-
-
 
 	 _command1->UseDMA = false;
 	 _command2->UseDMA = false;
@@ -167,7 +164,7 @@ int main()
 //
 //	_dma->MemCpy((char*)_flashMemory,t2,10);
 
-mem.ShowMemory();
+	 mem.ShowMemory();
 
 
 

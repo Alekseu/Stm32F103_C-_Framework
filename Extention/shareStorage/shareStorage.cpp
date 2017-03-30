@@ -12,12 +12,13 @@ ShareStorage* ShareStorage::SSObj =0;
 ShareStorage::ShareStorage()
 {
 	SSObj = this;
-	for(int i=0;i<200;i++)
+	for(int i=0;i<STORAGE_COUNT;i++)
 	{
 		_ptrs[i].obj =0;
 		_ptrs[i].counter=0;
 	}
 }
+
 
 int ShareStorage::Add(void* obj)
 {
