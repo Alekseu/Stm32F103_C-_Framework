@@ -40,6 +40,20 @@ void Overclocking(void) // Разгон микроконтроллера.
 //typedef void reset__(void);
 //reset__* reset_ = 0;
 
+
+void smartptrtester()
+{
+	SPtr<char> array (new char[128]);
+		if(array.get()!=0)
+		{
+			memcpy(array.get(),"array !",strlen("array !"));
+		}
+
+		SPtr<char> array1 = array;
+		SPtr<char> array2 = array;
+		int a=0;
+}
+
 unsigned char place[4096];
 
 int main()
@@ -55,26 +69,7 @@ int main()
 	mem.UsingShareStorage = true;
 	mem.Init();
 
-	char* array = new char[128];
-	if(array!=0)
-	{
-		memcpy(array,"array !",strlen("array !"));
-	}
-
-	char* array1 = new char[128];
-	if(array1!=0)
-	{
-		memcpy(array1,"array1 !",strlen("array1 !"));
-	}
-
-	char* array2 = new char[128];
-	if(array2!=0)
-	{
-		memcpy(array2,"array2 !",strlen("array2 !"));
-	}
-
-
-	 delete[] array;
+	smartptrtester();
 
 	 char* array3 = new char[28];
 	 if(array3!=0)
@@ -89,8 +84,7 @@ int main()
 	 _command2->Width = 128;
 	 _command2->Hieght = 32;
 
-	 delete[] array1;
-	 delete[] array2;
+
 	 delete[] array3;
 
 	 mem.Collect();

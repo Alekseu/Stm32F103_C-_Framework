@@ -11,7 +11,7 @@
 #include "shareStorage/shareStorage.h"
 
 
-template<class T>
+template<typename T>
 class SPtr
 {
 public:
@@ -32,7 +32,7 @@ public:
 
 	T* get()
 	{
-		_ptr = ShareStorage::SSObj->getObj(_index);
+		_ptr = (T*)ShareStorage::SSObj->getObj(_index);
 		return _ptr;
 	}
 

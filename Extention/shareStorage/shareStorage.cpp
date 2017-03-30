@@ -58,6 +58,12 @@ void ShareStorage::Remove(void* obj, int index)
 	{
 		_ptrs[index].counter--;
 	}
+
+	if(_ptrs[index].counter==0)
+	{
+		delete (char*)(_ptrs[index].obj);
+		_ptrs[index].obj =0;
+	}
 }
 
 bool ShareStorage::Check(void* obj, int index)
