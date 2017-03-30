@@ -7,6 +7,7 @@
 
 #include "main.h"
 
+#include "Extention/SPtr.h"
 
 void Overclocking(void) // Разгон микроконтроллера.
 {
@@ -39,28 +40,69 @@ void Overclocking(void) // Разгон микроконтроллера.
 //typedef void reset__(void);
 //reset__* reset_ = 0;
 
+unsigned char place[4096];
+
 int main()
 {
+	ShareStorage _storage;
 	InterruptController::RemapToRam();
 	_leds.Init();
-	Overclocking();
+	//Overclocking();
 
-	//MemPool pool((void*)0x60000001,0x80000);
-//	MemoryManager mem((uint32_t)0x60000000,0x0FFFFF);
-//	mem.Init();
+//	MemPool pool((void*)place,4096);
+	MemoryManager mem(place,4096);
+	mem.RemovedElementsAutoCollectCount =5;
+	mem.UsingShareStorage = true;
+	mem.Init();
 //
-//	char* array = new char[128];
-//
-//	if(array!=0)
-//	{
-//		memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
-//	}
-//	char* array1 = new char[128];
-//	char* array2 = new char[128];
-//
-//	 delete[] array;
-//	 delete[] array1;
-//	 delete[] array1;
+	char* array = new char[128];
+
+	if(array!=0)
+	{
+		memcpy(array,"array !",strlen("array !"));
+	}
+
+	char* array1 = new char[128];
+	if(array1!=0)
+	{
+		memcpy(array1,"array1 !",strlen("array1 !"));
+	}
+
+	char* array2 = new char[128];
+	if(array2!=0)
+	{
+		memcpy(array2,"array2 !",strlen("array2 !"));
+	}
+
+	 delete[] array;
+
+	 char* array3 = new char[28];
+	 if(array3!=0)
+	 {
+		 memcpy(array3,"array3 !",strlen("array3 !"));
+	 }
+
+	 SPtr<CommandProcessor> _command1(new CommandProcessor(_USART1,19200));
+	 _command1->Width = 32;
+	 _command1->Hieght = 64;
+	 SPtr<CommandProcessor> _command2(new CommandProcessor(_USART2,19200));
+	 _command2->Width = 128;
+	 _command2->Hieght = 32;
+
+	 delete[] array1;
+	 delete[] array2;
+	 delete[] array3;
+
+	// CommandProcessor* _command = new CommandProcessor(_USART1,19200);
+	 mem.Collect();
+	 mem.Collect();
+
+
+
+	 _command1->UseDMA = false;
+	 _command2->UseDMA = false;
+
+
 //
 //	LList<char>* _list = new LList<char>();
 //	for(int i=0;i<10;i++)
@@ -125,6 +167,7 @@ int main()
 //
 //	_dma->MemCpy((char*)_flashMemory,t2,10);
 
+mem.ShowMemory();
 
 
 

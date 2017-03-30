@@ -12,17 +12,17 @@
 #include "Driver/nvic/nvic.h"
 #include "Driver/Blinker.h"
 #include "Extention/delay.h"
+#include "Driver/usart/usart.h"
 
-//#include "Driver/usart.h"
 //#include "Driver/Dma.h"
 //#include "Extention/operators.h"
 //#include "Driver/usb/usb.h"
 
 //
-//#include "Communication/CommandProcessor.h"
-//#include <string.h>
+#include "Communication/CommandProcessor.h"
+#include <string.h>
 //
-//#include "Extention/MemoryManager.h"
+#include "Extention/MemoryManager.h"
 //#include "Extention/MemoryPool.h"
 //#include "Extention/LinkedList.h"
 //#include "Extention/RingBuffer.h"

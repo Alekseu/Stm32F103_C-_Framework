@@ -32,6 +32,7 @@ StdPeriph/usb/src \
 StdPeriph/stm_lib/src \
 StdPeriph/newlib \
 StdPeriph/cmsis_boot \
+Extention/shareStorage \
 Extention \
 Driver/usb \
 Driver/usart \

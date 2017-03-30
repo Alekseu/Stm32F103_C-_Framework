@@ -18,63 +18,45 @@ void* operator new(size_t size)
 	{
 		return MemoryManager::MemoryManObj->Malloc(size);
 	}
-	else if(MemPool::PoolObj!=0)
-	{
-		return MemPool::PoolObj->malloc(size);
-	}
 
-		return malloc(size);
+	return malloc(size);
 
 }
 
 void* operator new[](size_t size)
 {
 	if(MemoryManager::MemoryManObj!=0)
-		{
-			return MemoryManager::MemoryManObj->Malloc(size);
-		}
-		else if(MemPool::PoolObj!=0)
-		{
-			return MemPool::PoolObj->malloc(size);
-		}
+	{
+		return MemoryManager::MemoryManObj->Malloc(size);
+	}
 
-			return malloc(size);
+	return malloc(size);
 
 }
 
- void operator delete (void* p)
+void operator delete (void* p)
 {
-	 if(MemoryManager::MemoryManObj!=0)
-	 	{
-		 MemoryManager::MemoryManObj->Free(p);
-	 		 return;
-	 	}
-	 	else if(MemPool::PoolObj!=0)
-	 	{
-	 		MemPool::PoolObj->free(p);
-	 		 return;
-	 	}
+	if(MemoryManager::MemoryManObj!=0)
+	{
+		MemoryManager::MemoryManObj->Free(p);
+		return;
+	}
 
-	 		 free(p);
+	free(p);
 
 }
 
-void operator delete[](void* p)
-{
+ void operator delete[](void* p)
+ {
 	 if(MemoryManager::MemoryManObj!=0)
-		 	{
+	 {
 		 MemoryManager::MemoryManObj->Free(p);
-		 		 return;
-		 	}
-		 	else if(MemPool::PoolObj!=0)
-		 	{
-		 		MemPool::PoolObj->free(p);
-		 		 return;
-		 	}
+		 return;
+	 }
 
-		 		 free(p);
+	 free(p);
 
-}
+ }
 
 
 ////playsment
