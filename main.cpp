@@ -44,14 +44,14 @@ void Overclocking(void) // Разгон микроконтроллера.
 void smartptrtester()
 {
 	SPtr<char> array (new char[128]);
-		if(array.get()!=0)
-		{
-			memcpy(array.get(),"array !",strlen("array !"));
-		}
+	if(array.get()!=0)
+	{
+		memcpy(array.get(),"array !",strlen("array !"));
+	}
 
-		SPtr<char> array1 = array;
-		SPtr<char> array2 = array;
-		int a=0;
+	SPtr<char> array1 = array;
+	SPtr<char> array2 = array;
+	int a=0;
 }
 
 unsigned char place[4096];
@@ -69,7 +69,7 @@ int main()
 	mem.UsingShareStorage = true;
 	mem.Init();
 
-	smartptrtester();
+	//smartptrtester();
 
 	 char* array3 = new char[28];
 	 if(array3!=0)
@@ -93,6 +93,8 @@ int main()
 	 _command1->UseDMA = false;
 	 _command2->UseDMA = false;
 
+
+	 char* t = new char(10);
 
 //
 //	LList<char>* _list = new LList<char>();

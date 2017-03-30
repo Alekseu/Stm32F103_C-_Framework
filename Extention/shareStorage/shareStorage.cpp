@@ -6,6 +6,7 @@
  */
 
 #include "shareStorage.h"
+#include "../Object.h"
 
 ShareStorage* ShareStorage::SSObj =0;
 
@@ -26,7 +27,7 @@ int ShareStorage::Add(void* obj)
 
 	if(obj==0) return index;
 
-	for(int i=0;i<200;i++)
+	for(int i=0;i<STORAGE_COUNT;i++)
 	{
 		if(obj==_ptrs[i].obj)
 		{
@@ -61,6 +62,7 @@ void ShareStorage::Remove(void* obj, int index)
 
 	if(_ptrs[index].counter==0)
 	{
+
 		delete (char*)(_ptrs[index].obj);
 		_ptrs[index].obj =0;
 	}
@@ -81,7 +83,7 @@ int ShareStorage::getIndex(void* obj)
 
 	if(obj==0) return index;
 
-	for(int i=0;i<200;i++)
+	for(int i=0;i<STORAGE_COUNT;i++)
 	{
 		if(obj==_ptrs[i].obj)
 		{

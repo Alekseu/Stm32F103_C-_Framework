@@ -19,6 +19,8 @@
 #include "../StdPeriph/stm_lib/inc/stm32f10x_dma.h"
 #include "../StdPeriph/stm_lib/inc/misc.h"
 
+#include "../Extention/Object.h"
+
 //Timer* Timer::pObject = 0;
 //unsigned long Timer::SystemTick = 0;
 
@@ -26,7 +28,7 @@ typedef void CommandProcessing(Command, unsigned char*, unsigned int);
 
 
 
-class CommandProcessor :public SerialPort
+class CommandProcessor :public SerialPort, public Object
 {
 public:
 	static CommandProcessor* pObj;
