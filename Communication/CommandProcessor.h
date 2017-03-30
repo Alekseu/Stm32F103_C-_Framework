@@ -73,6 +73,11 @@ public:
 
 	}
 
+	~CommandProcessor()
+	{
+		int a=0;
+	}
+
 	void Init()
 	{
 		_data = new unsigned char[((Width/2)*Hieght)+10];
