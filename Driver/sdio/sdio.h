@@ -9,10 +9,11 @@
 #define DRIVER_SDIO_SDIO_H_
 
 #include "../platform.h"
+#include "../Interface/CommunicationObject.h"
 
 namespace Driver
 {
-	class Sdio
+	class Sdio : public ICommunicationObject
 	{
 	public:
 		static Sdio* SdObj;

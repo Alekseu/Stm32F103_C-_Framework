@@ -9,6 +9,7 @@
 #define DRIVER_SPI_SPI_H_
 
 #include "../platform.h"
+#include "../Interface/CommunicationObject.h"
 
 namespace Driver
 {
@@ -19,7 +20,7 @@ namespace Driver
 		Slave
 	};
 
-	class Spi
+	class Spi :public ICommunicationObject
 	{
 	public:
 		static Spi* SObj;
@@ -27,11 +28,13 @@ namespace Driver
 		Spi();
 		virtual ~Spi();
 
-		virtual uint8_t Read8();
-		virtual void Write8(uint8_t byte);
+		void Init();
 
-		virtual uint16_t Read16();
-		virtual void Write16(uint16_t word);
+		virtual uint8_t ReadByte() ;
+		virtual void WriteByte(uint8_t byte);
+
+		virtual uint16_t ReadWord();
+		virtual void WriteWord(uint16_t word);
 
 	private:
 		uint8_t rxtx(uint8_t byte);

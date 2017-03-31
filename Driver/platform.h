@@ -10,7 +10,7 @@
 
 
 /*
- *  Пины и порты для устройств, зависимость определенной аппаратной платформы (платы)
+ *  Пины и порты для устройств, зависимость определенной аппаратной платформы (платы), настройки и т.д.
  */
 
 #include <stdio.h>
@@ -46,19 +46,17 @@ extern "C"
 #define LedPort GPIOA
 
 
-
-
 /*
  * usart's
  */
-#define USART1_RX 0
+#define usart
 
 
 
 /*
  *  spi's
  */
-#define SPI1_MISO
+#define spi
 
 
 
@@ -66,14 +64,14 @@ extern "C"
 /*
  *  i2c's
  */
-#define I2C1_SCL
+#define i2c
 
 
 
 /*
  * usb
  */
-#define USB
+#define usb
 #define RCC_APB2Periph_GPIO_DISCONNECT RCC_APB2Periph_GPIOA
 #define USB_DISCONNECT_PIN	GPIO_Pin_10
 #define USB_DISCONNECT  GPIOA
@@ -82,27 +80,28 @@ extern "C"
 /*
  * timer's
  */
-#define TIMER
+#define timer
 
 
 
 /*
  * dma's
  */
-#define DMA
+#define dma
 
 
 /*
  * sdio
  */
-#define SdIo
+#define sdio
 
 
 
 /*
- * kernel
+ * OS
  */
-#define KERNEL
+#define os
+
 
 
 

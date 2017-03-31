@@ -12,6 +12,7 @@ RM := rm -rf
 -include StdPeriph/stm_lib/src/subdir.mk
 -include StdPeriph/newlib/subdir.mk
 -include StdPeriph/cmsis_boot/subdir.mk
+-include Protocols/Rs485/subdir.mk
 -include Os/subdir.mk
 -include Extention/shareStorage/subdir.mk
 -include Extention/subdir.mk

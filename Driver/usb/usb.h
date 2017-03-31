@@ -9,6 +9,7 @@
 #define DRIVER_USB_H_
 
 #include "../platform.h"
+#include "../Interface/CommunicationObject.h"
 
 namespace Driver
 {
@@ -52,7 +53,7 @@ namespace Driver
 	} UsbType;
 
 
-	class Usb
+	class Usb: public ICommunicationObject
 	{
 		public:
 		static Usb* pUsb;
@@ -116,7 +117,7 @@ namespace Driver
 		virtual void RecivedFromUsb(unsigned int endpoint);
 
 
-		bool Init();
+		void Init();
 
 		void SendData(const char* data, int length);
 		int ReadData(char* mass);

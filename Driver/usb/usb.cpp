@@ -314,7 +314,7 @@ namespace Driver
 
 	}
 
-	bool Usb::Init()
+	void Usb::Init()
 	{
 		pUsb = this;
 
@@ -413,7 +413,7 @@ namespace Driver
 			_delay_ms(1);
 		}
 
-		return timeout>0;
+		//return timeout>0;
 	}
 
 	void Usb::UsbInit()

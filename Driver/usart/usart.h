@@ -12,6 +12,7 @@
 
 #include "../../Extention/delay.h"
 #include "../../Extention/list.h"
+#include "../Interface/CommunicationObject.h"
 
 namespace Driver
 {
@@ -29,7 +30,8 @@ namespace Driver
 	#define _UART_PARITY_ODD USART_Parity_Odd
 
 
-	class SerialPort {
+	class SerialPort :public ICommunicationObject
+	{
 		USART_InitTypeDef USART_InitStruct;
 		GPIO_InitTypeDef  GPIO_InitStruct;
 		NVIC_InitTypeDef  NVIC_InitStructure;

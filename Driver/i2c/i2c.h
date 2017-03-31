@@ -10,10 +10,12 @@
 
 #include "../platform.h"
 
+#include "../Interface/CommunicationObject.h"
+
 namespace Driver
 {
 
-	class I2c
+	class I2c :public ICommunicationObject
 	{
 	public:
 		static I2c* Iobj;
@@ -23,9 +25,11 @@ namespace Driver
 
 		void Init();
 
-		void Write(uint8_t byte);
+		 virtual uint8_t ReadByte() ;
+		 virtual void WriteByte(uint8_t byte);
 
-		uint8_t Read();
+		 virtual uint16_t ReadWord() ;
+		 virtual void WriteWord(uint16_t word);
 
 
 	private:

@@ -64,24 +64,7 @@ int main()
 		 memcpy(array3,"array3 !",strlen("array3 !"));
 	 }
 
-	 SPtr<CommandProcessor> _command1(new CommandProcessor(_USART1,19200));
-	 _command1->Width = 32;
-	 _command1->Hieght = 64;
-	 SPtr<CommandProcessor> _command2(new CommandProcessor(_USART2,19200));
-	 _command2->Width = 128;
-	 _command2->Hieght = 32;
 
-
-	 delete[] array3;
-
-	 mem.Collect();
-	 mem.Collect();
-
-	 _command1->UseDMA = false;
-	 _command2->UseDMA = false;
-
-
-	 char* t = new char(10);
 
 //
 //	LList<char>* _list = new LList<char>();
