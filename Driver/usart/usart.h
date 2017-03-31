@@ -42,6 +42,7 @@ namespace Driver
 
 		List<unsigned char> Data;
 		uint16_t BuferSize;
+		uint16_t InterruptNumber;
 
 		/*
 		 * Конструкторы
@@ -105,6 +106,11 @@ namespace Driver
 		 * метод чтения байта с кольцевого буфера
 		 */
 		uint16_t ReadWord();
+
+		/*
+		 * метод отправки группы байт
+		 */
+		void SendData(uint8_t* data, uint16_t length);
 
 
 		/*

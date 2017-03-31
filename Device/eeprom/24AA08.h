@@ -8,6 +8,7 @@
 #ifndef DEVICE_EEPROM_24AA08_H_
 #define DEVICE_EEPROM_24AA08_H_
 
+#include "../deviceConfig.h"
 
 namespace Device
 {

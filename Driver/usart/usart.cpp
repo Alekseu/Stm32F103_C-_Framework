@@ -85,18 +85,23 @@ namespace Driver
 
 		case _USART0:
 			pUsart0 = this;
+			InterruptNumber = USART1_IRQn;
 			break;
 		case _USART1:
 			pUsart1 = this;
+			InterruptNumber = USART2_IRQn;
 			break;
 		case _USART2:
 			pUsart2 = this;
+			InterruptNumber = USART3_IRQn;
 			break;
 		case _USART3:
 			pUsart3 = this;
+			InterruptNumber = UART4_IRQn;
 			break;
 		case _USART4:
 			pUsart4 = this;
+			InterruptNumber = UART5_IRQn;
 			break;
 
 		}
@@ -522,11 +527,20 @@ namespace Driver
 	}
 
 	//todo реализовать
-	uint8_t SerialPort::ReadByte(){}
+	uint8_t SerialPort::ReadByte(){return 0;}
 
 	void SerialPort::WriteWord(uint16_t word){}
 
-	uint16_t SerialPort::ReadWord(){}
+	uint16_t SerialPort::ReadWord(){return 0;}
+
+
+	void SerialPort::SendData(uint8_t* data, uint16_t length)
+	{
+		for(int i=0;i<length;i++)
+		{
+			WriteByte(data[i]);
+		}
+	}
 
 	void SerialPort::Received(uint8_t data)
 	{

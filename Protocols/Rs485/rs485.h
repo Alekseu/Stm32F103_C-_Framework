@@ -7,7 +7,8 @@
 
 #ifndef PROTOCOLS_RS485_RS485_H_
 #define PROTOCOLS_RS485_RS485_H_
-#include "../../Driver/usart/usart.h"
+
+#include "../protocolConfig.h"
 
 namespace Protocol
 {
@@ -31,6 +32,8 @@ namespace Protocol
 		 uint16_t ReadWord() ;
 		 void WriteWord(uint16_t word);
 
+		 void SendData(uint8_t* data, uint16_t length);
+
 		 void Recived(uint8_t data);
 
 		 /*
@@ -40,7 +43,12 @@ namespace Protocol
 		 const char* toString();
 
 	private:
+		 GpioInit GpioType;
 		 bool _transmit;
+
+		 void _transmitEnable();
+		 void _reciveEnable();
+
 	};
 }
 

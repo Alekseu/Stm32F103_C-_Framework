@@ -33,7 +33,7 @@ typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
 
 		void Init();
 
-		void SendCommand(uint8_t command, uint8_t data, uint16_t length);
+		void SendCommand(uint8_t command, uint8_t* data, uint16_t length);
 
 		void Recived(uint8_t data);
 
@@ -54,6 +54,8 @@ typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
 		unsigned char _crc;
 
 		unsigned char* _data;
+
+		void SendData(uint8_t* data, uint16_t size);
 
 	};
 }

@@ -26,6 +26,11 @@ namespace Protocol
 	void Rs485::Init()
 	{
 		SerialPort::Init();
+		RCC_APB2PeriphClockCmd(RxTxPheriph,ENABLE);
+		GpioType.GPIO_Pin =  RxTxPin;
+		GpioType.GPIO_Speed = GPIO_Speed_50MHz;
+		GpioType.GPIO_Mode = GPIO_Mode_Out_PP;
+		GPIO_Init(RxTxPort, &GpioType);
 	}
 
 	uint8_t Rs485::ReadByte()
@@ -48,6 +53,13 @@ namespace Protocol
 
 	}
 
+	void Rs485::SendData(uint8_t* data, uint16_t length)
+	{
+		_transmitEnable();
+		SerialPort::SendData(data,length);
+		_reciveEnable();
+	}
+
 	void Rs485::Recived(uint8_t data)
 	{
 		if(OnRecived!=0)
@@ -59,6 +71,20 @@ namespace Protocol
 	 const char* Rs485::toString()
 	 {
 		 return "Rs485";
+	 }
+
+	 void  Rs485::_transmitEnable()
+	 {
+		 //отключаем прерывание приема
+		 InterruptController::DisableChannel((IRQn_Type)SerialPort::InterruptNumber);
+		 RxTxPort->BSRR = RxTxPin;
+
+	 }
+
+	 void  Rs485::_reciveEnable()
+	 {
+		 InterruptController::EnableChannel((IRQn_Type)SerialPort::InterruptNumber);
+		 RxTxPort->BRR = RxTxPin;
 	 }
 
 }

@@ -112,15 +112,41 @@ namespace Protocol
 
 	}
 
-	void CommandProcessor::SendCommand(uint8_t command, uint8_t data, uint16_t length)
+	void CommandProcessor::SendCommand(uint8_t command, uint8_t* data, uint16_t length)
 	{
+		unsigned char* tmp = new unsigned char[length + 1];
 
+		tmp[0] = (unsigned char) command;
+
+		memcpy(&tmp[1], data, length);
+
+		SendData(tmp, length + 1);
+
+		delete[] tmp;
 	}
-
 
 	const char* CommandProcessor::toString()
 	{
 		return "CommandProcessor";
+	}
+
+	void CommandProcessor::SendData(uint8_t* data, uint16_t size)
+	{
+		unsigned char crc;
+
+		_comObj->WriteByte(0x13);			crc = 0x13;
+
+		_comObj->WriteByte(size>>8&0xFF); crc ^= (unsigned char)(size>>8&0xFF);
+		_comObj->WriteByte(size&0xFF); crc ^= (unsigned char)(size&0xFF);
+
+		for (unsigned char i = 0; i < size; i++)
+		{
+			_comObj->WriteByte(data[i]); 	crc ^= data[i];
+		}
+
+		_comObj->WriteByte(crc);
+
+
 	}
 
 }

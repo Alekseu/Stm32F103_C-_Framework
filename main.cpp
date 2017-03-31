@@ -28,15 +28,11 @@ void Overclocking(void) // Разгон микроконтроллера.
 //Usb com;
 //SL _sl;
 
-//void OnProcessCommand(Command com, unsigned char* data, unsigned int length)
-//{
-//
-//	if(com==SetBuffer)
-//	{
-//		memcpy(_sl.VideoBuffer,data,length);
-//		_command->SendCommand(com,(char*)0,0);
-//	}
-//}
+void OnProcessCommand(uint8_t com, uint8_t* data, uint16_t length)
+{
+
+
+}
 //typedef void reset__(void);
 //reset__* reset_ = 0;
 
@@ -67,9 +63,14 @@ int main()
 
 	 Rs485 _rs485(_USART0,9600);
 	 _rs485.Init();
+
 	 memcpy(array3,_rs485.toString(),strlen(_rs485.toString()));
+
 	 CommandProcessor _comProc((ICommunicationObject*)&_rs485);
+	 _comProc.OnCommand =OnProcessCommand;
 	 _comProc.Init();
+	 _comProc.SendCommand(0x10,0,0);
+
 	 memcpy(array3,_comProc.toString(),strlen(_comProc.toString()));
 
 	 SerialPort _port(_USART1, 9600);

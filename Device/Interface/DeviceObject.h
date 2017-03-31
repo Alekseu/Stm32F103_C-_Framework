@@ -9,7 +9,7 @@
 #define DEVICE_INTERFACE_DEVICEOBJECT_H_
 
 #include "../../Global/object.h"
-
+#include "../deviceConfig.h"
 
 class DeviceObject :public Object
 {
