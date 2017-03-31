@@ -21,8 +21,8 @@
 
 #include "../Extention/Object.h"
 
-//Timer* Timer::pObject = 0;
-//unsigned long Timer::SystemTick = 0;
+
+using namespace Driver;
 
 typedef void CommandProcessing(Command, unsigned char*, unsigned int);
 

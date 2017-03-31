@@ -8,14 +8,19 @@
 #ifndef DRIVER_I2C_I2C_H_
 #define DRIVER_I2C_I2C_H_
 
+#include "../platform.h"
 
-class I2c
+namespace Driver
 {
-public:
-	static I2c* Iobj;
-private:
-};
 
+	class I2c
+	{
+	public:
+		static I2c* Iobj;
+	private:
+	};
+
+}
 
 
 #endif /* DRIVER_I2C_I2C_H_ */

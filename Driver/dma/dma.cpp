@@ -6,6 +6,9 @@
  */
 #include "dma.h"
 
+namespace Driver
+{
+
 Dma *Dma::pDma0 = 0;
 Dma *Dma::pDma1 = 0;
 Dma *Dma::pDma2 = 0;
@@ -165,7 +168,7 @@ void DMA2_Channel5_IRQHandler(void) //tx
 
 	Dma::Dma()
 	{
-
+		_channel =0;
 	}
 
 	Dma::~Dma(){
@@ -422,5 +425,5 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 		}
  	}
 
-
+}
 

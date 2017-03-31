@@ -10,7 +10,7 @@
 #include "StdPeriph/cmsis_boot/stm32f10x.h"
 #include "StdPeriph/cmsis_boot/system_stm32f10x.h"
 #include "Driver/nvic/nvic.h"
-#include "Driver/Blinker.h"
+#include "Driver/led/led.h"
 #include "Extention/delay.h"
 #include "Driver/usart/usart.h"
 
@@ -27,6 +27,8 @@
 //#include "Extention/LinkedList.h"
 //#include "Extention/RingBuffer.h"
 
-Blinker _leds;
+using namespace Driver;
+
+Led _leds;
 
 #endif /* MAIN_H_ */

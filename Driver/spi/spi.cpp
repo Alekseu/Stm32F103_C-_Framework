@@ -7,7 +7,12 @@
 
 #include "spi.h"
 
-Spi* Spi::SObj =0;
+namespace Driver
+{
+
+	Spi* Spi::SObj =0;
 
 
+
+}
 

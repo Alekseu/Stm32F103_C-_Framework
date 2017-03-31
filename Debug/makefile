@@ -19,6 +19,7 @@ RM := rm -rf
 -include Driver/timer/subdir.mk
 -include Driver/spi/subdir.mk
 -include Driver/nvic/subdir.mk
+-include Driver/led/subdir.mk
 -include Driver/i2c/subdir.mk
 -include Driver/dma/subdir.mk
 -include Communication/subdir.mk

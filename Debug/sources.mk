@@ -39,6 +39,7 @@ Driver/usart \
 Driver/timer \
 Driver/spi \
 Driver/nvic \
+Driver/led \
 Driver/i2c \
 Driver/dma \
 Communication \

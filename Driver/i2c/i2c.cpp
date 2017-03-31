@@ -7,6 +7,11 @@
 
 #include "i2c.h"
 
+namespace Driver
+{
+	I2c* I2c::Iobj=0;
 
-I2c* I2c::Iobj=0;
 
+
+
+}
