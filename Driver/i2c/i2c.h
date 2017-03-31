@@ -17,6 +17,17 @@ namespace Driver
 	{
 	public:
 		static I2c* Iobj;
+
+		I2c();
+		~I2c();
+
+		void Init();
+
+		void Write(uint8_t byte);
+
+		uint8_t Read();
+
+
 	private:
 	};
 

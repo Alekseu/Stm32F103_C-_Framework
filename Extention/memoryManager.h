@@ -35,6 +35,7 @@ public:
 	unsigned int RemovedElementsAutoCollectCount;
 	bool UsingShareStorage;
 
+	//todo добавить конструктор с параметром фсмц
 	MemoryManager(void* StartAddr, unsigned int length);
 
 	bool Init();

@@ -92,6 +92,18 @@ extern "C"
 #define DMA
 
 
+/*
+ * sdio
+ */
+#define SdIo
+
+
+
+/*
+ * kernel
+ */
+#define KERNEL
+
 
 
 #endif /* DRIVER_PLATFORM_H_ */

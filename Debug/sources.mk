@@ -32,15 +32,21 @@ StdPeriph/usb/src \
 StdPeriph/stm_lib/src \
 StdPeriph/newlib \
 StdPeriph/cmsis_boot \
+Os \
 Extention/shareStorage \
 Extention \
 Driver/usb \
 Driver/usart \
 Driver/timer \
 Driver/spi \
+Driver/sdio \
+Driver/rtc \
+Driver/pwm \
 Driver/nvic \
 Driver/led \
 Driver/i2c \
+Driver/fsmc \
 Driver/dma \
+Device/eeprom \
 Communication \
 
