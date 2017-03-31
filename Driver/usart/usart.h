@@ -29,11 +29,14 @@ namespace Driver
 		uint8_t* _tx;
 
 		volatile uint8_t _head, _tail;
-		volatile uint8_t _port;
+
 		volatile uint16_t _parity;
 		volatile bool _useInterupsTX;
 
 	public:
+		volatile uint8_t Port;
+		volatile uint16_t Baud;
+
 		static SerialPort* pUsart0;
 		static SerialPort* pUsart1;
 		static SerialPort* pUsart2;
@@ -122,12 +125,12 @@ namespace Driver
 
 
 		/*
-		 * События от внешних источников (dma, pwm, timer ...) в данном случае для дма
+		 * События от внешних источников (dma, pwm, timer ...) в данном случае для дма, переопределяемые методы
 		 */
-		 void RxComplete();
-		 void TxComplete();
-		 void RxHalfComplete();
-		 void TxHalfComplete();
+		 virtual void RxComplete();
+		 virtual void TxComplete();
+		 virtual void RxHalfComplete();
+		 virtual void TxHalfComplete();
 
 
 		/*

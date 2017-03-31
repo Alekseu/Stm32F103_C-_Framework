@@ -11,6 +11,7 @@
 #include "../platform.h"
 #include "../Interface/DriverObject.h"
 #include "../Interface/CommunicationObject.h"
+#include "../nvic/nvic.h"
 
 namespace Driver
 {
@@ -26,7 +27,7 @@ namespace Driver
 	class Dma :public DriverObject
 	{
 		DmaInit   DMA_InitStructure;
-
+		Source    _source;
 
 		bool configured = false;
 	public:
@@ -47,6 +48,8 @@ namespace Driver
 
 
 		unsigned char Channel;
+		bool UseHalfInterrupts;
+
 
 		//todo указать что за дма (устройство или память) или передать аппаратный блок
 		Dma();

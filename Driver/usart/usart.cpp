@@ -70,7 +70,7 @@ namespace Driver
 
 		void DriverEvent(Source source, uint8_t communication)
 		{
-			if(source.DriverSource!=DMA_SOURCE) return;
+			if(source.DriverSource!=DmaSource) return;
 
 			SerialPort* pointer = 0;
 
@@ -97,18 +97,18 @@ namespace Driver
 
 			switch(source.EventType)
 			{
-				case RX_COMPLETE:
+				case RxComplete:
 					pointer->RxComplete();
 					break;
-				case TX_COMPLETE:
+				case TxComplete:
 					pointer->TxComplete();
 					break;
 
-				case RX_HALF_COMPLETE:
+				case RxHalfComplete:
 					pointer->RxHalfComplete();
 					break;
 
-				case TX_HALF_COMPLETE:
+				case TxHalfComplete:
 					pointer->TxHalfComplete();
 					break;
 			}
@@ -122,11 +122,12 @@ namespace Driver
 		_ring=0;
 		_tx=0;
 
-		_port = port;
+		Port = port;
+		Baud = baud;
 		_head = 0;
 		_tail = 0;
 
-		switch (_port)
+		switch (Port)
 		{
 
 		case _USART0:
@@ -152,7 +153,7 @@ namespace Driver
 
 		}
 
-		switch (_port)
+		switch (Port)
 		{
 		case _USART0:
 				  /* Enable GPIOA clock                                                   */
@@ -325,11 +326,12 @@ namespace Driver
 		_ring=0;
 		_tx=0;
 
-		_port = port;
+		Port = port;
+		Baud=baud;
 		_head = 0;
 		_tail = 0;
 
-		switch (_port)
+		switch (Port)
 		{
 
 		case _USART0:
@@ -349,7 +351,7 @@ namespace Driver
 			break;
 
 		}
-		switch (_port)
+		switch (Port)
 			{
 		case _USART0:
 					  /* Enable GPIOA clock                                                   */
@@ -524,12 +526,13 @@ namespace Driver
 		if(DriverObj!=0)
 		{
 			DriverObj->OnEvent = DriverEvent;
+			DriverObj->CommunicationDriver = Port;
 		}
 	}
 
 	void SerialPort::WriteByte(uint8_t byte)
 	{
-		switch (_port)
+		switch (Port)
 		{
 
 		case _USART0:

@@ -33,6 +33,13 @@ void OnProcessCommand(uint8_t com, uint8_t* data, uint16_t length)
 
 
 }
+
+
+void OnDMATxComplete(Source source, uint8_t comm)
+{
+	int a=0;
+}
+
 //typedef void reset__(void);
 //reset__* reset_ = 0;
 
@@ -85,6 +92,19 @@ int main()
 	 _port.Init();
 
 	 memcpy(array3,_port.toString(),strlen(_port.toString()));
+
+
+	 const char* _source  ="Htis is test!";
+	 char destanation[255];
+	 memset(destanation,0,255);
+
+	 Dma _memcpyDma;
+	 _memcpyDma.Channel = CHANNEL_2;
+	 _memcpyDma.OnEvent = OnDMATxComplete;
+	 _memcpyDma.UseHalfInterrupts = true;
+	 _memcpyDma.Init();
+	 _memcpyDma.MemCpy((char*)_source,destanation,strlen(_source));
+
 
 //
 //	LList<char>* _list = new LList<char>();

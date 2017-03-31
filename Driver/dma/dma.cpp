@@ -23,11 +23,10 @@ Dma *Dma::pDma10 = 0;
 Dma *Dma::pDma11 = 0;
 Dma *Dma::pDma12 = 0;
 
-extern "C"
-{
+
 // ------------ Прерывания DMA ------------------
 
-void DMA1_Channel1_IRQHandler(void) //память память
+void DMA1_Channel1_IRQ(void) //память память
 {
 	if (DMA1->ISR & DMA1_IT_TC1)
 	{
@@ -44,7 +43,7 @@ void DMA1_Channel1_IRQHandler(void) //память память
 }
 
 //UART1
-void DMA1_Channel5_IRQHandler(void) //rx
+void DMA1_Channel5_IRQ(void) //rx
 {
 	if (DMA1->ISR & DMA1_IT_TC5)
 	{
@@ -58,7 +57,7 @@ void DMA1_Channel5_IRQHandler(void) //rx
 	}
 }
 
-void DMA1_Channel4_IRQHandler(void) //tx
+void DMA1_Channel4_IRQ(void) //tx
 {
 	if (DMA1->ISR & DMA1_IT_TC4)
 	{
@@ -73,7 +72,7 @@ void DMA1_Channel4_IRQHandler(void) //tx
 }
 
 //UART2
-void DMA1_Channel6_IRQHandler(void) //rx
+void DMA1_Channel6_IRQ(void) //rx
 {
 	if (DMA1->ISR & DMA1_IT_TC6)
 	{
@@ -87,7 +86,7 @@ void DMA1_Channel6_IRQHandler(void) //rx
 	}
 }
 
-void DMA1_Channel7_IRQHandler(void) //tx
+void DMA1_Channel7_IRQ(void) //tx
 {
 	if (DMA1->ISR & DMA1_IT_TC7)
 	{
@@ -102,7 +101,7 @@ void DMA1_Channel7_IRQHandler(void) //tx
 }
 
 //UART3
-void DMA1_Channel3_IRQHandler(void) //rx
+void DMA1_Channel3_IRQ(void) //rx
 {
 	if (DMA1->ISR & DMA1_IT_TC3)
 	{
@@ -116,12 +115,13 @@ void DMA1_Channel3_IRQHandler(void) //rx
 	}
 }
 
-void DMA1_Channel2_IRQHandler(void) //tx
+void DMA1_Channel2_IRQ(void) //tx
 {
 	if (DMA1->ISR & DMA1_IT_TC2)
 	{
 		DMA1->IFCR =DMA1_IT_TC2;
 		Dma::pDma1->TransmitDmaComplete();
+		return;
 	}
 	if (DMA1->ISR & DMA1_IT_HT2)
 	{
@@ -131,7 +131,7 @@ void DMA1_Channel2_IRQHandler(void) //tx
 }
 
 //UART4
-void DMA2_Channel3_IRQHandler(void) //rx
+void DMA2_Channel3_IRQ(void) //rx
 {
 	if (DMA2->ISR & DMA2_IT_TC3)
 	{
@@ -145,7 +145,7 @@ void DMA2_Channel3_IRQHandler(void) //rx
 	}
 }
 
-void DMA2_Channel5_IRQHandler(void) //tx
+void DMA2_Channel5_IRQ(void) //tx
 {
 	if (DMA2->ISR & DMA2_IT_TC5)
 	{
@@ -160,15 +160,13 @@ void DMA2_Channel5_IRQHandler(void) //tx
 }
 
 
-//5-й юарт не имеет дма каналов
 
-// -----------------------------------------------
-}
 
 
 	Dma::Dma()
 	{
 		Channel =0;
+		UseHalfInterrupts = false;
 	}
 
 	Dma::~Dma(){
@@ -185,32 +183,23 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 case CHANNEL_1:
  			 	 pDma0 = this;
  			      RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-// 				  NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
-// 				  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-// 				  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-// 				  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-// 				  NVIC_Init(&NVIC_InitStructure);
+ 			      InterruptController::SetHandler(DMA1_Channel1_IRQn,DMA1_Channel1_IRQ);
+ 			     InterruptController::EnableChannel(DMA1_Channel1_IRQn);
 
  			 break;
 
  		 case CHANNEL_2:
 				 pDma1 = this;
 				 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-//				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
-//				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-//				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//				 NVIC_Init(&NVIC_InitStructure);
+				 InterruptController::SetHandler(DMA1_Channel2_IRQn,DMA1_Channel2_IRQ);
+				 InterruptController::EnableChannel(DMA1_Channel2_IRQn);
  		 	break;
 
  		 case CHANNEL_3:
 				 pDma2 = this;
 				 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-//				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;
-//				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-//				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//				 NVIC_Init(&NVIC_InitStructure);
+				 InterruptController::SetHandler(DMA1_Channel3_IRQn,DMA1_Channel3_IRQ);
+				 InterruptController::EnableChannel(DMA1_Channel3_IRQn);
  			 break;
 
  		 }
@@ -286,25 +275,53 @@ void DMA2_Channel5_IRQHandler(void) //tx
  	/*
  	 * Приаем половины пакета по дма (переопределяемый метод, прерывание)
  	 */
- 	 void  Dma::HalfRecivedDmaComplete(){}
+ 	 void  Dma::HalfRecivedDmaComplete()
+ 	 {
+ 		 if(OnEvent!=0)
+ 		 {
+ 			_source.DriverSource = DmaSource;
+ 			_source.EventType = RxHalfComplete;
+ 			 OnEvent(_source, CommunicationDriver);
+ 		 }
+ 	 }
 
  	/*
  	 * Прием всего пакета по дма  (переопределяемый метод, прерывание)
  	 */
- 	 void  Dma::RecivedDmaComplete(){
- 		 int a=0;
+ 	 void  Dma::RecivedDmaComplete()
+ 	 {
+ 		 if(OnEvent!=0)
+ 		 {
+ 			 _source.DriverSource = DmaSource;
+ 			 _source.EventType = RxComplete;
+ 			 OnEvent(_source, CommunicationDriver);
+ 		 }
  	 }
 
  	/*
  	 * передача половины пакета дма (переопределяемый метод, прерывание )
  	 */
- 	 void  Dma::HalfTransmitDmaComplete(){}
+ 	 void  Dma::HalfTransmitDmaComplete()
+ 	 {
+ 		 if(OnEvent!=0)
+ 		 {
+ 			 _source.DriverSource = DmaSource;
+ 			 _source.EventType = TxHalfComplete;
+ 			 OnEvent(_source, CommunicationDriver);
+ 		 }
+ 	 }
 
  	/*
  	 * Передача всего пакета дма (переопределяемый метод, прерывание)
  	 */
- 	void  Dma::TransmitDmaComplete(){
- 		int a=0;
+ 	void  Dma::TransmitDmaComplete()
+ 	{
+ 		if(OnEvent!=0)
+ 		{
+ 			_source.DriverSource = DmaSource;
+ 			_source.EventType = TxComplete;
+ 			OnEvent(_source, CommunicationDriver);
+ 		}
  	}
 
 
@@ -328,7 +345,14 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 			 DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
  		 			 DMA_Init(DMA1_Channel1, &DMA_InitStructure);
  		 			 DMA_ClearFlag(DMA1_IT_TC1|DMA1_IT_HT1);
- 		 			 DMA_ITConfig(DMA1_Channel1, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 if(UseHalfInterrupts)
+ 		 			 {
+ 		 				 DMA_ITConfig(DMA1_Channel1, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 }
+ 		 			 else
+ 		 			 {
+ 		 				DMA_ITConfig(DMA1_Channel1, DMA_IT_TC|DMA_IT_TE, ENABLE);
+ 		 			 }
  		 			 DMA_Cmd(DMA1_Channel1,ENABLE);
 
  		 			 break;
@@ -347,7 +371,14 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 			 DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
  		 			 DMA_Init(DMA1_Channel2, &DMA_InitStructure);
  		 			 DMA_ClearFlag(DMA1_IT_TC2|DMA1_IT_HT2);
- 		 			 DMA_ITConfig(DMA1_Channel2, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 if(UseHalfInterrupts)
+ 		 			 {
+ 		 				 DMA_ITConfig(DMA1_Channel2, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 }
+ 		 			 else
+ 		 			 {
+ 		 				 DMA_ITConfig(DMA1_Channel2, DMA_IT_TC|DMA_IT_TE, ENABLE);
+ 		 			 }
  		 			 DMA_Cmd(DMA1_Channel2,ENABLE);
  		 			 break;
 
@@ -366,7 +397,14 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 			 DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
  		 			 DMA_Init(DMA1_Channel3, &DMA_InitStructure);
  		 			 DMA_ClearFlag(DMA1_IT_TC3|DMA1_IT_HT3);
- 		 			 DMA_ITConfig(DMA1_Channel3, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 if(UseHalfInterrupts)
+ 		 			 {
+ 		 				 DMA_ITConfig(DMA1_Channel3, DMA_IT_TC|DMA_IT_HT|DMA_IT_TE, ENABLE);
+ 		 			 }
+ 		 			 else
+ 		 			 {
+ 		 				 DMA_ITConfig(DMA1_Channel3, DMA_IT_TC|DMA_IT_TE, ENABLE);
+ 		 			 }
  		 			 DMA_Cmd(DMA1_Channel3,ENABLE);
  		 			 break;
 
