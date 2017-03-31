@@ -35,7 +35,7 @@ extern "C"
  * typedefs
  */
 
-#define GPIO  GPIO_InitTypeDef
+#define GpioInit  GPIO_InitTypeDef
 
 
 /*
@@ -51,6 +51,19 @@ extern "C"
  */
 #define usart
 
+#define BUFFER_SIZE 32
+
+#define _USART0	0x00
+#define _USART1	0x01
+#define _USART2	0x02
+#define _USART3	0x03
+#define _USART4	0x04
+
+#define _UART_PARITY_NONE USART_Parity_No
+#define _UART_PARITY_EVEN USART_Parity_Even
+#define _UART_PARITY_ODD USART_Parity_Odd
+
+#define UsartInit USART_InitTypeDef
 
 
 /*

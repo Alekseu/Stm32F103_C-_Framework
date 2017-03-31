@@ -12,19 +12,29 @@
 
 namespace Driver
 {
+	typedef void OnRecivedCallBack(uint8_t);
+
 	class ICommunicationObject
 	{
 		public:
-		ICommunicationObject(){}
+		OnRecivedCallBack* OnRecived;
+
+		ICommunicationObject(){OnRecived=0;};
 		virtual ~ICommunicationObject(){}
 
 		virtual void Init()=0;
 
 		virtual uint8_t ReadByte() =0;
+		virtual bool ReadByte(uint8_t* value, uint16_t timeOut)=0;
 		virtual void WriteByte(uint8_t byte)=0;
 
 		virtual uint16_t ReadWord() =0;
 		virtual void WriteWord(uint16_t word)=0;
+
+		/*
+		 * interrupt
+		 */
+		virtual void Recived(uint8_t byte)=0;
 
 	};
 }

@@ -6,6 +6,7 @@
  */
 
 #include "usart.h"
+#include "../nvic/nvic.h"
 
 namespace Driver
 {
@@ -16,71 +17,64 @@ namespace Driver
 	SerialPort *SerialPort::pUsart3 = 0;
 	SerialPort *SerialPort::pUsart4 = 0;
 
-	extern "C"
-	{
 		// ----------- Прерывания приема передачи ---------------------
-		void  USART1_IRQHandler(void)
+		void  USART1_IRQ(void)
 		{
 			if (USART1->SR & USART_SR_RXNE)
 			{
 				USART1->SR&=~USART_SR_RXNE;
-				char tmp =USART1->DR;
+				uint8_t tmp =USART1->DR;
 				SerialPort::pUsart0->Received(tmp);
 			}
 		}
 
-		void  USART2_IRQHandler(void)
+		void  USART2_IRQ(void)
 		{
 			if (USART2->SR & USART_SR_RXNE)
 			{
 				USART2->SR&=~USART_SR_RXNE;
-				char tmp =USART2->DR;
+				uint8_t tmp =USART2->DR;
 				SerialPort::pUsart1->Received(tmp);
 			}
 		}
 
-		void  USART3_IRQHandler(void)
+		void  USART3_IRQ(void)
 		{
 			if (USART3->SR & USART_SR_RXNE)
 			{
 				USART3->SR&=~USART_SR_RXNE;
-				char tmp =USART3->DR;
+				uint8_t tmp =USART3->DR;
 				SerialPort::pUsart2->Received(tmp);
 			}
 		}
 
-		void  UART4_IRQHandler(void)
+		void  USART4_IRQ(void)
 		{
 			if (UART4->SR & USART_SR_RXNE)
 			{
 				UART4->SR&=~USART_SR_RXNE;
-				char tmp =UART4->DR;
+				uint8_t tmp =UART4->DR;
 				SerialPort::pUsart3->Received(tmp);
 			}
 		}
 
-		void  UART5_IRQHandler(void)
+		void  USART5_IRQ(void)
 		{
 			if (UART5->SR & USART_SR_RXNE)
 			{
 				UART5->SR&=~USART_SR_RXNE;
-				char tmp =UART5->DR;
+				uint8_t tmp =UART5->DR;
 				SerialPort::pUsart4->Received(tmp);
 			}
 		}
 
-		// ------------------------------------------------
-
-	}
 
 
-	SerialPort::SerialPort(unsigned char port, int baud)
+	SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 	{
 		BuferSize=0;
 		_ring=0;
 		_tx=0;
-
-
 
 		_port = port;
 		_head = 0;
@@ -128,9 +122,6 @@ namespace Driver
 				  GPIO_Init(GPIOB, &GPIO_InitStruct); //Заданные настройки сохраняем в регистрах GPIOА
 
 
-				  /*Configure peripheral I/O remapping */
-
-
 				  USART_InitStruct.USART_BaudRate            = baud;
 				  USART_InitStruct.USART_WordLength          = USART_WordLength_8b;
 				  USART_InitStruct.USART_StopBits            = USART_StopBits_1;
@@ -142,9 +133,9 @@ namespace Driver
 
 				  USART_Cmd(USART1, ENABLE);
 				  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-				  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-				  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				  NVIC_Init(&NVIC_InitStructure);
+				  InterruptController::SetHandler(USART1_IRQn,USART1_IRQ);
+				  InterruptController::EnableChannel(USART1_IRQn);
+
 
 			break;
 		case _USART1:
@@ -174,9 +165,9 @@ namespace Driver
 			USART_Cmd(USART2, ENABLE); //Включаем USART2
 
 			USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-			NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-			NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-			NVIC_Init(&NVIC_InitStructure);
+			InterruptController::SetHandler(USART2_IRQn,USART2_IRQ);
+			InterruptController::EnableChannel(USART2_IRQn);
+
 
 			break;
 		case _USART2:
@@ -204,9 +195,9 @@ namespace Driver
 
 			USART_Cmd(USART3, ENABLE); //Включаем USART3
 			USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-			NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-			NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-			NVIC_Init(&NVIC_InitStructure);
+			InterruptController::SetHandler(USART3_IRQn,USART3_IRQ);
+			InterruptController::EnableChannel(USART3_IRQn);
+
 			break;
 		case _USART3:
 			   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_AFIO, ENABLE);
@@ -233,9 +224,9 @@ namespace Driver
 
 				USART_Cmd(UART4, ENABLE); //Включаем USART4
 				USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
-				NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
-				NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				NVIC_Init(&NVIC_InitStructure);
+				InterruptController::SetHandler(UART4_IRQn,USART4_IRQ);
+				InterruptController::EnableChannel(UART4_IRQn);
+
 			break;
 		case _USART4:
 			   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_AFIO, ENABLE);
@@ -262,9 +253,10 @@ namespace Driver
 
 				USART_Cmd(UART5, ENABLE); //Включаем USART4
 				USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);
-				NVIC_InitStructure.NVIC_IRQChannel = UART5_IRQn;
-				NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				NVIC_Init(&NVIC_InitStructure);
+				InterruptController::SetHandler(UART5_IRQn,USART5_IRQ);
+				InterruptController::EnableChannel(UART5_IRQn);
+
+
 			break;
 
 		default:
@@ -274,7 +266,7 @@ namespace Driver
 		//sei();
 	}
 
-	SerialPort::SerialPort(unsigned char port, int baud, int parity)
+	SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 	{
 		BuferSize=0;
 		_ring=0;
@@ -339,9 +331,8 @@ namespace Driver
 
 					  USART_Cmd(USART1, ENABLE);
 					  USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-					  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-					  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-					  NVIC_Init(&NVIC_InitStructure);
+					  InterruptController::SetHandler(USART1_IRQn,USART1_IRQ);
+					  InterruptController::EnableChannel(USART1_IRQn);
 
 				break;
 			case _USART1:
@@ -371,9 +362,8 @@ namespace Driver
 				USART_Cmd(USART2, ENABLE); //Включаем USART2
 
 				USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-				NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-				NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				NVIC_Init(&NVIC_InitStructure);
+				InterruptController::SetHandler(USART2_IRQn,USART2_IRQ);
+				InterruptController::EnableChannel(USART2_IRQn);
 
 				break;
 			case _USART2:
@@ -401,9 +391,9 @@ namespace Driver
 
 				USART_Cmd(USART3, ENABLE); //Включаем USART3
 				USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-				NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-				NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				NVIC_Init(&NVIC_InitStructure);
+				InterruptController::SetHandler(USART3_IRQn,USART3_IRQ);
+				InterruptController::EnableChannel(USART3_IRQn);
+
 				break;
 			case _USART3:
 				   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_AFIO, ENABLE);
@@ -430,9 +420,9 @@ namespace Driver
 
 					USART_Cmd(UART4, ENABLE); //Включаем USART4
 					USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
-					NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
-					NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-					NVIC_Init(&NVIC_InitStructure);
+					InterruptController::SetHandler(UART4_IRQn,USART4_IRQ);
+					InterruptController::EnableChannel(UART4_IRQn);
+
 				break;
 			case _USART4:
 				   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_AFIO, ENABLE);
@@ -459,9 +449,9 @@ namespace Driver
 
 					USART_Cmd(UART5, ENABLE); //Включаем USART4
 					USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);
-					NVIC_InitStructure.NVIC_IRQChannel = UART5_IRQn;
-					NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-					NVIC_Init(&NVIC_InitStructure);
+					InterruptController::SetHandler(UART5_IRQn,USART5_IRQ);
+					InterruptController::EnableChannel(UART5_IRQn);
+
 				break;
 
 			default:
@@ -475,9 +465,13 @@ namespace Driver
 	{
 	}
 
-	void SerialPort::WriteByte(char byte)
+	void SerialPort::Init()
 	{
+		_ring = new uint8_t[BuferSize];
+	}
 
+	void SerialPort::WriteByte(uint8_t byte)
+	{
 		switch (_port)
 		{
 
@@ -509,7 +503,7 @@ namespace Driver
 
 	}
 
-	bool SerialPort::ReadByte(char* value, unsigned int timeOut)
+	bool SerialPort::ReadByte(uint8_t* value, uint16_t timeOut)
 	{
 		while (_head == _tail && --timeOut) _delay_ms(1);
 
@@ -527,7 +521,14 @@ namespace Driver
 		}
 	}
 
-	void SerialPort::Received(char data)
+	//todo реализовать
+	uint8_t SerialPort::ReadByte(){}
+
+	void SerialPort::WriteWord(uint16_t word){}
+
+	uint16_t SerialPort::ReadWord(){}
+
+	void SerialPort::Received(uint8_t data)
 	{
 		_ring[_head++] = data;
 		if (_head >= BUFFER_SIZE) _head = 0;
@@ -537,9 +538,9 @@ namespace Driver
 	{
 	}
 
-	bool SerialPort::GetAnswer(int timeOut)
+	bool SerialPort::GetAnswer(uint16_t timeOut)
 		{
-			char tmp;
+			uint8_t tmp;
 
 			if (ReadByte(&tmp, timeOut))
 			{

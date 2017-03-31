@@ -17,35 +17,20 @@
 namespace Driver
 {
 
-	#define BUFFER_SIZE 32
-
-	#define _USART0	0x00
-	#define _USART1	0x01
-	#define _USART2	0x02
-	#define _USART3	0x03
-	#define _USART4	0x04
-
-	#define _UART_PARITY_NONE USART_Parity_No
-	#define _UART_PARITY_EVEN USART_Parity_Even
-	#define _UART_PARITY_ODD USART_Parity_Odd
-
-
 	class SerialPort :public ICommunicationObject
 	{
-		USART_InitTypeDef USART_InitStruct;
-		GPIO_InitTypeDef  GPIO_InitStruct;
-		NVIC_InitTypeDef  NVIC_InitStructure;
+		UsartInit USART_InitStruct;
+		GpioInit  GPIO_InitStruct;
 
 		// rx
-		char* _ring;
+		uint8_t* _ring;
 		//tx
-		char* _tx;
+		uint8_t* _tx;
 
-		volatile unsigned char _head, _tail;
-		volatile unsigned char _port;
-		volatile unsigned int _parity;
+		volatile uint8_t _head, _tail;
+		volatile uint8_t _port;
+		volatile uint16_t _parity;
 		volatile bool _useInterupsTX;
-		//volatile bool _useDmaRxTx;
 
 	public:
 		static SerialPort* pUsart0;
@@ -56,23 +41,15 @@ namespace Driver
 		static SerialPort* pUsart5;
 
 		List<unsigned char> Data;
-		unsigned int BuferSize;
+		uint16_t BuferSize;
 
 		/*
 		 * Конструкторы
 		 */
-		SerialPort(unsigned char port, int baud);
-		//SerialPort(unsigned char port, int baud, bool useInterupsTx_orDma); //true =InterupsTx , false = DMA
+		SerialPort(uint8_t port, uint16_t baud);
 
 
-		SerialPort(unsigned char port, int baud, int parity);
-		//SerialPort(unsigned char port, int baud, int parity,bool useInterupsTx_orDma); //true =InterupsTx , false = DMA
-
-
-		/*
-		 * Открытие порта, создается масив приема, передачи, настривается порт
-		 */
-		void Init();
+		SerialPort(uint8_t port, uint16_t baud, uint16_t parity);
 
 		/*
 		 * деструктор
@@ -80,60 +57,55 @@ namespace Driver
 		virtual ~SerialPort();
 
 		/*
+		 * Открытие порта, создается масив приема, передачи, настривается порт и т.д.
+		 */
+		void Init();
+
+
+		/*
 		 * переопределяемый метод прерывания по юарт (прерывание)
 		 */
-		virtual void Received(char data);
+		virtual void Received(uint8_t data);
 
 		/*
 		 * переопределяемый метод передачи по прерываию (прерывание)
 		 */
 		virtual void Transmit();
-	//
-	//	/*
-	//	 * Приаем половины пакета по дма (переопределяемый метод, прерывание)
-	//	 */
-	//	virtual void HalfRecivedDmaComplete();
-	//
-	//	/*
-	//	 * Прием всего пакета по дма  (переопределяемый метод, прерывание)
-	//	 */
-	//	virtual void RecivedDmaComplete();
-	//
-	//	/*
-	//	 * передача половины пакета дма (переопределяемый метод, прерывание )
-	//	 */
-	//	virtual void HalfTransmitDmaComplete();
-	//
-	//	/*
-	//	 * Передача всего пакета дма (переопределяемый метод, прерывание)
-	//	 */
-	//	virtual void TransmitDmaComplete();
 
 		/*
 		 * метод "получи ответ" за определеный таймаут (переопределяемый метод, так как можно ждать пакет и по дма)
 		 */
-		virtual bool GetAnswer(int timeOut);
+		virtual bool GetAnswer(uint16_t timeOut);
 
 		/*
 		 * метод отправки одного байта
 		 */
-		void WriteByte(char byte);
+		void WriteByte(uint8_t byte);
 
-	//	/*
-	//	 * пнуть дма на передачу
-	//	 */
-	//	void WriteArrayDma(char* array, int length);
 
 		/*
 		 * метод чтения байта с кольцевого буфера
 		 */
-		bool ReadByte(char* value, unsigned int timeOut);
+		bool ReadByte(uint8_t* value, uint16_t timeOut);
 
-	//
-	//	/*
-	//	 * запустить прием по дма
-	//	 */
-	//	void StartReciveDma(int length);
+
+		/*
+		 * метод чтения байта с кольцевого буфера
+		 */
+		uint8_t ReadByte();
+
+
+		/*
+		 * метод отправки одного байта
+		 */
+		void WriteWord(uint16_t word);
+
+
+		/*
+		 * метод чтения байта с кольцевого буфера
+		 */
+		uint16_t ReadWord();
+
 
 		/*
 		 * Очистка кольцевого буфера
@@ -160,12 +132,6 @@ namespace Driver
 		 *  хз для чего просто для полноты картины
 		 */
 		void EnableTxInterupt();
-
-
-		//todo под вопросом так как это может сделать класс дма если ему передать устройство
-		void EnableDmaRx();
-
-		void EnableDmaTx();
 
 
 	};

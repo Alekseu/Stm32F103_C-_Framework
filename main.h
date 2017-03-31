@@ -12,22 +12,18 @@
 #include "Driver/nvic/nvic.h"
 #include "Driver/led/led.h"
 #include "Extention/delay.h"
-#include "Driver/usart/usart.h"
 
-//#include "Driver/Dma.h"
-//#include "Extention/operators.h"
-//#include "Driver/usb/usb.h"
 
-//
-#include "Communication/CommandProcessor.h"
+
 #include <string.h>
 //
 #include "Extention/MemoryManager.h"
-//#include "Extention/MemoryPool.h"
-//#include "Extention/LinkedList.h"
-//#include "Extention/RingBuffer.h"
+
+#include "Protocols/Rs485/rs485.h"
+#include "Protocols/commandProcessor/commandProcessor.h"
 
 using namespace Driver;
+using namespace Protocol;
 
 Led _leds;
 

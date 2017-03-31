@@ -31,7 +31,10 @@ namespace Protocol
 		 uint16_t ReadWord() ;
 		 void WriteWord(uint16_t word);
 
+		 void Recived(uint8_t data);
+
 	private:
+		 bool _transmit;
 	};
 }
 

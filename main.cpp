@@ -65,6 +65,11 @@ int main()
 	 }
 
 
+	 Rs485 _rs485(_USART0,9600);
+	 _rs485.Init();
+	 CommandProcessor _comProc((ICommunicationObject*)&_rs485);
+	 _comProc.Init();
+
 
 //
 //	LList<char>* _list = new LList<char>();

@@ -65,6 +65,8 @@ namespace Driver
 			NVIC->IP[irqChannel] = tmppriority;
 		#endif
 		}
+
+
 		//
 		static void PriorityGroupConfig(uint32_t NVIC_PriorityGroup)
 		{

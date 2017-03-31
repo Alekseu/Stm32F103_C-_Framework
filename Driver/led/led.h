@@ -29,7 +29,7 @@ namespace Driver
 		void Off(unsigned char i);
 
 	private:
-		GPIO  GPIO_InitStructure;
+		GpioInit  GPIO_InitStructure;
 	};
 
 }

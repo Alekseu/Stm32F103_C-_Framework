@@ -16,16 +16,42 @@ namespace Protocol
 using namespace Driver;
 
 
+typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
+
 	class CommandProcessor
 	{
 		public:
+		static CommandProcessor* ComPrObj;
+		CommandProcessing* OnCommand;
+
+
 		/*
 		 * Конструктор с параметром
 		 */
-		CommandProcessor(ICommunicationObject* obj){}
-		~CommandProcessor(){}
+		CommandProcessor(ICommunicationObject* obj);
+		~CommandProcessor();
+
+		void Init();
+
+		void SendCommand(uint8_t command, uint8_t data, uint16_t length);
+
+		void Recived(uint8_t data);
 
 
+		private:
+		ICommunicationObject* _comObj;
+
+		unsigned int _lastActivity;
+
+		unsigned int _dataLength, _dataIndex;
+
+		bool _startPacket, _receivedPacket;
+
+		unsigned char _dataLow;
+
+		unsigned char _crc;
+
+		unsigned char* _data;
 
 	};
 }

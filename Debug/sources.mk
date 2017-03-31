@@ -32,6 +32,7 @@ StdPeriph/usb/src \
 StdPeriph/stm_lib/src \
 StdPeriph/newlib \
 StdPeriph/cmsis_boot \
+Protocols/commandProcessor \
 Protocols/Rs485 \
 Os \
 Extention/shareStorage \
@@ -49,5 +50,4 @@ Driver/i2c \
 Driver/fsmc \
 Driver/dma \
 Device/eeprom \
-Communication \
 
