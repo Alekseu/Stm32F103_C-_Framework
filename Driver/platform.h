@@ -13,6 +13,8 @@
  * Тут подключаются все платформозависимые библиотеки
  *  Пины и порты для устройств, зависимость определенной аппаратной платформы (платы), настройки и т.д.
  */
+#include "../Global/object.h"
+
 
 #include <stdio.h>
 #include <string.h>
@@ -102,6 +104,24 @@ extern "C"
  * dma's
  */
 #define dma
+#define DmaInit DMA_InitTypeDef
+
+#define CHANNEL_1 1
+	#define CHANNEL_2 2
+	#define CHANNEL_3 3
+	#define CHANNEL_4 4
+	#define CHANNEL_5 5
+	#define CHANNEL_6 6
+	#define CHANNEL_7 7
+	#define CHANNEL_8 8
+	#define CHANNEL_9 9
+	#define CHANNEL_10 10
+	#define CHANNEL_11 11
+	#define CHANNEL_12 12
+
+	#define _SPI 1
+	#define _UART 2
+	#define _I2C 3
 
 
 /*

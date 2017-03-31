@@ -73,7 +73,17 @@ int main()
 
 	 memcpy(array3,_comProc.toString(),strlen(_comProc.toString()));
 
+
+
 	 SerialPort _port(_USART1, 9600);
+	 Dma _usartDma;
+	 _usartDma.Channel = CHANNEL_1;
+	 _usartDma.Init();
+
+	 // передаем обьект драйвера коммуникативному устройству
+	 _port.DriverObj = (DriverObject*)&_usartDma;
+	 _port.Init();
+
 	 memcpy(array3,_port.toString(),strlen(_port.toString()));
 
 //

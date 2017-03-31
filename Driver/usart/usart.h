@@ -13,6 +13,7 @@
 #include "../../Extention/delay.h"
 #include "../../Extention/list.h"
 #include "../Interface/CommunicationObject.h"
+#include "../Interface/DriverObject.h"
 
 namespace Driver
 {
@@ -43,6 +44,7 @@ namespace Driver
 		List<unsigned char> Data;
 		uint16_t BuferSize;
 		uint16_t InterruptNumber;
+		DriverObject* DriverObj;
 
 		/*
 		 * Конструкторы
@@ -117,6 +119,15 @@ namespace Driver
 		 * Очистка кольцевого буфера
 		 */
 		void ClearBuffer();
+
+
+		/*
+		 * События от внешних источников (dma, pwm, timer ...) в данном случае для дма
+		 */
+		 void RxComplete();
+		 void TxComplete();
+		 void RxHalfComplete();
+		 void TxHalfComplete();
 
 
 		/*

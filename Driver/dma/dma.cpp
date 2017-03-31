@@ -168,7 +168,7 @@ void DMA2_Channel5_IRQHandler(void) //tx
 
 	Dma::Dma()
 	{
-		_channel =0;
+		Channel =0;
 	}
 
 	Dma::~Dma(){
@@ -177,48 +177,49 @@ void DMA2_Channel5_IRQHandler(void) //tx
 
 
 
- 	 void  Dma::Init(unsigned char channel)
+ 	 void  Dma::Init()
  	 {
- 		_channel = channel;
- 		 switch(channel)
+
+ 		 switch(Channel)
  		 {
  		 case CHANNEL_1:
  			 	 pDma0 = this;
  			      RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
- 				  NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
- 				  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
- 				  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
- 				  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
- 				  NVIC_Init(&NVIC_InitStructure);
+// 				  NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel1_IRQn;
+// 				  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+// 				  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+// 				  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+// 				  NVIC_Init(&NVIC_InitStructure);
 
  			 break;
 
  		 case CHANNEL_2:
 				 pDma1 = this;
 				 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
-				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				 NVIC_Init(&NVIC_InitStructure);
+//				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
+//				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+//				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//				 NVIC_Init(&NVIC_InitStructure);
  		 	break;
 
  		 case CHANNEL_3:
 				 pDma2 = this;
 				 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;
-				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-				 NVIC_Init(&NVIC_InitStructure);
+//				 NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel3_IRQn;
+//				 NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+//				 NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//				 NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//				 NVIC_Init(&NVIC_InitStructure);
  			 break;
 
  		 }
  	 }
 
+
  	void Dma::InitPherif(void* pherif)
  	{
- 		switch(_channel)
+ 		switch(Channel)
  		{
  		case CHANNEL_1:
  			DMA_DeInit(DMA1_Channel1);
@@ -310,7 +311,7 @@ void DMA2_Channel5_IRQHandler(void) //tx
 
  	void  Dma::MemCpy(char* src, char* dst, int length)
  	{
- 		switch(_channel)
+ 		switch(Channel)
  		 		 {
  		 		 case CHANNEL_1:
  		 			 DMA_DeInit(DMA1_Channel1);
@@ -386,7 +387,7 @@ void DMA2_Channel5_IRQHandler(void) //tx
  	 * пнуть дма на передачу
  	 */
  	void  Dma::WriteArrayDma(unsigned char* array, int length){
- 		switch(_channel)
+ 		switch(Channel)
  		{
  			case CHANNEL_1:
  				DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)array;
@@ -400,7 +401,7 @@ void DMA2_Channel5_IRQHandler(void) //tx
 
  	void Dma::StartTransmitArrayDmaCircle(unsigned char* src,  char* dst, int length)
  	{
- 		switch(_channel)
+ 		switch(Channel)
  		 		{
  		 			case CHANNEL_2:
 
@@ -423,6 +424,12 @@ void DMA2_Channel5_IRQHandler(void) //tx
  		 					DMA_Cmd(DMA1_Channel2,ENABLE);
  		 			break;
  		 		}
+ 	}
+
+
+ 	 const char* Dma::toString()
+ 	{
+ 		return "Dma";
  	}
 
 }

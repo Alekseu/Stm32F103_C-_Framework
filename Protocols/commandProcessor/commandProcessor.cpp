@@ -40,7 +40,10 @@ namespace Protocol
 
 	void CommandProcessor::Init()
 	{
-		_comObj->OnRecived = CommunicationRxInterrupt;
+		if(_comObj!=0)
+		{
+			_comObj->OnRecived = CommunicationRxInterrupt;
+		}
 	}
 
 	void CommandProcessor::Recived(uint8_t data)

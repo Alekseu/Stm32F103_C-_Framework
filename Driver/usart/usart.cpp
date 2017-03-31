@@ -68,11 +68,57 @@ namespace Driver
 			}
 		}
 
+		void DriverEvent(Source source, uint8_t communication)
+		{
+			if(source.DriverSource!=DMA_SOURCE) return;
+
+			SerialPort* pointer = 0;
+
+			switch (communication)
+			{
+
+			case _USART0:
+				pointer =SerialPort::pUsart0;
+				break;
+			case _USART1:
+				pointer =SerialPort::pUsart1;
+				break;
+			case _USART2:
+				pointer =SerialPort::pUsart2;
+				break;
+			case _USART3:
+				pointer =SerialPort::pUsart3;
+				break;
+			case _USART4:
+				pointer=SerialPort::pUsart4;
+				break;
+
+			}
+
+			switch(source.EventType)
+			{
+				case RX_COMPLETE:
+					pointer->RxComplete();
+					break;
+				case TX_COMPLETE:
+					pointer->TxComplete();
+					break;
+
+				case RX_HALF_COMPLETE:
+					pointer->RxHalfComplete();
+					break;
+
+				case TX_HALF_COMPLETE:
+					pointer->TxHalfComplete();
+					break;
+			}
+		}
 
 
 	SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 	{
 		BuferSize=0;
+		DriverObj =0;
 		_ring=0;
 		_tx=0;
 
@@ -274,6 +320,8 @@ namespace Driver
 	SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 	{
 		BuferSize=0;
+		DriverObj=0;
+		InterruptNumber=0;
 		_ring=0;
 		_tx=0;
 
@@ -473,6 +521,10 @@ namespace Driver
 	void SerialPort::Init()
 	{
 		_ring = new uint8_t[BuferSize];
+		if(DriverObj!=0)
+		{
+			DriverObj->OnEvent = DriverEvent;
+		}
 	}
 
 	void SerialPort::WriteByte(uint8_t byte)
@@ -486,7 +538,6 @@ namespace Driver
 			break;
 
 		case _USART1:
-
 				while(!(USART2->SR & USART_SR_TXE));
 				USART2->DR = byte;
 			break;
@@ -527,12 +578,20 @@ namespace Driver
 	}
 
 	//todo реализовать
-	uint8_t SerialPort::ReadByte(){return 0;}
+	uint8_t SerialPort::ReadByte()
+	{
+		return 0;
+	}
 
-	void SerialPort::WriteWord(uint16_t word){}
+	void SerialPort::WriteWord(uint16_t word)
+	{
 
-	uint16_t SerialPort::ReadWord(){return 0;}
+	}
 
+	uint16_t SerialPort::ReadWord()
+	{
+		return 0;
+	}
 
 	void SerialPort::SendData(uint8_t* data, uint16_t length)
 	{
@@ -576,6 +635,27 @@ namespace Driver
 			_head = 0;
 			_tail = 0;
 		}
+
+	/*
+	 * События от внешних источников (dma, pwm, timer ...) в данном случае для дма
+	 */
+	//todo реализовать
+	void SerialPort::RxComplete()
+	{
+
+	}
+	void SerialPort::TxComplete()
+	{
+
+	}
+	void SerialPort::RxHalfComplete()
+	{
+
+	}
+	void SerialPort::TxHalfComplete()
+	{
+
+	}
 
 	const char* SerialPort::toString()
 	{

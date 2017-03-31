@@ -9,6 +9,8 @@
 #define DRIVER_DMA_H_
 
 #include "../platform.h"
+#include "../Interface/DriverObject.h"
+#include "../Interface/CommunicationObject.h"
 
 namespace Driver
 {
@@ -18,30 +20,14 @@ namespace Driver
 	 * переферией, так как на одном канале может быть два переферийных устройства
 	 */
 
-	#define CHANNEL_1 1
-	#define CHANNEL_2 2
-	#define CHANNEL_3 3
-	#define CHANNEL_4 4
-	#define CHANNEL_5 5
-	#define CHANNEL_6 6
-	#define CHANNEL_7 7
-	#define CHANNEL_8 8
-	#define CHANNEL_9 9
-	#define CHANNEL_10 10
-	#define CHANNEL_11 11
-	#define CHANNEL_12 12
-
-	#define _SPI 1
-	#define _UART 2
-	#define _I2C 3
 
 
 
-	class Dma
+	class Dma :public DriverObject
 	{
-		DMA_InitTypeDef   DMA_InitStructure;
-		NVIC_InitTypeDef  NVIC_InitStructure;
-		unsigned char _channel;
+		DmaInit   DMA_InitStructure;
+
+
 		bool configured = false;
 	public:
 
@@ -59,12 +45,16 @@ namespace Driver
 		static Dma* pDma11;
 		static Dma* pDma12;
 
+
+		unsigned char Channel;
+
 		//todo указать что за дма (устройство или память) или передать аппаратный блок
 		Dma();
 		virtual ~Dma();
 
 
-		void Init(unsigned char channel );
+		void Init();
+
 
 		void InitPherif(void* pherif);
 
@@ -107,7 +97,7 @@ namespace Driver
 
 		void StartTransmitArrayDmaCircle(unsigned char* src,  char* dst, int length);
 
-
+		const char* toString();
 
 	};
 }

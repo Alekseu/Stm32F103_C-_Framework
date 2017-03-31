@@ -22,6 +22,8 @@
 #include "Protocols/Rs485/rs485.h"
 #include "Protocols/commandProcessor/commandProcessor.h"
 
+#include "Driver/dma/dma.h"
+
 using namespace Driver;
 using namespace Protocol;
 

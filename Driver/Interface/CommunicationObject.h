@@ -9,7 +9,7 @@
 #define DRIVER_INTERFACE_COMMUNICATIONOBJECT_H_
 
 #include "../platform.h"
-#include "../../Global/object.h"
+
 
 namespace Driver
 {
