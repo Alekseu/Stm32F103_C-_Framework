@@ -37,7 +37,9 @@ Extention \
 Driver/usb \
 Driver/usart \
 Driver/timer \
+Driver/spi \
 Driver/nvic \
+Driver/i2c \
 Driver/dma \
 Communication \
 
