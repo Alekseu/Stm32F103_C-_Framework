@@ -117,6 +117,12 @@ namespace Protocol
 
 	}
 
+
+	const char* CommandProcessor::toString()
+	{
+		return "CommandProcessor";
+	}
+
 }
 
 

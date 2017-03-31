@@ -6,7 +6,7 @@
  */
 
 #include "shareStorage.h"
-#include "../Object.h"
+#include "../ExtentionObject.h"
 
 ShareStorage* ShareStorage::SSObj =0;
 
@@ -62,7 +62,7 @@ void ShareStorage::Remove(void* obj, int index)
 
 	if(_ptrs[index].counter==0)
 	{
-		Object* _obj = (Object*)(_ptrs[index].obj);
+		ExtentionObject* _obj = (ExtentionObject*)(_ptrs[index].obj);
 		_obj->~Object();
 		delete (char*)(_ptrs[index].obj);
 		_ptrs[index].obj =0;

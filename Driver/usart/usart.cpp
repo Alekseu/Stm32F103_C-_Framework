@@ -562,4 +562,9 @@ namespace Driver
 			_head = 0;
 			_tail = 0;
 		}
+
+	const char* SerialPort::toString()
+	{
+		return "SerialPort";
+	}
 }

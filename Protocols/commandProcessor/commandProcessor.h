@@ -18,7 +18,7 @@ using namespace Driver;
 
 typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
 
-	class CommandProcessor
+	class CommandProcessor : public Object
 	{
 		public:
 		static CommandProcessor* ComPrObj;
@@ -37,6 +37,8 @@ typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
 
 		void Recived(uint8_t data);
 
+
+		const char* toString();
 
 		private:
 		ICommunicationObject* _comObj;

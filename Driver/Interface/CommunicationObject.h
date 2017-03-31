@@ -9,20 +9,19 @@
 #define DRIVER_INTERFACE_COMMUNICATIONOBJECT_H_
 
 #include "../platform.h"
+#include "../../Global/object.h"
 
 namespace Driver
 {
 	typedef void OnRecivedCallBack(uint8_t);
 
-	class ICommunicationObject
+	class ICommunicationObject:public Object
 	{
 		public:
 		OnRecivedCallBack* OnRecived;
 
 		ICommunicationObject(){OnRecived=0;};
 		virtual ~ICommunicationObject(){}
-
-		virtual void Init()=0;
 
 		virtual uint8_t ReadByte() =0;
 		virtual bool ReadByte(uint8_t* value, uint16_t timeOut)=0;
@@ -34,7 +33,7 @@ namespace Driver
 		/*
 		 * interrupt
 		 */
-		virtual void Recived(uint8_t byte)=0;
+		virtual void Received(uint8_t byte)=0;
 
 	};
 }

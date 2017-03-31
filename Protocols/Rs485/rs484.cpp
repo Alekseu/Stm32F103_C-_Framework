@@ -56,6 +56,11 @@ namespace Protocol
 		}
 	}
 
+	 const char* Rs485::toString()
+	 {
+		 return "Rs485";
+	 }
+
 }
 
 

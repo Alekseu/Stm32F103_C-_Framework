@@ -133,6 +133,10 @@ namespace Driver
 		 */
 		void EnableTxInterupt();
 
+		/*
+		 * object
+		 */
+		const char* toString();
 
 	};
 }

@@ -33,6 +33,12 @@ namespace Protocol
 
 		 void Recived(uint8_t data);
 
+		 /*
+		  * object
+		  */
+		 bool Equals(Object* obj);
+		 const char* toString();
+
 	private:
 		 bool _transmit;
 	};

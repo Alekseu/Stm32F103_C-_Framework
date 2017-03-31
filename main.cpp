@@ -67,9 +67,13 @@ int main()
 
 	 Rs485 _rs485(_USART0,9600);
 	 _rs485.Init();
+	 memcpy(array3,_rs485.toString(),strlen(_rs485.toString()));
 	 CommandProcessor _comProc((ICommunicationObject*)&_rs485);
 	 _comProc.Init();
+	 memcpy(array3,_comProc.toString(),strlen(_comProc.toString()));
 
+	 SerialPort _port(_USART1, 9600);
+	 memcpy(array3,_port.toString(),strlen(_port.toString()));
 
 //
 //	LList<char>* _list = new LList<char>();
