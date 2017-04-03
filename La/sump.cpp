@@ -21,7 +21,7 @@ static SumpBufferTXFunction bufferTXFunc = NULL;
 
 static char metaData[] _AHBRAM
      = {SUMP_META_NAME, 'L', 'o', 'g', 'i', 'c', ' ', 'a', 'n', 'a', 'l','y', 'z', 'e', 'r', 0,
-		SUMP_META_FPGA_VERSION, 'N', 'o', 'F', 'P', 'G', 'A', ' ', ':', '(', 0,
+		SUMP_META_FPGA_VERSION, 'N', 'o', 'F', 'P', 'G', 'A', ' ', ' ', ' ', 0,
 		SUMP_META_CPU_VERSION, 'S', 't', 'm', '3', '2','F' ,'1', '0', '3', 0,
 		SUMP_META_SAMPLE_RATE, BYTE4(maxSampleRate), BYTE3(maxSampleRate), BYTE2(maxSampleRate), BYTE1(maxSampleRate),
 		SUMP_META_SAMPLE_RAM, 0, 0, BYTE2(maxSampleMemory), BYTE1(maxSampleMemory), //24*1024 b
@@ -87,9 +87,9 @@ void SetupDemoTimer()
 static uint8_t num = 0;
 static void DemoUSARTIrq()
 {
-	TIM2->SR &= ~TIM_SR_UIF;
-	if(USART2->SR & USART_SR_TXE)
-		USART2->DR = num++;
+//	TIM2->SR &= ~TIM_SR_UIF;
+//	if(USART2->SR & USART_SR_TXE)
+//		USART2->DR = num++;
 }
 
 int SumpIsShortCommand(uint8_t command)

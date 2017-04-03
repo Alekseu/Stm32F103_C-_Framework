@@ -83,7 +83,17 @@ namespace Driver
 		unsigned int RxBytes;
 
 		// if use vcp
-		LINE_CODING Linecoding;
+//		uint32_t bitrate;
+//					uint8_t format;
+//					uint8_t paritytype;
+//					uint8_t datatype;
+		LINE_CODING Linecoding=
+		{
+				9600,
+				0,
+				0,
+				0
+		};
 
 
 		Usb();

@@ -53,14 +53,28 @@ static bool rleTailSampling;
 
 extern "C"
 {
-	void TIM2_IRQHandler()
+	void TIM8_UP_TIM13_IRQHandler()
 		{
-			if (TIM_GetITStatus(TIM2,TIM_IT_Update) != RESET)
+			if (TIM_GetITStatus(TIM8,TIM_IT_Update) != RESET)
 			{
-				TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-
+				TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
+				SamplingFrameCompelte();
 			}
 		}
+
+	void DMA2_Channel5_IRQHandler(void) //tx
+	{
+		if (DMA2->ISR & DMA2_IT_TC5)
+		{
+			DMA2->IFCR =DMA2_IT_TC5;
+			//Dma::pDma4->TransmitDmaComplete();
+		}
+		if (DMA2->ISR & DMA2_IT_HT5)
+		{
+			DMA2->IFCR =DMA2_IT_HT5;
+			//Dma::pDma4->HalfTransmitDmaComplete();
+		}
+	}
 }
 
 
@@ -76,36 +90,39 @@ void Sampler::SetDelayCount(uint32_t value)
 
 void Sampler::SetupSamplingTimer()
 {
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
+
 	//Main sampling timer
 
-		 TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-		 TIM_TimeBaseStructure.TIM_Period = 1100;
-		   TIM_TimeBaseStructure.TIM_Prescaler = 350-1;
-		   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-		   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-		   TIM_TimeBaseInit( TIM2, &TIM_TimeBaseStructure );
-		   TIM_ARRPreloadConfig( TIM2, ENABLE );
-		   TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-		   TIM_Cmd(TIM2, ENABLE);
+//		 TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+//		 TIM_TimeBaseStructure.TIM_Period = 1100;
+//		   TIM_TimeBaseStructure.TIM_Prescaler = 350-1;
+//		   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+//		   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+//
+//		   TIM_TimeBaseInit( TIM2, &TIM_TimeBaseStructure );
+//		   TIM_ARRPreloadConfig( TIM2, ENABLE );
+//		   TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+//		   TIM_GenerateEvent();
+//		   TIM_Cmd(TIM2, ENABLE);
+//
+//	// NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
+//	 NVIC_InitTypeDef NVIC_InitStructure;
+//		   NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+//		   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//		   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+//		   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//		   NVIC_Init( &NVIC_InitStructure );
 
-	// NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
-	 NVIC_InitTypeDef NVIC_InitStructure;
-		   NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-		   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-		   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-		   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-		   NVIC_Init( &NVIC_InitStructure );
-
-//	TIM1->DIER = 0;
-//	TIM1->SR &= ~TIM_SR_UIF;
-//	TIM1->CNT = 0;
-//	TIM1->PSC = 0;
-//	TIM1->CR1 = TIM_CR1_URS;
-//	TIM1->ARR = period;//actual period is +1 of this value
-//	TIM1->CR2 = 0;
-//	TIM1->DIER = TIM_DIER_UDE;
-//	TIM1->EGR = TIM_EGR_UG;
+	TIM1->DIER = 0;
+	TIM1->SR &= ~TIM_SR_UIF;
+	TIM1->CNT = 0;
+	TIM1->PSC = 0;
+	TIM1->CR1 = TIM_CR1_URS;
+	TIM1->ARR = period;//actual period is +1 of this value
+	TIM1->CR2 = 0;
+	TIM1->DIER = TIM_DIER_UDE;
+	TIM1->EGR = TIM_EGR_UG;
 }
 
 uint32_t Sampler::CalcDMATransferSize()
@@ -116,15 +133,15 @@ uint32_t Sampler::CalcDMATransferSize()
 	{
 	case SUMP_FLAG1_GR_16BIT:
 		transferSize = 2;
-		//dmaSize = DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0; //todo
+		dmaSize =DMA_PeripheralDataSize_HalfWord;
 		break;
 	case SUMP_FLAG1_GR_32BIT:
 		transferSize = 4;
-		//dmaSize = DMA_SxCR_MSIZE_1 | DMA_SxCR_PSIZE_1; //todo
+		dmaSize = DMA_PeripheralDataSize_Word;
 		break;
 	case SUMP_FLAG1_GR_8BIT:
 	default:
-		dmaSize = 0;
+		dmaSize = DMA_PeripheralDataSize_Byte;
 		transferSize = 1;
 		break;
 	}
@@ -133,35 +150,39 @@ uint32_t Sampler::CalcDMATransferSize()
 
 void Sampler::SetupSamplingDMA(void *dataBuffer, uint32_t dataTransferCount)
 {
-//	RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_DMA2EN, ENABLE);
-//	uint32_t dmaSize = CalcDMATransferSize();
-//
-//	//TIM8->DIER = 0;
-//	//TIM8->SR &= ~TIM_SR_UIF;
-//
-//	//TIM1_UP -> DMA2, Ch6, Stream5
-//	//DMA should be stopped before this point
-//	DMA2_Stream5->CR = (DMA_SxCR_CHSEL_1 | DMA_SxCR_CHSEL_2) | dmaSize | DMA_SxCR_MINC | DMA_SxCR_CIRC;
-//	//DMA2_Stream5->CR = D<>| dmaSize | DMA_SxCR_MINC | DMA_SxCR_CIRC;
-//	DMA2_Stream5->M0AR = (uint32_t)dataBuffer;//samplingRam;
-//#ifdef SAMPLING_FSMC
-//	DMA2_Stream5->PAR  = (uint32_t)FSMC_ADDR;
-//#else
-//	DMA2_Stream5->PAR  = (uint32_t)&(SAMPLING_PORT->IDR);
-//#endif
-//	DMA2_Stream5->NDTR = dataTransferCount;//transferCount;// / transferSize;
-//	DMA2_Stream5->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH;
-//
-//#ifdef SAMPLING_RLE_FORCE_ZERO_ON_MSB
-//	GPIO_InitTypeDef GPIO_InitStructure;
-//	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_15;
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-//	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-//	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN ;
-//	GPIO_Init(SAMPLING_PORT, &GPIO_InitStructure);
-//	SAMPLING_PORT->ODR = 0;
-//#endif
+	//RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_DMA2EN, ENABLE);
+	 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+	uint32_t dmaSize = CalcDMATransferSize();
+
+//	DmaInit   DMA_InitStructure;
+//	DMA_DeInit(DMA2_Channel5);
+//	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(SAMPLING_PORT->IDR);//0x40013804;
+//	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dataBuffer;
+//	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+//	DMA_InitStructure.DMA_BufferSize = dataTransferCount;
+//	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+//	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+//	DMA_InitStructure.DMA_PeripheralDataSize = dmaSize;
+//	DMA_InitStructure.DMA_MemoryDataSize = dmaSize;
+//	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+//	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+//	DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+//	DMA_Init(DMA2_Channel5, &DMA_InitStructure);
+//	DMA_ClearFlag(DMA2_IT_TC5|DMA2_IT_HT5);
+
+//	DMA_Cmd(DMA2_Channel5,ENABLE);
+
+
+#ifdef SAMPLING_RLE_FORCE_ZERO_ON_MSB
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 | GPIO_Pin_15;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN ;
+	GPIO_Init(SAMPLING_PORT, &GPIO_InitStructure);
+	SAMPLING_PORT->ODR = 0;
+#endif
 }
 
 void Sampler::SetupRLESamplingDMA(void *dataBufferA, void *dataBufferB, uint32_t dataTransferCount)
@@ -243,7 +264,7 @@ void Sampler::SetupRegularEXTITrigger(InterruptHandler interruptHandler)
 //	EXTI->FTSR = falling;
 //
 //	__DSB();
-//
+
 //	if(triggerMask & 0x0001)InterruptController::EnableChannel(EXTI0_IRQn, 0, 0, interruptHandler);
 //	else InterruptController::DisableChannel(EXTI0_IRQn);
 //	if(triggerMask & 0x0002)InterruptController::EnableChannel(EXTI1_IRQn, 0, 0, interruptHandler);
@@ -258,28 +279,36 @@ void Sampler::SetupRegularEXTITrigger(InterruptHandler interruptHandler)
 //	else InterruptController::DisableChannel(EXTI9_5_IRQn);
 //	if(triggerMask & 0xFC00)InterruptController::EnableChannel(EXTI15_10_IRQn, 0, 0, interruptHandler);
 //	else InterruptController::DisableChannel(EXTI15_10_IRQn);
-//
+
+
 //#ifdef SAMPLING_MANUAL //push-button-trigger
 //	TIM8->SMCR = TIM_SMCR_TS_0 | TIM_SMCR_TS_1 | TIM_SMCR_TS_2;//External trigger input
 //	TIM8->SMCR |= TIM_SMCR_SMS_1 | TIM_SMCR_SMS_2;
 //	TIM8->DIER |= TIM_DIER_TIE;
-//	InterruptController::EnableChannel(TIM8_TRG_COM_TIM14_IRQn, 2, 0, SamplingManualStart);
+//	//InterruptController::EnableChannel(TIM8_TRG_COM_TIM14_IRQn, 2, 0, SamplingManualStart);
 //	samplingManualToExternalTransit = interruptHandler;
 //#endif
 }
 
 void Sampler::SetupDelayTimer()
 {
-//	RCC_APB2PeriphClockCmd(RCC_APB2ENR_TIM8EN, ENABLE);
-//	//After-trigger delay timer
-//	TIM8->CR1 = TIM_CR1_URS;//stop timer too
-//	TIM8->CNT = 0;
-//	TIM8->ARR = delayCount;//  / transferSize;
-//	TIM8->PSC = TIM1->ARR;
-//	TIM8->CR2 = 0;
-//	TIM8->EGR = TIM_EGR_UG;
-//	TIM8->SR &= ~TIM_SR_UIF;
-//	TIM8->DIER = TIM_DIER_UIE;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM8,ENABLE);
+	//After-trigger delay timer
+	TIM8->CR1 = TIM_CR1_URS;//stop timer too
+	TIM8->CNT = 0;
+	TIM8->ARR = delayCount;//  / transferSize;
+	TIM8->PSC = TIM1->ARR;
+	TIM8->CR2 = 0;
+	TIM8->EGR = TIM_EGR_UG;
+	TIM8->SR &= ~TIM_SR_UIF;
+	TIM8->DIER = TIM_DIER_UIE;
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM8_UP_TIM13_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init( &NVIC_InitStructure );
 //
 //	InterruptController::EnableChannel(TIM8_UP_TIM13_IRQn, 2, 0, SamplingFrameCompelte);
 }
@@ -335,22 +364,23 @@ void Sampler::Start()
 	{
 		SetupRegular();
 	}
-//	DMA2->HIFCR = DMA_HIFCR_CTCIF5;
-//	DMA2_Stream5->CR |= DMA_SxCR_EN;
-//	TIM1->CR1 |= TIM_CR1_CEN;//enable timer
+//	DMA_ITConfig(DMA2_Channel5, DMA_IT_TC|DMA_IT_TE, ENABLE);
+//	DMA_Cmd(DMA2_Channel5,ENABLE);
+	TIM1->CR1 |= TIM_CR1_CEN;//enable timer
+	SamplingExternalEventInterrupt();
 }
 
 void Sampler::Stop()
 {
-//	DMA2_Stream5->CR &= ~(DMA_SxCR_TCIE | DMA_SxCR_EN);//stop dma
-//	TIM1->CR1 &= ~TIM_CR1_CEN;//stop sampling timer
+	DMA_Cmd(DMA2_Channel5,DISABLE);
+	TIM1->CR1 &= ~TIM_CR1_CEN;//stop sampling timer
 }
 
 void Sampler::Arm(InterruptHandler handler)
 {
-//	EXTI->PR = 0xffffffff;//clear pending
-//	__DSB();
-//	EXTI->IMR = triggerMask;
+	EXTI->PR = 0xffffffff;//clear pending
+	__DSB();
+	EXTI->IMR = triggerMask;
 
 	comletionHandler = handler;
 	transferSize = 1;
@@ -359,7 +389,7 @@ void Sampler::Arm(InterruptHandler handler)
 
 uint32_t Sampler::ActualTransferCount()
 {
-	return 0;//return transferCount - (DMA2_Stream5->NDTR & ~3);
+	return transferCount - (DMA2_Channel5->CNDTR & ~3);
 }
 
 uint8_t* Sampler::GetBufferTail()
@@ -390,10 +420,12 @@ void SamplingClearBuffer()
 
 static void SamplingFrameCompelte()
 {
-//	TIM1->CR1 &= ~TIM_CR1_CEN;
-//	TIM8->CR1 &= ~TIM_CR1_CEN;
-//	TIM8->SR  &= ~TIM_SR_UIF;
-//	DMA2_Stream5->CR &= ~(DMA_SxCR_TCIE | DMA_SxCR_EN);
+	TIM1->CR1 &= ~TIM_CR1_CEN;
+	TIM8->CR1 &= ~TIM_CR1_CEN;
+	TIM8->SR  &= ~TIM_SR_UIF;
+
+	DMA_Cmd(DMA2_Channel5,DISABLE);
+
 	if(comletionHandler != NULL)
 		comletionHandler();
 }
@@ -401,35 +433,34 @@ static void SamplingFrameCompelte()
 
 static void SamplingExternalEventInterrupt()
 {
-//	EXTI->PR = 0xffffffff;
-//	__DSB();
-//	EXTI->IMR = 0;
-//	TIM8->CNT = 0;
-//	TIM8->SR  &= ~TIM_SR_UIF;
-//	TIM8->CR1 |= TIM_CR1_CEN;
+	EXTI->PR = 0xffffffff;
+	__DSB();
+	EXTI->IMR = 0;
+	TIM8->CNT = 0;
+	TIM8->SR  &= ~TIM_SR_UIF;
+	TIM8->CR1 |= TIM_CR1_CEN;
 
 }
 
 static void SamplingRLEExternalEventInterrupt()
 {
-//	EXTI->PR = 0xffffffff;
-//	__DSB();
-//	EXTI->IMR = 0;
-//	rleDelayCount = delayCount;
-//	rleTailSampling = true;
+	EXTI->PR = 0xffffffff;
+	__DSB();
+	EXTI->IMR = 0;
+	rleDelayCount = delayCount;
+	rleTailSampling = true;
 //	GPIOD->PUPDR = 1 << 4;
 //	InterruptController::SetHandler(DMA2_Stream5_IRQn, samplingRLETailFrameInterrupt);
 }
 
 static void SamplingManualStart()
 {
-//	TIM8->SR &= ~TIM_SR_TIF;
-//	TIM8->DIER &= ~TIM_DIER_TIE;
+	TIM8->SR &= ~TIM_SR_TIF;
+	TIM8->DIER &= ~TIM_DIER_TIE;
 	//call regular handler
 	//SamplingExternalEventInterrupt();
 
-	//samplingManualToExternalTransit();
-	SamplingFrameCompelte();
+	samplingManualToExternalTransit();
 }
 
 template <class samplesType, uint32_t FLAG, uint32_t MAX_COUNT>

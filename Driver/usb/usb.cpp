@@ -30,7 +30,7 @@ namespace Driver
 		__IO uint16_t wIstr;  /* ISTR register last read value */
 		__IO uint8_t bIntPackSOF = 0;  /* SOFs received between 2 consecutive packets */
 
-		#define VCOMPORT_IN_FRAME_INTERVAL             5
+		#define VCOMPORT_IN_FRAME_INTERVAL             15
 
 		DEVICE Device_Table =
 		{
@@ -398,7 +398,7 @@ namespace Driver
 		Device_Property.GetConfigDescriptor = UsbGetConfigDescriptor;
 		Device_Property.GetStringDescriptor = UsbGetStringDescriptor;
 		Device_Property.RxEP_buffer =0;
-		Device_Property.MaxPacketSize = 0x40;
+		Device_Property.MaxPacketSize = RxBufferSize;
 
 		User_Standard_Requests.User_GetConfiguration = UsbGetConfiguration;
 		User_Standard_Requests.User_SetConfiguration = UsbSetConfiguration;
@@ -756,6 +756,14 @@ namespace Driver
 			 void Usb::WriteByte(uint8_t byte){
 				 if(TxBytes>TxBufferSize) TxBytes=0;
 				 TxBuffer[TxBytes++] = byte;
+
+				 if(TxBytes==64)
+				 {
+					 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
+					 				 SetEPTxCount(ENDP1, TxBytes);
+					 				 SetEPTxValid(ENDP1);
+					 				 TxBytes=0;
+				 }
 
 			 }
 

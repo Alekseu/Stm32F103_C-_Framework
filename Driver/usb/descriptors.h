@@ -14,7 +14,7 @@
 #define USB_INTERFACE_DESCRIPTOR_TYPE           0x04
 #define USB_ENDPOINT_DESCRIPTOR_TYPE            0x05
 
-#define VIRTUAL_COM_PORT_DATA_SIZE              128
+#define VIRTUAL_COM_PORT_DATA_SIZE              64
 #define VIRTUAL_COM_PORT_INT_SIZE               8
 
 #define VIRTUAL_COM_PORT_SIZ_DEVICE_DESC        18
@@ -39,11 +39,11 @@ uint8_t _Virtual_Com_Port_Device_Descriptor[] =  {
 		    0x04,   /* idVendor = 0x0483 */
 		    0x40,
 		    0x57,   /* idProduct = 0x7540 */
-		    0x00,
-		    0x02,   /* bcdDevice = 2.00 */
-		    1,              /* Index of string descriptor describing manufacturer */
-		    2,              /* Index of string descriptor describing product */
-		    3,              /* Index of string descriptor describing the device's serial number */
+		    0x01,
+		    0x00,   /* bcdDevice = 1.00 */
+		    0x00,              /* Index of string descriptor describing manufacturer */
+		    0x01,              /* Index of string descriptor describing product */
+		    0x03,              /* Index of string descriptor describing the device's serial number */
 		    0x01    /* bNumConfigurations */
 		  };
 
