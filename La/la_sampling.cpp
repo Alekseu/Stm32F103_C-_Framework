@@ -62,17 +62,21 @@ extern "C"
 			}
 		}
 
-	void DMA2_Channel5_IRQHandler(void) //tx
+	void DMA2_Channel4_5_IRQHandler(void) //tx
 	{
 		if (DMA2->ISR & DMA2_IT_TC5)
 		{
 			DMA2->IFCR =DMA2_IT_TC5;
 			//Dma::pDma4->TransmitDmaComplete();
+			//samplingRLETailFrameInterrupt();
+		//	comletionHandler();
+			return;
 		}
 		if (DMA2->ISR & DMA2_IT_HT5)
 		{
 			DMA2->IFCR =DMA2_IT_HT5;
 			//Dma::pDma4->HalfTransmitDmaComplete();
+			return;
 		}
 	}
 }
@@ -93,26 +97,6 @@ void Sampler::SetupSamplingTimer()
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
 
 	//Main sampling timer
-
-//		 TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
-//		 TIM_TimeBaseStructure.TIM_Period = 1100;
-//		   TIM_TimeBaseStructure.TIM_Prescaler = 350-1;
-//		   TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
-//		   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-//
-//		   TIM_TimeBaseInit( TIM2, &TIM_TimeBaseStructure );
-//		   TIM_ARRPreloadConfig( TIM2, ENABLE );
-//		   TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
-//		   TIM_GenerateEvent();
-//		   TIM_Cmd(TIM2, ENABLE);
-//
-//	// NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);
-//	 NVIC_InitTypeDef NVIC_InitStructure;
-//		   NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-//		   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//		   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-//		   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//		   NVIC_Init( &NVIC_InitStructure );
 
 	TIM1->DIER = 0;
 	TIM1->SR &= ~TIM_SR_UIF;
@@ -154,24 +138,30 @@ void Sampler::SetupSamplingDMA(void *dataBuffer, uint32_t dataTransferCount)
 	 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 	uint32_t dmaSize = CalcDMATransferSize();
 
-//	DmaInit   DMA_InitStructure;
-//	DMA_DeInit(DMA2_Channel5);
-//	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(SAMPLING_PORT->IDR);//0x40013804;
-//	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dataBuffer;
-//	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-//	DMA_InitStructure.DMA_BufferSize = dataTransferCount;
-//	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-//	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-//	DMA_InitStructure.DMA_PeripheralDataSize = dmaSize;
-//	DMA_InitStructure.DMA_MemoryDataSize = dmaSize;
-//	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
-//	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
-//	DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
-//	DMA_Init(DMA2_Channel5, &DMA_InitStructure);
-//	DMA_ClearFlag(DMA2_IT_TC5|DMA2_IT_HT5);
+	DmaInit   DMA_InitStructure;
+	DMA_DeInit(DMA2_Channel5);
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(SAMPLING_PORT->IDR);//0x40013804;
+	DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dataBuffer;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+	DMA_InitStructure.DMA_BufferSize = dataTransferCount;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+	DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+	DMA_Init(DMA2_Channel5, &DMA_InitStructure);
 
-//	DMA_Cmd(DMA2_Channel5,ENABLE);
 
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel =DMA2_Channel4_5_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init( &NVIC_InitStructure );
+
+	DMA_ClearFlag(DMA2_IT_TC5|DMA2_IT_HT5);
 
 #ifdef SAMPLING_RLE_FORCE_ZERO_ON_MSB
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -187,55 +177,67 @@ void Sampler::SetupSamplingDMA(void *dataBuffer, uint32_t dataTransferCount)
 
 void Sampler::SetupRLESamplingDMA(void *dataBufferA, void *dataBufferB, uint32_t dataTransferCount)
 {
-//	GPIO_InitTypeDef GPIO_InitStructure;
-//	RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_DMA2EN, ENABLE);
-//	uint32_t dmaSize = CalcDMATransferSize();
-//
-//	//TIM1_UP -> DMA2, Ch6, Stream5
-//	//DMA should be stopped before this point
-//	DMA2_Stream5->CR = (DMA_SxCR_CHSEL_1 | DMA_SxCR_CHSEL_2) | dmaSize | DMA_SxCR_MINC | DMA_SxCR_DBM | DMA_SxCR_TCIE;
-//	DMA2_Stream5->M0AR = (uint32_t)dataBufferA;
-//	DMA2_Stream5->M1AR = (uint32_t)dataBufferB;
-//#ifdef SAMPLING_FSMC
-//	DMA2_Stream5->PAR  = (uint32_t)FSMC_ADDR;
-//#else
-//	DMA2_Stream5->PAR  = (uint32_t)&(SAMPLING_PORT->IDR);
-//#endif
-//	DMA2_Stream5->NDTR = dataTransferCount;//transferCount;// / transferSize;
-//	DMA2_Stream5->FCR = DMA_SxFCR_DMDIS | DMA_SxFCR_FTH;
-//	DMA2->HIFCR = DMA_HIFCR_CTCIF5;
-//
-//	switch(transferSize)
-//	{
-//	case 1:
-//		InterruptController::EnableChannel(DMA2_Stream5_IRQn, 0, 0,
-//			SamplingRLEFrameInterrupt<uint8_t, RLE_8BIT_FLAG, RLE_8BIT_MAX_COUNT>);
-//		samplingRLETailFrameInterrupt = SamplingRLETailFrameInterrupt<uint8_t, RLE_8BIT_FLAG, RLE_8BIT_MAX_COUNT>;
-//
-//		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-//		break;
-//	default:
-//	case 2:
-//		InterruptController::EnableChannel(DMA2_Stream5_IRQn, 0, 0,
-//				SamplingRLEFrameInterrupt<uint16_t, RLE_16BIT_FLAG, RLE_16BIT_MAX_COUNT>);
-//		samplingRLETailFrameInterrupt = SamplingRLETailFrameInterrupt<uint16_t, RLE_16BIT_FLAG, RLE_16BIT_MAX_COUNT>;
-//
-//		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-//		break;
-//	}
-//#ifdef SAMPLING_RLE_FORCE_ZERO_ON_MSB
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
-//	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-//	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN ;
-//	GPIO_Init(SAMPLING_PORT, &GPIO_InitStructure);
-//	SAMPLING_PORT->ODR = 0;
-//#endif
+	GPIO_InitTypeDef GPIO_InitStructure;
+	 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+	uint32_t dmaSize = CalcDMATransferSize();
+
+	DmaInit   DMA_InitStructure;
+		DMA_DeInit(DMA2_Channel5);
+		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(SAMPLING_PORT->IDR);//0x40013804;
+		DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)dataBufferA;
+		DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
+		DMA_InitStructure.DMA_BufferSize = dataTransferCount;
+		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+		DMA_InitStructure.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
+		DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+		DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+		DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+		DMA_Init(DMA2_Channel5, &DMA_InitStructure);
+
+		NVIC_InitTypeDef NVIC_InitStructure;
+		NVIC_InitStructure.NVIC_IRQChannel =DMA2_Channel4_5_IRQn;
+		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+		NVIC_Init( &NVIC_InitStructure );
+
+		DMA_ClearFlag(DMA2_IT_TC5|DMA2_IT_HT5);
+
+	switch(transferSize)
+	{
+	case 1:
+		//InterruptController::EnableChannel(DMA2_Stream5_IRQn, 0, 0,
+		//	SamplingRLEFrameInterrupt<uint8_t, RLE_8BIT_FLAG, RLE_8BIT_MAX_COUNT>);
+		samplingRLETailFrameInterrupt = SamplingRLETailFrameInterrupt<uint8_t, RLE_8BIT_FLAG, RLE_8BIT_MAX_COUNT>;
+
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
+		break;
+	default:
+	case 2:
+		//InterruptController::EnableChannel(DMA2_Stream5_IRQn, 0, 0,
+			//	SamplingRLEFrameInterrupt<uint16_t, RLE_16BIT_FLAG, RLE_16BIT_MAX_COUNT>);
+		samplingRLETailFrameInterrupt = SamplingRLETailFrameInterrupt<uint16_t, RLE_16BIT_FLAG, RLE_16BIT_MAX_COUNT>;
+
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+		break;
+	}
+#ifdef SAMPLING_RLE_FORCE_ZERO_ON_MSB
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_DOWN ;
+	GPIO_Init(SAMPLING_PORT, &GPIO_InitStructure);
+	SAMPLING_PORT->ODR = 0;
+#endif
 }
 
 void Sampler::SetupRegularEXTITrigger(InterruptHandler interruptHandler)
 {
-//	RCC_APB2PeriphClockCmd(RCC_APB2ENR_SYSCFGEN, ENABLE);
+
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD,ENABLE);
+//	RCC_APB2Periph_GPIOD(RCC_APB2ENR_SYSCFGEN, ENABLE);
 //
 //	//Trigger setup
 //	uint32_t rising = triggerMask & triggerValue;
@@ -286,7 +288,7 @@ void Sampler::SetupRegularEXTITrigger(InterruptHandler interruptHandler)
 //	TIM8->SMCR |= TIM_SMCR_SMS_1 | TIM_SMCR_SMS_2;
 //	TIM8->DIER |= TIM_DIER_TIE;
 //	//InterruptController::EnableChannel(TIM8_TRG_COM_TIM14_IRQn, 2, 0, SamplingManualStart);
-//	samplingManualToExternalTransit = interruptHandler;
+	samplingManualToExternalTransit = interruptHandler;
 //#endif
 }
 
@@ -364,9 +366,14 @@ void Sampler::Start()
 	{
 		SetupRegular();
 	}
-//	DMA_ITConfig(DMA2_Channel5, DMA_IT_TC|DMA_IT_TE, ENABLE);
-//	DMA_Cmd(DMA2_Channel5,ENABLE);
+
+	//todo ???
+	DMA_ITConfig(DMA2_Channel5, DMA_IT_TC|DMA_IT_TE, ENABLE);
+	DMA_Cmd(DMA2_Channel5,ENABLE);
+	//-----
 	TIM1->CR1 |= TIM_CR1_CEN;//enable timer
+
+	// это обычно запускается по прерыванию от внешнего источника
 	SamplingExternalEventInterrupt();
 }
 
@@ -383,8 +390,10 @@ void Sampler::Arm(InterruptHandler handler)
 	EXTI->IMR = triggerMask;
 
 	comletionHandler = handler;
-	transferSize = 1;
-	comletionHandler();
+
+	//мое
+	transferSize = 2;
+	//comletionHandler();
 }
 
 uint32_t Sampler::ActualTransferCount()
@@ -468,47 +477,47 @@ static void SamplingRLEFrameInterrupt()
 {
 //	DMA2->HIFCR = DMA_HIFCR_CTCIF5;
 //
-//	static samplesType * store = (samplesType*)samplingRam;
-//	samplesType * samples = (samplesType*)((DMA2_Stream5->CR & DMA_SxCR_CT) ? rleTempSamplingRamA : rleTempSamplingRamB);
-//	int n = MAX_RLE_SAMPLE_COUNT;
-//	uint32_t newValue;
-//
-//	do
-//	{
-//		newValue =  *samples++
-//#ifndef SAMPLING_RLE_FORCE_ZERO_ON_MSB
-//				& MAX_COUNT
-//#endif
-//				;
-//
-//		if(rleValue == newValue)
-//		{
-//			rleRepeatCount++;
-//			if(MAX_COUNT == rleRepeatCount)//repeat count overflow
-//			{
-//				store[rlePtr++] = rleValue;
-//				store[rlePtr++] = rleRepeatCount | FLAG;
-//				rleRepeatCount = 0;
-//				if(rlePtr >= transferCount)
-//				{
-//					rlePtr = 0;
-//				}
-//			}
-//		}
-//		else//change detected
-//		{
-//			store[rlePtr++] = rleValue;
-//			store[rlePtr++] = rleRepeatCount | FLAG;
-//			if(rlePtr >= transferCount)
-//			{
-//				rlePtr = 0;
-//			}
-//
-//			rleRepeatCount = 0;
-//			rleValue = newValue;
-//		}
-//	}
-//	while(--n);
+	static samplesType * store = (samplesType*)samplingRam;
+	samplesType * samples = (samplesType*)rleTempSamplingRamA;//((DMA2_Channel5->CCR & DMA_CCR_CT5) ? rleTempSamplingRamA : rleTempSamplingRamB);
+	int n = MAX_RLE_SAMPLE_COUNT;
+	uint32_t newValue;
+
+	do
+	{
+		newValue =  *samples++
+#ifndef SAMPLING_RLE_FORCE_ZERO_ON_MSB
+				& MAX_COUNT
+#endif
+				;
+
+		if(rleValue == newValue)
+		{
+			rleRepeatCount++;
+			if(MAX_COUNT == rleRepeatCount)//repeat count overflow
+			{
+				store[rlePtr++] = rleValue;
+				store[rlePtr++] = rleRepeatCount | FLAG;
+				rleRepeatCount = 0;
+				if(rlePtr >= transferCount)
+				{
+					rlePtr = 0;
+				}
+			}
+		}
+		else//change detected
+		{
+			store[rlePtr++] = rleValue;
+			store[rlePtr++] = rleRepeatCount | FLAG;
+			if(rlePtr >= transferCount)
+			{
+				rlePtr = 0;
+			}
+
+			rleRepeatCount = 0;
+			rleValue = newValue;
+		}
+	}
+	while(--n);
 }
 
 template <class samplesType, uint32_t FLAG, uint32_t MAX_COUNT>
@@ -516,63 +525,63 @@ static void SamplingRLETailFrameInterrupt()
 {
 //	DMA2->HIFCR = DMA_HIFCR_CTCIF5;
 //
-//	static samplesType * store = (samplesType*)samplingRam;
-//	samplesType * samples = (samplesType*)((DMA2_Stream5->CR & DMA_SxCR_CT) ? rleTempSamplingRamA : rleTempSamplingRamB);
-//	int n = MAX_RLE_SAMPLE_COUNT;
-//	uint32_t newValue;
-//
-//	do
-//	{
-//		newValue =  *samples++
-//#ifndef SAMPLING_RLE_FORCE_ZERO_ON_MSB
-//				& MAX_COUNT
-//#endif
-//				;
-//
-//		if(rleValue == newValue)
-//		{
-//			rleRepeatCount++;
-//			if(MAX_COUNT == rleRepeatCount)//repeat count overflow
-//			{
-//				store[rlePtr++] = rleValue;
-//				store[rlePtr++] = rleRepeatCount | FLAG;
-//				rleRepeatCount = 0;
-//
-//				rleDelayCount -= 2;
-//				if(rleDelayCount <= 0)
-//				{
-//					SamplingFrameCompelte();
-//					return;
-//				}
-//
-//				if(rlePtr >= transferCount)
-//				{
-//					rlePtr = 0;
-//				}
-//			}
-//		}
-//		else//change detected
-//		{
-//			{
-//				store[rlePtr++] = rleValue;
-//				store[rlePtr++] = rleRepeatCount | FLAG;
-//
-//				rleDelayCount -= 2;
-//				if(rleDelayCount <= 0)
-//				{
-//					SamplingFrameCompelte();
-//					return;
-//				}
-//			}
-//
-//			if(rlePtr >= transferCount)
-//			{
-//				rlePtr = 0;
-//			}
-//
-//			rleRepeatCount = 0;
-//			rleValue = newValue;
-//		}
-//	}
-//	while(--n);
+	static samplesType * store = (samplesType*)samplingRam;
+	samplesType * samples = (samplesType*)rleTempSamplingRamA;//((DMA2_Stream5->CR & DMA_SxCR_CT) ? rleTempSamplingRamA : rleTempSamplingRamB);
+	int n = MAX_RLE_SAMPLE_COUNT;
+	uint32_t newValue;
+
+	do
+	{
+		newValue =  *samples++
+#ifndef SAMPLING_RLE_FORCE_ZERO_ON_MSB
+				& MAX_COUNT
+#endif
+				;
+
+		if(rleValue == newValue)
+		{
+			rleRepeatCount++;
+			if(MAX_COUNT == rleRepeatCount)//repeat count overflow
+			{
+				store[rlePtr++] = rleValue;
+				store[rlePtr++] = rleRepeatCount | FLAG;
+				rleRepeatCount = 0;
+
+				rleDelayCount -= 2;
+				if(rleDelayCount <= 0)
+				{
+					SamplingFrameCompelte();
+					return;
+				}
+
+				if(rlePtr >= transferCount)
+				{
+					rlePtr = 0;
+				}
+			}
+		}
+		else//change detected
+		{
+			{
+				store[rlePtr++] = rleValue;
+				store[rlePtr++] = rleRepeatCount | FLAG;
+
+				rleDelayCount -= 2;
+				if(rleDelayCount <= 0)
+				{
+					SamplingFrameCompelte();
+					return;
+				}
+			}
+
+			if(rlePtr >= transferCount)
+			{
+				rlePtr = 0;
+			}
+
+			rleRepeatCount = 0;
+			rleValue = newValue;
+		}
+	}
+	while(--n);
 }
