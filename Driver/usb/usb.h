@@ -52,6 +52,8 @@ namespace Driver
 		MassStorageDevice
 	} UsbType;
 
+	typedef uint16_t UsbReciveCallback(uint8_t*, uint16_t);
+
 
 	class Usb: public ICommunicationObject
 	{
@@ -63,6 +65,7 @@ namespace Driver
 		DEVICE Device_Table;
 		uint32_t bDeviceState;
 		uint8_t Request = 0;
+		UsbReciveCallback* OnRecived;
 
 		ONE_DESCRIPTOR Device_Descriptor;
 		ONE_DESCRIPTOR Config_Descriptor;
@@ -117,11 +120,24 @@ namespace Driver
 		virtual void RecivedFromUsb(unsigned int endpoint);
 
 
+
 		void Init();
 
-		void SendData(const char* data, int length);
-		int ReadData(char* mass);
+		 uint8_t ReadByte() ;
+		 bool ReadByte(uint8_t* value, uint16_t timeOut);
+		 void WriteByte(uint8_t byte);
 
+		 uint16_t ReadWord();
+		 void WriteWord(uint16_t word);
+
+		 void SendData(uint8_t* data, uint16_t length);
+		 uint16_t ReadData(uint8_t* mass);
+		/*
+		 * interrupt
+		 */
+		 void Received(uint8_t byte);
+
+		 const char* toString();
 
 		private:
 		GPIO_InitTypeDef GPIO_InitStructure;

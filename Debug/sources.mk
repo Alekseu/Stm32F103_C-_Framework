@@ -35,6 +35,7 @@ StdPeriph/cmsis_boot \
 Protocols/commandProcessor \
 Protocols/Rs485 \
 Os \
+La \
 Extention/shareStorage \
 Extention \
 Driver/usb \

@@ -8,6 +8,7 @@
 #include "main.h"
 
 #include "Extention/sPtr.h"
+#include "La/sump.h"
 
 void Overclocking(void) // Разгон микроконтроллера.
 {
@@ -25,7 +26,8 @@ void Overclocking(void) // Разгон микроконтроллера.
 
 //CommandProcessor* _command;
 //
-//Usb com;
+Usb com;
+
 //SL _sl;
 
 void OnProcessCommand(uint8_t com, uint8_t* data, uint16_t length)
@@ -43,67 +45,83 @@ void OnDMATxComplete(Source source, uint8_t comm)
 //typedef void reset__(void);
 //reset__* reset_ = 0;
 
+void write_byte(uint8_t data)
+{
+	com.WriteByte(data);
+}
 
+void write_buffer(uint8_t *data, int count)
+{
+	com.SendData(data,count);
+}
 
 unsigned char place[4096];
 
 int main()
 {
-	ShareStorage _storage;
+	//ShareStorage _storage;
 
-	InterruptController::RemapToRam();
+//	InterruptController::RemapToRam();
 	_leds.Init();
+	com.RxBufferSize = 64;
+	com.TxBufferSize = 64;
+	com.TypeUsb = VirtualComPort;
+	com.OnRecived = SumpProcessRequest;
+	com.Init();
+
+	SumpSetTXFunctions(write_byte,write_buffer);
+
 	//Overclocking();
 
-	MemoryManager mem(place,4096);
-	mem.RemovedElementsAutoCollectCount =5;
-	mem.UsingShareStorage = true;
-	mem.Init();
-
-
-	 char* array3 = new char[28];
-	 if(array3!=0)
-	 {
-		 memcpy(array3,"array3 !",strlen("array3 !"));
-	 }
-
-
-	 Rs485 _rs485(_USART0,9600);
-	 _rs485.Init();
-
-	 memcpy(array3,_rs485.toString(),strlen(_rs485.toString()));
-
-	 CommandProcessor _comProc((ICommunicationObject*)&_rs485);
-	 _comProc.OnCommand =OnProcessCommand;
-	 _comProc.Init();
-	 _comProc.SendCommand(0x10,0,0);
-
-	 memcpy(array3,_comProc.toString(),strlen(_comProc.toString()));
-
-
-
-	 SerialPort _port(_USART1, 9600);
-	 Dma _usartDma;
-	 _usartDma.Channel = CHANNEL_1;
-	 _usartDma.Init();
-
-	 // передаем обьект драйвера коммуникативному устройству
-	 _port.DriverObj = (DriverObject*)&_usartDma;
-	 _port.Init();
-
-	 memcpy(array3,_port.toString(),strlen(_port.toString()));
-
-
-	 const char* _source  ="Htis is test!";
-	 char destanation[255];
-	 memset(destanation,0,255);
-
-	 Dma _memcpyDma;
-	 _memcpyDma.Channel = CHANNEL_2;
-	 _memcpyDma.OnEvent = OnDMATxComplete;
-	 _memcpyDma.UseHalfInterrupts = true;
-	 _memcpyDma.Init();
-	 _memcpyDma.MemCpy((char*)_source,destanation,strlen(_source));
+//	MemoryManager mem(place,4096);
+//	mem.RemovedElementsAutoCollectCount =5;
+//	mem.UsingShareStorage = true;
+//	mem.Init();
+//
+//
+//	 char* array3 = new char[28];
+//	 if(array3!=0)
+//	 {
+//		 memcpy(array3,"array3 !",strlen("array3 !"));
+//	 }
+//
+//
+//	 Rs485 _rs485(_USART0,9600);
+//	 _rs485.Init();
+//
+//	 memcpy(array3,_rs485.toString(),strlen(_rs485.toString()));
+//
+//	 CommandProcessor _comProc((ICommunicationObject*)&_rs485);
+//	 _comProc.OnCommand =OnProcessCommand;
+//	 _comProc.Init();
+//	 _comProc.SendCommand(0x10,0,0);
+//
+//	 memcpy(array3,_comProc.toString(),strlen(_comProc.toString()));
+//
+//
+//
+//	 SerialPort _port(_USART1, 9600);
+//	 Dma _usartDma;
+//	 _usartDma.Channel = CHANNEL_1;
+//	 _usartDma.Init();
+//
+//	 // передаем обьект драйвера коммуникативному устройству
+//	 _port.DriverObj = (DriverObject*)&_usartDma;
+//	 _port.Init();
+//
+//	 memcpy(array3,_port.toString(),strlen(_port.toString()));
+//
+//
+//	 const char* _source  ="Htis is test!";
+//	 char destanation[255];
+//	 memset(destanation,0,255);
+//
+//	 Dma _memcpyDma;
+//	 _memcpyDma.Channel = CHANNEL_2;
+//	 _memcpyDma.OnEvent = OnDMATxComplete;
+//	 _memcpyDma.UseHalfInterrupts = true;
+//	 _memcpyDma.Init();
+//	 _memcpyDma.MemCpy((char*)_source,destanation,strlen(_source));
 
 
 //
@@ -170,7 +188,7 @@ int main()
 //
 //	_dma->MemCpy((char*)_flashMemory,t2,10);
 
-	 mem.ShowMemory();
+	// mem.ShowMemory();
 
 
 

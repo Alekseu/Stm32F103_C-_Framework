@@ -23,6 +23,7 @@
 #include "Protocols/commandProcessor/commandProcessor.h"
 
 #include "Driver/dma/dma.h"
+#include "Driver/usb/usb.h"
 
 using namespace Driver;
 using namespace Protocol;

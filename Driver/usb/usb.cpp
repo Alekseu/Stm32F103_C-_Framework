@@ -6,23 +6,25 @@
  */
 #include "usb.h"
 
+#include "../../Extention/delay.h"
+#include "../nvic/nvic.h"
+
 namespace Driver
 {
 
 
-	#include "../../Extention/delay.h"
+
 	#include <string.h>
 
 	#include "descriptors.h"
+
+
 
 	Usb *Usb::pUsb = 0;
 
 	extern "C"
 	{
-	//	#include "../StdPeriph/cmsis_boot/stm32f10x.h"
-	//	#include "../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
-	//	#include "../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-	//	#include "../StdPeriph/stm_lib/inc/misc.h"
+
 		extern __IO BOOL fSuspendEnabled;  /* true when suspend is possible */
 
 		__IO uint16_t wIstr;  /* ISTR register last read value */
@@ -285,7 +287,7 @@ namespace Driver
 			#endif
 		}
 
-	}//end extern "C"
+	}
 
 
 
@@ -311,6 +313,7 @@ namespace Driver
 		RxBytes = 0;
 		TypeUsb = VirtualComPort;
 		bDeviceState = UNCONNECTED;
+		OnRecived=0;
 
 	}
 
@@ -371,6 +374,9 @@ namespace Driver
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
 
 		//usb interrupts
+		//InterruptController::PriorityGroupConfig(NVIC_PriorityGroup_1);
+		//InterruptController::SetHandler(USB_LP_CAN1_RX0_IRQn,USB_LP_CAN1_RX0_IRQHandler);
+
 		NVIC_InitTypeDef NVIC_InitStructure;
 
 		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
@@ -404,8 +410,10 @@ namespace Driver
 		User_Standard_Requests.User_SetDeviceFeature = UsbSetDeviceFeature;
 		User_Standard_Requests.User_SetDeviceAddress = UsbSetDeviceAddress;
 
+
 		USB_Init(&Device_Property,&User_Standard_Requests);
 
+		//InterruptController::EnableChannel(USB_LP_CAN1_RX0_IRQn);
 		int timeout = 1500;
 
 		while (bDeviceState != CONFIGURED && --timeout)
@@ -487,8 +495,8 @@ namespace Driver
 		  /* Set this device to response on default address */
 		  SetDeviceAddress(0);
 
-	//		SetBTABLE(BTABLE_ADDRESS);
-	//
+
+
 	//		// Инициализация Endpoint 0
 	//		SetEPType(ENDP0, EP_CONTROL);
 	//		SetEPTxStatus(ENDP0, EP_TX_NAK);
@@ -679,16 +687,23 @@ namespace Driver
 	 {
 		 if(endpoint == 0)
 		 {
-			 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
-			 SetEPTxCount(ENDP1, TxBytes);
-			 SetEPTxValid(ENDP1);
+			 if(TxBytes>0)
+			 {
+				 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
+				 SetEPTxCount(ENDP1, TxBytes);
+				 SetEPTxValid(ENDP1);
+				 TxBytes=0;
+			 }
 		 }
 		 else
 		 {
-			 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
-			 SetEPTxCount(ENDP1, TxBytes);
-			 SetEPTxValid(ENDP1);
-			 TxBytes=0;
+			 if(TxBytes>0)
+			 {
+				 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
+				 SetEPTxCount(ENDP1, TxBytes);
+				 SetEPTxValid(ENDP1);
+				 TxBytes=0;
+			}
 		 }
 	 }
 
@@ -699,19 +714,23 @@ namespace Driver
 		 int rx = USB_SIL_Read(EP3_OUT, RxBuffer+RxBytes);
 		 SetEPRxValid(ENDP3);
 		 RxBytes+= rx;
+		 if(OnRecived!=0)
+		 {
+			 OnRecived(RxBuffer,RxBytes);
+		 }
 	 }
 
 
-	 void Usb::SendData(const char* data, int length)
+	 void Usb::SendData(uint8_t* data, uint16_t length)
 	 {
 		 if(TxBytes+length>TxBufferSize) TxBytes=0;
-		 memcpy(TxBuffer,data, strlen(data));
-		 TxBytes = strlen(data);
+		 memcpy(TxBuffer,data, length);
+		 TxBytes = length;
 	 }
 
-	 int Usb::ReadData(char* mass)
+	 uint16_t Usb::ReadData(uint8_t* mass)
 	 {
-		 int length = RxBytes;
+		 uint16_t length = RxBytes;
 		 memcpy(mass,RxBuffer,RxBytes);
 		 RxBytes=0;
 		 return length;
@@ -727,6 +746,26 @@ namespace Driver
 		 return(uint8_t *)&Usb::pUsb->Linecoding;
 	 }
 
+	 void Usb::Received(uint8_t byte)
+	 {
 
+	 }
+
+	 uint8_t Usb::ReadByte(){return 0;}
+			 bool Usb::ReadByte(uint8_t* value, uint16_t timeOut){return false;}
+			 void Usb::WriteByte(uint8_t byte){
+				 if(TxBytes>TxBufferSize) TxBytes=0;
+				 TxBuffer[TxBytes++] = byte;
+
+			 }
+
+			 uint16_t Usb::ReadWord(){return 0;}
+			 void Usb::WriteWord(uint16_t word){}
+
+
+			 const char* Usb::toString()
+			 {
+				 return "Usb";
+			 }
 }
 

@@ -31,6 +31,7 @@ namespace Driver
 		virtual void WriteWord(uint16_t word)=0;
 
 		virtual void SendData(uint8_t* data, uint16_t length)=0;
+		virtual uint16_t ReadData(uint8_t* mass)=0;
 
 		/*
 		 * interrupt
