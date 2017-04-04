@@ -17,7 +17,7 @@ extern "C" {
 
 //frequency base of the original SUMP logic analyzer
 //used for converting frequency dividers
-#define SUMP_ORIGINAL_FREQ	(100000000)
+#define SUMP_ORIGINAL_FREQ	(50000000)//(100000000)
 
 //short sump commands
 #define SUMP_CMD_RESET	0x00
@@ -57,7 +57,7 @@ extern "C" {
 #define SUMP_FLAG1_GR_16BIT		(SUMP_FLAG1_GR2_DISABLE | SUMP_FLAG1_GR3_DISABLE)
 #define SUMP_FLAG1_GR_32BIT		(0)
 
-#define maxSampleRate 20000000
+#define maxSampleRate 10000000
 #define maxSampleMemory (28*1024)
 
 #define BYTE1(v) ((uint8_t)v & 0xff)         //LSB

@@ -16,7 +16,7 @@ using namespace Driver;
 //#define MAX_RLE_SAMPLE_COUNT	(64)
 #define MAX_RLE_SAMPLE_COUNT	(128)
 //#define SAMPLING_FSMC
-#define FSMC_ADDR (0x60000000)
+//#define FSMC_ADDR (0x60000000)
 //Port A: used for USB_FS, non-usable
 //Port B: B2 is BOOT1 pin with 10k pull-up
 //Port C: C0 nEnable of STMPS2141STR. C3 output form mic.

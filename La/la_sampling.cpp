@@ -386,6 +386,21 @@ void Sampler::SetupRegularEXTITrigger(InterruptHandler interruptHandler)
 
 	/* Tell system that you will use PB0 for EXTI_Line0 */
 	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource0);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource1);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource2);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource3);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource4);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource5);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource6);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource7);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource8);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource9);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource10);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource11);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource12);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource13);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource14);
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource15);
 
 	EXTI->IMR  = 0;//mask;
 	EXTI->PR = 0xffffffff;
