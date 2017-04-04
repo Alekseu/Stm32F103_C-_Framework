@@ -13,6 +13,7 @@
 #include "../StdPeriph/cmsis_boot/stm32f10x.h"
 #include "../StdPeriph/stm_lib/inc/stm32f10x_dma.h"
 #include "../StdPeriph/stm_lib/inc/stm32f10x_tim.h"
+#include "../StdPeriph/stm_lib/inc/stm32f10x_exti.h"
 #include "../StdPeriph/stm_lib/inc/misc.h"
 
 Sampler sampler;
@@ -53,12 +54,25 @@ static bool rleTailSampling;
 
 extern "C"
 {
+
+	uint8_t _triggered=0;
+
 	void TIM8_UP_TIM13_IRQHandler()
 		{
 			if (TIM_GetITStatus(TIM8,TIM_IT_Update) != RESET)
 			{
 				TIM_ClearITPendingBit(TIM8, TIM_IT_Update);
-				SamplingFrameCompelte();
+				//
+//				if(_triggered==0)
+//				{
+//					_triggered=1;
+//					SamplingManualStart();
+//				}
+//				else
+//				{
+//					_triggered=0;
+					SamplingFrameCompelte();
+//				}
 			}
 		}
 
@@ -67,18 +81,126 @@ extern "C"
 		if (DMA2->ISR & DMA2_IT_TC5)
 		{
 			DMA2->IFCR =DMA2_IT_TC5;
-			//Dma::pDma4->TransmitDmaComplete();
-			//samplingRLETailFrameInterrupt();
-		//	comletionHandler();
+
+			if(samplingRLETailFrameInterrupt!=0)
+			{
+				samplingRLETailFrameInterrupt();
+			}
+
 			return;
 		}
 		if (DMA2->ISR & DMA2_IT_HT5)
 		{
 			DMA2->IFCR =DMA2_IT_HT5;
-			//Dma::pDma4->HalfTransmitDmaComplete();
+
 			return;
 		}
 	}
+
+	//|EXTI1_IRQn|EXTI2_IRQn|EXTI3_IRQn|EXTI4_IRQn|EXTI9_5_IRQn|EXTI15_10_IRQn
+
+	void Exti_Interrupt(uint8_t chan)
+	{
+		samplingManualToExternalTransit();
+	}
+
+	void EXTI0_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line0) != RESET) {
+		Exti_Interrupt(0);
+		 EXTI_ClearITPendingBit(EXTI_Line0);
+		}
+	}
+
+	void EXTI1_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line1) != RESET) {
+				Exti_Interrupt(1);
+				 EXTI_ClearITPendingBit(EXTI_Line1);
+				}
+	}
+
+	void EXTI2_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line2) != RESET) {
+				Exti_Interrupt(2);
+				 EXTI_ClearITPendingBit(EXTI_Line2);
+				}
+	}
+
+	void EXTI3_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line3) != RESET) {
+				Exti_Interrupt(3);
+				 EXTI_ClearITPendingBit(EXTI_Line3);
+				}
+	}
+
+	void EXTI4_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line4) != RESET) {
+				Exti_Interrupt(4);
+				 EXTI_ClearITPendingBit(EXTI_Line4);
+				}
+	}
+
+	void EXTI9_5_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line5) != RESET)
+		{
+			Exti_Interrupt(5);
+			EXTI_ClearITPendingBit(EXTI_Line5);
+		}
+		if (EXTI_GetITStatus(EXTI_Line6) != RESET) {
+			Exti_Interrupt(6);
+			EXTI_ClearITPendingBit(EXTI_Line6);
+		}
+		if (EXTI_GetITStatus(EXTI_Line7) != RESET) {
+			Exti_Interrupt(7);
+			EXTI_ClearITPendingBit(EXTI_Line7);
+		}
+		if (EXTI_GetITStatus(EXTI_Line8) != RESET) {
+			Exti_Interrupt(8);
+			EXTI_ClearITPendingBit(EXTI_Line8);
+		}
+		if (EXTI_GetITStatus(EXTI_Line9) != RESET) {
+			Exti_Interrupt(9);
+			EXTI_ClearITPendingBit(EXTI_Line9);
+		}
+
+	}
+
+	void EXTI15_10_IRQHandler()
+	{
+		if (EXTI_GetITStatus(EXTI_Line10) != RESET)
+		{
+			Exti_Interrupt(10);
+			EXTI_ClearITPendingBit(EXTI_Line10);
+		}
+		if (EXTI_GetITStatus(EXTI_Line11) != RESET) {
+			Exti_Interrupt(11);
+			EXTI_ClearITPendingBit(EXTI_Line11);
+		}
+		if (EXTI_GetITStatus(EXTI_Line12) != RESET) {
+			Exti_Interrupt(12);
+			EXTI_ClearITPendingBit(EXTI_Line12);
+		}
+		if (EXTI_GetITStatus(EXTI_Line13) != RESET) {
+			Exti_Interrupt(13);
+			EXTI_ClearITPendingBit(EXTI_Line13);
+		}
+		if (EXTI_GetITStatus(EXTI_Line14) != RESET) {
+			Exti_Interrupt(14);
+			EXTI_ClearITPendingBit(EXTI_Line14);
+		}
+		if (EXTI_GetITStatus(EXTI_Line15) != RESET) {
+			Exti_Interrupt(15);
+			EXTI_ClearITPendingBit(EXTI_Line15);
+		}
+	}
+
+
+
 }
 
 
@@ -97,7 +219,6 @@ void Sampler::SetupSamplingTimer()
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1,ENABLE);
 
 	//Main sampling timer
-
 	TIM1->DIER = 0;
 	TIM1->SR &= ~TIM_SR_UIF;
 	TIM1->CNT = 0;
@@ -134,7 +255,6 @@ uint32_t Sampler::CalcDMATransferSize()
 
 void Sampler::SetupSamplingDMA(void *dataBuffer, uint32_t dataTransferCount)
 {
-	//RCC_AHB1PeriphClockCmd(RCC_AHB1ENR_DMA2EN, ENABLE);
 	 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 	uint32_t dmaSize = CalcDMATransferSize();
 
@@ -146,8 +266,8 @@ void Sampler::SetupSamplingDMA(void *dataBuffer, uint32_t dataTransferCount)
 	DMA_InitStructure.DMA_BufferSize = dataTransferCount;
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_PeripheralDataSize = dmaSize;
+	DMA_InitStructure.DMA_MemoryDataSize = dmaSize;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
 	DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
 	DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
@@ -178,7 +298,12 @@ void Sampler::SetupSamplingDMA(void *dataBuffer, uint32_t dataTransferCount)
 void Sampler::SetupRLESamplingDMA(void *dataBufferA, void *dataBufferB, uint32_t dataTransferCount)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-	 RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
+//	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_All;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+//	GPIO_Init(SAMPLING_PORT, &GPIO_InitStructure);
+
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 	uint32_t dmaSize = CalcDMATransferSize();
 
 	DmaInit   DMA_InitStructure;
@@ -208,16 +333,13 @@ void Sampler::SetupRLESamplingDMA(void *dataBufferA, void *dataBufferB, uint32_t
 	switch(transferSize)
 	{
 	case 1:
-		//InterruptController::EnableChannel(DMA2_Stream5_IRQn, 0, 0,
-		//	SamplingRLEFrameInterrupt<uint8_t, RLE_8BIT_FLAG, RLE_8BIT_MAX_COUNT>);
+
 		samplingRLETailFrameInterrupt = SamplingRLETailFrameInterrupt<uint8_t, RLE_8BIT_FLAG, RLE_8BIT_MAX_COUNT>;
 
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
 		break;
 	default:
 	case 2:
-		//InterruptController::EnableChannel(DMA2_Stream5_IRQn, 0, 0,
-			//	SamplingRLEFrameInterrupt<uint16_t, RLE_16BIT_FLAG, RLE_16BIT_MAX_COUNT>);
 		samplingRLETailFrameInterrupt = SamplingRLETailFrameInterrupt<uint16_t, RLE_16BIT_FLAG, RLE_16BIT_MAX_COUNT>;
 
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
@@ -236,60 +358,74 @@ void Sampler::SetupRLESamplingDMA(void *dataBufferA, void *dataBufferB, uint32_t
 void Sampler::SetupRegularEXTITrigger(InterruptHandler interruptHandler)
 {
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD,ENABLE);
-//	RCC_APB2Periph_GPIOD(RCC_APB2ENR_SYSCFGEN, ENABLE);
-//
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD|RCC_APB2Periph_AFIO,ENABLE);
+
+//	GPIO_InitTypeDef GPIO_InitStructure;
+//	GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_All;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
+//	GPIO_Init(SAMPLING_PORT, &GPIO_InitStructure);
+
 //	//Trigger setup
-//	uint32_t rising = triggerMask & triggerValue;
-//	uint32_t falling = triggerMask & ~triggerValue;
-//	//route exti to triggerMask GPIO port
-//	uint32_t extiCR = 0;
-//	switch((uint32_t)SAMPLING_PORT)
-//	{
-//	case GPIOA_BASE:extiCR = 0x0000;break;
-//	case GPIOB_BASE:extiCR = 0x1111;break;
-//	case GPIOC_BASE:extiCR = 0x2222;break;
-//	case GPIOD_BASE:extiCR = 0x3333;break;
-//	case GPIOE_BASE:extiCR = 0x4444;break;
-//	case GPIOF_BASE:extiCR = 0x5555;break;
-//	case GPIOG_BASE:extiCR = 0x6666;break;
-//
-//	}
-//	SYSCFG->EXTICR[0] = extiCR;
-//	SYSCFG->EXTICR[1] = extiCR;
-//	SYSCFG->EXTICR[2] = extiCR;
-//	SYSCFG->EXTICR[3] = extiCR;
-//
-//	EXTI->IMR  = 0;//mask;
-//	EXTI->PR = 0xffffffff;
-//	EXTI->RTSR = rising;
-//	EXTI->FTSR = falling;
-//
-//	__DSB();
+	uint32_t rising = triggerMask & triggerValue;
+	uint32_t falling = triggerMask & ~triggerValue;
 
-//	if(triggerMask & 0x0001)InterruptController::EnableChannel(EXTI0_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI0_IRQn);
-//	if(triggerMask & 0x0002)InterruptController::EnableChannel(EXTI1_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI1_IRQn);
-//	if(triggerMask & 0x0004)InterruptController::EnableChannel(EXTI2_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI2_IRQn);
-//	if(triggerMask & 0x0008)InterruptController::EnableChannel(EXTI3_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI3_IRQn);
-//	if(triggerMask & 0x0010)InterruptController::EnableChannel(EXTI4_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI4_IRQn);
-//	if(triggerMask & 0x03E0)InterruptController::EnableChannel(EXTI9_5_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI9_5_IRQn);
-//	if(triggerMask & 0xFC00)InterruptController::EnableChannel(EXTI15_10_IRQn, 0, 0, interruptHandler);
-//	else InterruptController::DisableChannel(EXTI15_10_IRQn);
+	uint32_t extiCR = 0;
+	switch((uint32_t)SAMPLING_PORT)
+	{
+	case GPIOA_BASE:extiCR = 0x0000;break;
+	case GPIOB_BASE:extiCR = 0x1111;break;
+	case GPIOC_BASE:extiCR = 0x2222;break;
+	case GPIOD_BASE:extiCR = 0x3333;break;
+	case GPIOE_BASE:extiCR = 0x4444;break;
+	case GPIOF_BASE:extiCR = 0x5555;break;
+	case GPIOG_BASE:extiCR = 0x6666;break;
+
+	}
 
 
-//#ifdef SAMPLING_MANUAL //push-button-trigger
+	/* Tell system that you will use PB0 for EXTI_Line0 */
+	GPIO_EXTILineConfig(GPIO_PortSourceGPIOD, GPIO_PinSource0);
+
+	EXTI->IMR  = 0;//mask;
+	EXTI->PR = 0xffffffff;
+	EXTI->RTSR = rising;
+	EXTI->FTSR = falling;
+//
+	__DSB();
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI0_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init( &NVIC_InitStructure );
+
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI1_IRQn;
+	NVIC_Init( &NVIC_InitStructure );
+
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI2_IRQn;
+	NVIC_Init( &NVIC_InitStructure );
+
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI3_IRQn;
+	NVIC_Init( &NVIC_InitStructure );
+
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI4_IRQn;
+	NVIC_Init( &NVIC_InitStructure );
+
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI9_5_IRQn;
+	NVIC_Init( &NVIC_InitStructure );
+
+	NVIC_InitStructure.NVIC_IRQChannel =EXTI15_10_IRQn;
+	NVIC_Init( &NVIC_InitStructure );
+
+#ifdef SAMPLING_MANUAL //push-button-trigger
 //	TIM8->SMCR = TIM_SMCR_TS_0 | TIM_SMCR_TS_1 | TIM_SMCR_TS_2;//External trigger input
 //	TIM8->SMCR |= TIM_SMCR_SMS_1 | TIM_SMCR_SMS_2;
 //	TIM8->DIER |= TIM_DIER_TIE;
-//	//InterruptController::EnableChannel(TIM8_TRG_COM_TIM14_IRQn, 2, 0, SamplingManualStart);
+
 	samplingManualToExternalTransit = interruptHandler;
-//#endif
+#endif
 }
 
 void Sampler::SetupDelayTimer()
@@ -306,13 +442,12 @@ void Sampler::SetupDelayTimer()
 	TIM8->DIER = TIM_DIER_UIE;
 
 	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = TIM8_UP_TIM13_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM8_UP_TIM13_IRQn;///SamplingFrameCompelte
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init( &NVIC_InitStructure );
-//
-//	InterruptController::EnableChannel(TIM8_UP_TIM13_IRQn, 2, 0, SamplingFrameCompelte);
+
 }
 
 void Sampler::SetupRegular()
@@ -353,7 +488,8 @@ void Sampler::SetupRLE()
 	SetupRLESamplingDMA(rleTempSamplingRamA, rleTempSamplingRamB, MAX_RLE_SAMPLE_COUNT);
 	SetupRegularEXTITrigger(SamplingRLEExternalEventInterrupt);
 
-	//GPIOD->PUPDR = 2 << 4;
+	//GPIOD->PUPDR = GPIO_Mode_IPD;
+	//GPIOD->PUPDR = 2 << 4; //????
 }
 
 void Sampler::Start()
@@ -367,14 +503,10 @@ void Sampler::Start()
 		SetupRegular();
 	}
 
-	//todo ???
 	DMA_ITConfig(DMA2_Channel5, DMA_IT_TC|DMA_IT_TE, ENABLE);
 	DMA_Cmd(DMA2_Channel5,ENABLE);
-	//-----
-	TIM1->CR1 |= TIM_CR1_CEN;//enable timer
 
-	// это обычно запускается по прерыванию от внешнего источника
-	SamplingExternalEventInterrupt();
+	TIM1->CR1 |= TIM_CR1_CEN;//enable timer
 }
 
 void Sampler::Stop()
@@ -392,8 +524,7 @@ void Sampler::Arm(InterruptHandler handler)
 	comletionHandler = handler;
 
 	//мое
-	transferSize = 2;
-	//comletionHandler();
+	//transferSize = 2;
 }
 
 uint32_t Sampler::ActualTransferCount()
@@ -458,8 +589,9 @@ static void SamplingRLEExternalEventInterrupt()
 	EXTI->IMR = 0;
 	rleDelayCount = delayCount;
 	rleTailSampling = true;
-//	GPIOD->PUPDR = 1 << 4;
-//	InterruptController::SetHandler(DMA2_Stream5_IRQn, samplingRLETailFrameInterrupt);
+
+	//GPIOD->PUPDR = 1 << 4;
+
 }
 
 static void SamplingManualStart()

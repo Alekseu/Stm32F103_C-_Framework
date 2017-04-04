@@ -226,7 +226,7 @@ ITStatus EXTI_GetITStatus(uint32_t EXTI_Line)
   ITStatus bitstatus = RESET;
   uint32_t enablestatus = 0;
   /* Check the parameters */
-  assert_param(IS_GET_EXTI_LINE(EXTI_Line));
+
   
   enablestatus =  EXTI->IMR & EXTI_Line;
   if (((EXTI->PR & EXTI_Line) != (uint32_t)RESET) && (enablestatus != (uint32_t)RESET))

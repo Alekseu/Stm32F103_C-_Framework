@@ -602,9 +602,8 @@ void GPIO_EXTILineConfig(uint8_t GPIO_PortSource, uint8_t GPIO_PinSource)
 {
   uint32_t tmp = 0x00;
   /* Check the parameters */
-  assert_param(IS_GPIO_EXTI_PORT_SOURCE(GPIO_PortSource));
-  assert_param(IS_GPIO_PIN_SOURCE(GPIO_PinSource));
   
+
   tmp = ((uint32_t)0x0F) << (0x04 * (GPIO_PinSource & (uint8_t)0x03));
   AFIO->EXTICR[GPIO_PinSource >> 0x02] &= ~tmp;
   AFIO->EXTICR[GPIO_PinSource >> 0x02] |= (((uint32_t)GPIO_PortSource) << (0x04 * (GPIO_PinSource & (uint8_t)0x03)));

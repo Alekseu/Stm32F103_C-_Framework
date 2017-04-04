@@ -134,12 +134,10 @@ uint16_t SumpProcessRequest(uint8_t *buffer, uint16_t len)
 		result = 1;
 	  break;
 	case SUMP_CMD_ID://ID
-		//APP_FOPS.pIf_DataTx((uint8_t*)"1ALS", 4);
 		bufferTXFunc((uint8_t*)"1ALS", 4);
 		result = 1;
 	  break;
 	case SUMP_CMD_META://Query metas
-		//APP_FOPS.pIf_DataTx((uint8_t*)metaData, sizeof(metaData));
 		bufferTXFunc((uint8_t*)metaData, sizeof(metaData));
 		result = 1;
 	  break;

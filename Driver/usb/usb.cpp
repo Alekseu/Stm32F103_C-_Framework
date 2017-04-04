@@ -30,7 +30,7 @@ namespace Driver
 		__IO uint16_t wIstr;  /* ISTR register last read value */
 		__IO uint8_t bIntPackSOF = 0;  /* SOFs received between 2 consecutive packets */
 
-		#define VCOMPORT_IN_FRAME_INTERVAL             15
+		#define VCOMPORT_IN_FRAME_INTERVAL             2
 
 		DEVICE Device_Table =
 		{
@@ -752,28 +752,29 @@ namespace Driver
 	 }
 
 	 uint8_t Usb::ReadByte(){return 0;}
-			 bool Usb::ReadByte(uint8_t* value, uint16_t timeOut){return false;}
-			 void Usb::WriteByte(uint8_t byte){
-				 if(TxBytes>TxBufferSize) TxBytes=0;
-				 TxBuffer[TxBytes++] = byte;
+	 bool Usb::ReadByte(uint8_t* value, uint16_t timeOut){return false;}
 
-				 if(TxBytes==64)
-				 {
-					 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
-					 				 SetEPTxCount(ENDP1, TxBytes);
-					 				 SetEPTxValid(ENDP1);
-					 				 TxBytes=0;
-				 }
+	 void Usb::WriteByte(uint8_t byte){
+		 if(TxBytes>TxBufferSize) TxBytes=0;
+		 TxBuffer[TxBytes++] = byte;
 
-			 }
+		 if(TxBytes==64)
+		 {
+			 UserToPMABufferCopy(TxBuffer, ENDP1_TXADDR, TxBytes);
+			 SetEPTxCount(ENDP1, TxBytes);
+			 SetEPTxValid(ENDP1);
+			 TxBytes=0;
+		 }
 
-			 uint16_t Usb::ReadWord(){return 0;}
-			 void Usb::WriteWord(uint16_t word){}
+	 }
+
+	 uint16_t Usb::ReadWord(){return 0;}
+	 void Usb::WriteWord(uint16_t word){}
 
 
-			 const char* Usb::toString()
-			 {
-				 return "Usb";
-			 }
+	 const char* Usb::toString()
+	 {
+		 return "Usb";
+	 }
 }
 
