@@ -15,7 +15,6 @@ RM := rm -rf
 -include Protocols/commandProcessor/subdir.mk
 -include Protocols/Rs485/subdir.mk
 -include Os/subdir.mk
--include La/subdir.mk
 -include Extention/shareStorage/subdir.mk
 -include Extention/subdir.mk
 -include Driver/usb/subdir.mk

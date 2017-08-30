@@ -362,10 +362,7 @@ void TIM_OC2Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
   uint16_t tmpccmrx = 0, tmpccer = 0, tmpcr2 = 0;
    
   /* Check the parameters */
-  assert_param(IS_TIM_LIST6_PERIPH(TIMx)); 
-  assert_param(IS_TIM_OC_MODE(TIM_OCInitStruct->TIM_OCMode));
-  assert_param(IS_TIM_OUTPUT_STATE(TIM_OCInitStruct->TIM_OutputState));
-  assert_param(IS_TIM_OC_POLARITY(TIM_OCInitStruct->TIM_OCPolarity));   
+
    /* Disable the Channel 2: Reset the CC2E Bit */
   TIMx->CCER &= (uint16_t)(~((uint16_t)TIM_CCER_CC2E));
   
@@ -394,10 +391,7 @@ void TIM_OC2Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
     
   if((TIMx == TIM1) || (TIMx == TIM8))
   {
-    assert_param(IS_TIM_OUTPUTN_STATE(TIM_OCInitStruct->TIM_OutputNState));
-    assert_param(IS_TIM_OCN_POLARITY(TIM_OCInitStruct->TIM_OCNPolarity));
-    assert_param(IS_TIM_OCNIDLE_STATE(TIM_OCInitStruct->TIM_OCNIdleState));
-    assert_param(IS_TIM_OCIDLE_STATE(TIM_OCInitStruct->TIM_OCIdleState));
+
     
     /* Reset the Output N Polarity level */
     tmpccer &= (uint16_t)(~((uint16_t)TIM_CCER_CC2NP));
@@ -444,10 +438,7 @@ void TIM_OC3Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
   uint16_t tmpccmrx = 0, tmpccer = 0, tmpcr2 = 0;
    
   /* Check the parameters */
-  assert_param(IS_TIM_LIST3_PERIPH(TIMx)); 
-  assert_param(IS_TIM_OC_MODE(TIM_OCInitStruct->TIM_OCMode));
-  assert_param(IS_TIM_OUTPUT_STATE(TIM_OCInitStruct->TIM_OutputState));
-  assert_param(IS_TIM_OC_POLARITY(TIM_OCInitStruct->TIM_OCPolarity));   
+
   /* Disable the Channel 2: Reset the CC2E Bit */
   TIMx->CCER &= (uint16_t)(~((uint16_t)TIM_CCER_CC3E));
   
@@ -475,10 +466,7 @@ void TIM_OC3Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
     
   if((TIMx == TIM1) || (TIMx == TIM8))
   {
-    assert_param(IS_TIM_OUTPUTN_STATE(TIM_OCInitStruct->TIM_OutputNState));
-    assert_param(IS_TIM_OCN_POLARITY(TIM_OCInitStruct->TIM_OCNPolarity));
-    assert_param(IS_TIM_OCNIDLE_STATE(TIM_OCInitStruct->TIM_OCNIdleState));
-    assert_param(IS_TIM_OCIDLE_STATE(TIM_OCInitStruct->TIM_OCIdleState));
+
     
     /* Reset the Output N Polarity level */
     tmpccer &= (uint16_t)(~((uint16_t)TIM_CCER_CC3NP));
@@ -523,10 +511,7 @@ void TIM_OC4Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
   uint16_t tmpccmrx = 0, tmpccer = 0, tmpcr2 = 0;
    
   /* Check the parameters */
-  assert_param(IS_TIM_LIST3_PERIPH(TIMx)); 
-  assert_param(IS_TIM_OC_MODE(TIM_OCInitStruct->TIM_OCMode));
-  assert_param(IS_TIM_OUTPUT_STATE(TIM_OCInitStruct->TIM_OutputState));
-  assert_param(IS_TIM_OC_POLARITY(TIM_OCInitStruct->TIM_OCPolarity));   
+
   /* Disable the Channel 2: Reset the CC4E Bit */
   TIMx->CCER &= (uint16_t)(~((uint16_t)TIM_CCER_CC4E));
   
@@ -555,7 +540,7 @@ void TIM_OC4Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct)
     
   if((TIMx == TIM1) || (TIMx == TIM8))
   {
-    assert_param(IS_TIM_OCIDLE_STATE(TIM_OCInitStruct->TIM_OCIdleState));
+
     /* Reset the Output Compare IDLE State */
     tmpcr2 &= (uint16_t)(~((uint16_t)TIM_CR2_OIS4));
     /* Set the Output Idle state */
@@ -828,8 +813,7 @@ void TIM_Cmd(TIM_TypeDef* TIMx, FunctionalState NewState)
 void TIM_CtrlPWMOutputs(TIM_TypeDef* TIMx, FunctionalState NewState)
 {
   /* Check the parameters */
-  assert_param(IS_TIM_LIST2_PERIPH(TIMx));
-  assert_param(IS_FUNCTIONAL_STATE(NewState));
+
   if (NewState != DISABLE)
   {
     /* Enable the TIM Main Output */
@@ -931,9 +915,7 @@ void TIM_GenerateEvent(TIM_TypeDef* TIMx, uint16_t TIM_EventSource)
 void TIM_DMAConfig(TIM_TypeDef* TIMx, uint16_t TIM_DMABase, uint16_t TIM_DMABurstLength)
 {
   /* Check the parameters */
-  assert_param(IS_TIM_LIST4_PERIPH(TIMx));
-  assert_param(IS_TIM_DMA_BASE(TIM_DMABase));
-  assert_param(IS_TIM_DMA_LENGTH(TIM_DMABurstLength));
+
   /* Set the DMA Base and the DMA Burst Length */
   TIMx->DCR = TIM_DMABase | TIM_DMABurstLength;
 }
@@ -1528,8 +1510,7 @@ void TIM_OC2PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload)
 {
   uint16_t tmpccmr1 = 0;
   /* Check the parameters */
-  assert_param(IS_TIM_LIST6_PERIPH(TIMx));
-  assert_param(IS_TIM_OCPRELOAD_STATE(TIM_OCPreload));
+
   tmpccmr1 = TIMx->CCMR1;
   /* Reset the OC2PE Bit */
   tmpccmr1 &= (uint16_t)~((uint16_t)TIM_CCMR1_OC2PE);
@@ -1552,8 +1533,7 @@ void TIM_OC3PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload)
 {
   uint16_t tmpccmr2 = 0;
   /* Check the parameters */
-  assert_param(IS_TIM_LIST3_PERIPH(TIMx));
-  assert_param(IS_TIM_OCPRELOAD_STATE(TIM_OCPreload));
+
   tmpccmr2 = TIMx->CCMR2;
   /* Reset the OC3PE Bit */
   tmpccmr2 &= (uint16_t)~((uint16_t)TIM_CCMR2_OC3PE);
@@ -1576,8 +1556,7 @@ void TIM_OC4PreloadConfig(TIM_TypeDef* TIMx, uint16_t TIM_OCPreload)
 {
   uint16_t tmpccmr2 = 0;
   /* Check the parameters */
-  assert_param(IS_TIM_LIST3_PERIPH(TIMx));
-  assert_param(IS_TIM_OCPRELOAD_STATE(TIM_OCPreload));
+
   tmpccmr2 = TIMx->CCMR2;
   /* Reset the OC4PE Bit */
   tmpccmr2 &= (uint16_t)~((uint16_t)TIM_CCMR2_OC4PE);
@@ -2195,8 +2174,7 @@ void TIM_SelectOnePulseMode(TIM_TypeDef* TIMx, uint16_t TIM_OPMode)
 void TIM_SelectOutputTrigger(TIM_TypeDef* TIMx, uint16_t TIM_TRGOSource)
 {
   /* Check the parameters */
-  assert_param(IS_TIM_LIST7_PERIPH(TIMx));
-  assert_param(IS_TIM_TRGO_SOURCE(TIM_TRGOSource));
+
   /* Reset the MMS Bits */
   TIMx->CR2 &= (uint16_t)~((uint16_t)TIM_CR2_MMS);
   /* Select the TRGO source */

@@ -588,7 +588,8 @@ namespace Driver
 
 	void SerialPort::WriteWord(uint16_t word)
 	{
-
+		WriteByte(word>>8&0xFF);
+		WriteByte(word&0xFF);
 	}
 
 	uint16_t SerialPort::ReadWord()
