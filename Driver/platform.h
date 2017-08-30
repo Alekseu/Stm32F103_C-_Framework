@@ -44,9 +44,10 @@ extern "C"
 /*
  * Leds
  */
-#define LedPin1 GPIO_Pin_0
-#define LedPin2 GPIO_Pin_1
-#define LedPort GPIOA
+#define LedPin1 GPIO_Pin_3
+#define LedPin2 GPIO_Pin_4
+#define LedRCC  RCC_APB2Periph_GPIOE
+#define LedPort GPIOE
 
 
 /*

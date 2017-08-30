@@ -580,10 +580,13 @@ namespace Driver
 		}
 	}
 
-	//todo реализовать
 	uint8_t SerialPort::ReadByte()
 	{
-		return 0;
+		uint8_t byte =0;
+
+		ReadByte(&byte,50);
+
+		return byte;
 	}
 
 	void SerialPort::WriteWord(uint16_t word)
@@ -594,7 +597,15 @@ namespace Driver
 
 	uint16_t SerialPort::ReadWord()
 	{
-		return 0;
+		uint8_t byte =0;
+		uint8_t byte1 =0;
+		uint16_t word=0;
+
+		ReadByte(&byte,50);
+		ReadByte(&byte1,50);
+		word = byte<<8|byte1;
+
+		return word;
 	}
 
 	void SerialPort::SendData(uint8_t* data, uint16_t length)
