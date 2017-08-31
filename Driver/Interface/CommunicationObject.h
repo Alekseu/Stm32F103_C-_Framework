@@ -24,8 +24,11 @@ namespace Driver
 		virtual ~ICommunicationObject(){}
 
 		virtual uint8_t ReadByte() =0;
+		virtual uint8_t ReadByte(uint8_t addr) =0;
+
 		virtual bool ReadByte(uint8_t* value, uint16_t timeOut)=0;
 		virtual void WriteByte(uint8_t byte)=0;
+		virtual void WriteByte(uint8_t byte, uint8_t addr)=0;
 
 		virtual uint16_t ReadWord() =0;
 		virtual void WriteWord(uint16_t word)=0;

@@ -17,22 +17,54 @@ namespace Driver
 
 	class I2c :public ICommunicationObject
 	{
+		I2cInit  I2C_InitStructure;
+		GpioInit  GPIO_InitStructure;
+
+	public:
+		enum I2CType
+		{
+			Master,
+			Slave
+		};
+
 	public:
 		static I2c* Iobj;
 
-		I2c();
+		I2c(uint16_t rate, uint8_t addr, I2CType type);
 		~I2c();
 
 		void Init();
 
-		 virtual uint8_t ReadByte() ;
-		 virtual void WriteByte(uint8_t byte);
+		uint8_t ReadByte();
+		uint8_t ReadByte(uint8_t addr);
+		bool ReadByte(uint8_t* value, uint16_t timeOut);
 
-		 virtual uint16_t ReadWord() ;
-		 virtual void WriteWord(uint16_t word);
+		void WriteByte(uint8_t byte);
+		void WriteByte(uint8_t byte, uint8_t addr);
 
+		uint16_t ReadWord();
+		void WriteWord(uint16_t word);
+
+		void SendData(uint8_t* data, uint16_t length);
+
+
+		/*
+		 * interrupt
+		 */
+		virtual void Received(uint8_t byte);
+
+		/*
+		 * Interrupt
+		 */
+		static void InterruptWraper(void);
+
+		const char* toString();
 
 	private:
+		uint16_t _rate;
+		uint8_t  _badr;
+		 I2CType _type;
+
 	};
 
 }

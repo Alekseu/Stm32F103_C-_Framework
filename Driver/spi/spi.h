@@ -14,14 +14,15 @@
 namespace Driver
 {
 
-	enum SpiType
-	{
-		Master,
-		Slave
-	};
-
 	class Spi :public ICommunicationObject
 	{
+	public:
+		enum SpiType
+		{
+			Master,
+			Slave
+		};
+
 	public:
 		static Spi* SObj;
 

@@ -12,7 +12,7 @@ namespace Device
 
 	EE24AA08* EE24AA08::EEObj =0;
 
-	EE24AA08::EE24AA08()
+	EE24AA08::EE24AA08():I2c(4000, 0xc,I2c::Master)
 	{
 		EEObj = this;
 	}

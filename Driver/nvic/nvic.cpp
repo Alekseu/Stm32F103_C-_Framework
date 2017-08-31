@@ -19,43 +19,13 @@ namespace Driver
 	static InterruptHandler __attribute__((aligned(0x200)))  isrTable[isrCount];
 	#endif
 
-	// Hard Fault Status Register
-	#define NVIC_HFSR (*(volatile unsigned int*) (0xE000ED2Cu))
 
-	extern "C"
-	{
-		void hard_fault_handler_c( uint32_t *pStack )
-		{
-
-			//if (NVIC_HFSR & (1uL << 31)) {
-				//					NVIC_HFSR |= (1uL << 31); // Reset Hard Fault status
-										 *(pStack + 6u) += 2u; // PC is located on stack at SP + 24 bytes;
-										 // increment PC by 2 to skip break instruction.
-										// return; // Return to interrupted application
-									//	}
-		}
-	}
 	static void DefaultHandler(void)
 	{
-		 __asm volatile
-		    (
-		    		" movs r0,#4\n"
-		    		 " movs r1, lr\n"
-		    		 " tst r0, r1\n"
-		    		 " beq _MSP\n"
-		    		 " mrs r0, psp\n"
-		    		 " b _HALT\n"
-		    		"_MSP:\n"
-		    		"  mrs r0, msp\n"
-		    		"_HALT:\n"
-		    		"  ldr r1,[r0,#20]\n"
-		    		"  b hard_fault_handler_c\n"
-		    );
+		while(true)
+		{
 
-//		while(true)
-//		{
-//
-//		}
+		}
 	}
 
 	void InterruptController::RemapToRam()

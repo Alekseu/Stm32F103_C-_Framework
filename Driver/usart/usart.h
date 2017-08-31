@@ -88,6 +88,8 @@ namespace Driver
 		 */
 		void WriteByte(uint8_t byte);
 
+		void WriteByte(uint8_t byte, uint8_t addr);
+
 
 		/*
 		 * метод чтения байта с кольцевого буфера
@@ -99,6 +101,8 @@ namespace Driver
 		 * метод чтения байта с кольцевого буфера
 		 */
 		uint8_t ReadByte();
+
+		uint8_t ReadByte(uint8_t addr);
 
 
 		/*
@@ -157,6 +161,12 @@ namespace Driver
 		 * object
 		 */
 		const char* toString();
+
+
+		/*
+		 * Interrupt
+		 */
+		static void InterruptWraper(void);
 
 	};
 }
