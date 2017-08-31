@@ -34,7 +34,24 @@ namespace Driver
 		volatile bool _useInterupsTX;
 
 	public:
-		volatile uint8_t Port;
+		enum PortName
+		{
+			COM1 = USART1_BASE,
+			COM2 = USART2_BASE,
+			COM3 = USART3_BASE,
+			COM4 = UART4_BASE,
+			COM5 = UART5_BASE
+		};
+
+		enum PortParity
+		{
+			Parity_No =0,
+			Parity_Even = 0x0400,
+			Parity_Odd = 0x0600
+		};
+
+	public:
+		volatile PortName Port;
 		volatile uint16_t Baud;
 
 		static SerialPort* pUsart0;
@@ -52,10 +69,10 @@ namespace Driver
 		/*
 		 * Конструкторы
 		 */
-		SerialPort(uint8_t port, uint16_t baud);
+		SerialPort(PortName port, uint16_t baud);
 
 
-		SerialPort(uint8_t port, uint16_t baud, uint16_t parity);
+		SerialPort(PortName port, uint16_t baud, PortParity parity);
 
 		/*
 		 * деструктор

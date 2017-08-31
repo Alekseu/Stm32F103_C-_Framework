@@ -12,12 +12,14 @@ namespace Driver
 {
 	I2c* I2c::Iobj=0;
 
-	I2c::I2c(uint16_t rate, uint8_t addr, I2CType type)
+	I2c::I2c(I2cNum i2cNum,uint8_t addr, I2CType type, I2CSpeed speed)
 	{
-		_rate = rate;
+		_i2cNum =i2cNum;
 		_badr = addr;
 		_type = type;
+		_speed = speed;
 	}
+
 	I2c::~I2c()
 	{
 
@@ -37,18 +39,18 @@ namespace Driver
 
 		GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-		I2C_DeInit(I2C_NUM);
+		I2C_DeInit((I2C_TypeDef* )_i2cNum);
 		I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
 		I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
 		I2C_InitStructure.I2C_OwnAddress1 = 0x00;
 		I2C_InitStructure.I2C_Ack =I2C_Ack_Disable;
 		I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
-		I2C_InitStructure.I2C_ClockSpeed =_rate;  /* 50kHz */
+		I2C_InitStructure.I2C_ClockSpeed =_speed;
 
-		I2C_Cmd(I2C_NUM, ENABLE);
-		I2C_Init(I2C_NUM, &I2C_InitStructure);
-		I2C_AcknowledgeConfig(I2C_NUM, ENABLE);
-		I2C_ITConfig(I2C_NUM,I2C_IT_EVT,ENABLE);
+		I2C_Cmd((I2C_TypeDef* )_i2cNum, ENABLE);
+		I2C_Init((I2C_TypeDef* )_i2cNum, &I2C_InitStructure);
+		I2C_AcknowledgeConfig((I2C_TypeDef* )_i2cNum, ENABLE);
+		I2C_ITConfig((I2C_TypeDef* )_i2cNum,I2C_IT_EVT,ENABLE);
 
 		InterruptController::SetHandler(I2C1_EV_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(I2C1_EV_IRQn);
@@ -57,7 +59,8 @@ namespace Driver
 
 	uint8_t I2c::ReadByte()
 	{
-
+		uint8_t tmp;
+		return tmp;
 	}
 
 	uint8_t  I2c::ReadByte(uint8_t addr)
@@ -168,7 +171,6 @@ namespace Driver
 	{
 
 	}
-
 
 	/*
 	 * interrupt

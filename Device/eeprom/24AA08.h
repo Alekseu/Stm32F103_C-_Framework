@@ -18,7 +18,7 @@ namespace Device
 	using namespace Driver;
 
 	//todo возможно лучше передавать драйвер i2c
-	class EE24AA08 :I2c
+	class EE24AA08
 	{
 		public:
 

@@ -13,7 +13,7 @@ namespace Protocol
 	Rs485* Rs485::Rs485Obj=0;
 
 
-	Rs485::Rs485(uint8_t port, uint16_t baud):SerialPort(port, baud)
+	Rs485::Rs485(SerialPort::PortName port, uint16_t baud):SerialPort(port, baud)
 	{
 		_transmit = false;
 	}

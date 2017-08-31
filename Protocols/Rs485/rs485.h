@@ -20,7 +20,7 @@ namespace Protocol
 	public:
 		static Rs485* Rs485Obj;
 
-		Rs485(uint8_t port, uint16_t baud);
+		Rs485(SerialPort::PortName port, uint16_t baud);
 
 		~Rs485();
 

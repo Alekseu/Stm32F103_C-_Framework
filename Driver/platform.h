@@ -60,16 +60,6 @@ extern "C"
 
 #define BUFFER_SIZE 32
 
-#define _USART0	0x00
-#define _USART1	0x01
-#define _USART2	0x02
-#define _USART3	0x03
-#define _USART4	0x04
-
-#define _UART_PARITY_NONE USART_Parity_No
-#define _UART_PARITY_EVEN USART_Parity_Even
-#define _UART_PARITY_ODD USART_Parity_Odd
-
 #define UsartInit USART_InitTypeDef
 
 
@@ -78,13 +68,14 @@ extern "C"
  */
 #define spi
 
+#define SpiInit SPI_InitTypeDef
 
 
 
 /*
  *  i2c's
  */
-#define i2c
+#define  i2c
 #define  I2cInit I2C_InitTypeDef
 #define  I2C_NUM I2C1
 #define  Remap 0
@@ -107,12 +98,24 @@ extern "C"
 
 
 /*
+ * Ow's
+ */
+#define ow
+
+
+/*
+ * Can
+ */
+#define can
+
+
+/*
  * dma's
  */
 #define dma
 #define DmaInit DMA_InitTypeDef
 
-#define CHANNEL_1 1
+    #define CHANNEL_1 1
 	#define CHANNEL_2 2
 	#define CHANNEL_3 3
 	#define CHANNEL_4 4

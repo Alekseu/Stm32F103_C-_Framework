@@ -74,22 +74,22 @@ void DriverEvent(Source source, uint8_t communication)
 
 	SerialPort* pointer = 0;
 
-	switch (communication)
+	switch ((SerialPort::PortName)communication)
 	{
 
-	case _USART0:
+	case SerialPort::COM1:
 		pointer =SerialPort::pUsart0;
 		break;
-	case _USART1:
+	case SerialPort::COM2:
 		pointer =SerialPort::pUsart1;
 		break;
-	case _USART2:
+	case SerialPort::COM3:
 		pointer =SerialPort::pUsart2;
 		break;
-	case _USART3:
+	case SerialPort::COM4:
 		pointer =SerialPort::pUsart3;
 		break;
-	case _USART4:
+	case SerialPort::COM5:
 		pointer=SerialPort::pUsart4;
 		break;
 
@@ -114,8 +114,7 @@ void DriverEvent(Source source, uint8_t communication)
 	}
 }
 
-
-SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
+SerialPort::SerialPort(PortName port, uint16_t baud):ICommunicationObject()
 {
 	BuferSize=64;
 	DriverObj =0;
@@ -132,23 +131,23 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 	switch (Port)
 	{
 
-	case _USART0:
+	case COM1:
 		pUsart0 = this;
 		InterruptNumber = USART1_IRQn;
 		break;
-	case _USART1:
+	case COM2:
 		pUsart1 = this;
 		InterruptNumber = USART2_IRQn;
 		break;
-	case _USART2:
+	case COM3:
 		pUsart2 = this;
 		InterruptNumber = USART3_IRQn;
 		break;
-	case _USART3:
+	case COM4:
 		pUsart3 = this;
 		InterruptNumber = UART4_IRQn;
 		break;
-	case _USART4:
+	case COM5:
 		pUsart4 = this;
 		InterruptNumber = UART5_IRQn;
 		break;
@@ -157,7 +156,7 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 
 	switch (Port)
 	{
-	case _USART0:
+	case COM1:
 		/* Enable GPIOA clock                                                   */
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
@@ -182,17 +181,17 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 		USART_InitStruct.USART_Parity              = USART_Parity_No ;
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 		USART_InitStruct.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
-		USART_Init(USART1, &USART_InitStruct);
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct);
 
 
-		USART_Cmd(USART1, ENABLE);
-		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE);
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(USART1_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(USART1_IRQn);
 
 
 		break;
-	case _USART1:
+	case COM2:
 
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
@@ -214,17 +213,17 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 		USART_InitStruct.USART_Parity = USART_Parity_No; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(USART2, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(USART2, ENABLE); //Включаем USART2
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART2
 
-		USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(USART2_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(USART2_IRQn);
 
 
 		break;
-	case _USART2:
+	case COM3:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 		//Инициализации вывода PA9 - USART1_Tx
@@ -245,15 +244,15 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 		USART_InitStruct.USART_Parity = USART_Parity_No; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(USART3, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(USART3, ENABLE); //Включаем USART3
-		USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART3
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(USART3_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(USART3_IRQn);
 
 		break;
-	case _USART3:
+	case COM4:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 		//Инициализации вывода PA9 - USART1_Tx
@@ -274,15 +273,15 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 		USART_InitStruct.USART_Parity = USART_Parity_No; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(UART4, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(UART4, ENABLE); //Включаем USART4
-		USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART4
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(UART4_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(UART4_IRQn);
 
 		break;
-	case _USART4:
+	case COM5:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 		//Инициализации вывода PA9 - USART1_Tx
@@ -303,10 +302,10 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 		USART_InitStruct.USART_Parity = USART_Parity_No; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(UART5, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(UART5, ENABLE); //Включаем USART4
-		USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART4
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(UART5_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(UART5_IRQn);
 
@@ -319,7 +318,7 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud):ICommunicationObject()
 
 }
 
-SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
+SerialPort::SerialPort(PortName port, uint16_t baud, PortParity parity)
 {
 	BuferSize=64;
 	DriverObj=0;
@@ -335,26 +334,26 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 	switch (Port)
 	{
 
-	case _USART0:
+	case COM1:
 		pUsart0 = this;
 		break;
-	case _USART1:
+	case COM2:
 		pUsart1 = this;
 		break;
-	case _USART2:
+	case COM3:
 		pUsart2 = this;
 		break;
-	case _USART3:
+	case COM4:
 		pUsart3 = this;
 		break;
-	case _USART4:
+	case COM5:
 		pUsart4 = this;
 		break;
 
 	}
 	switch (Port)
 	{
-	case _USART0:
+	case COM1:
 		/* Enable GPIOA clock                                                   */
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1,ENABLE);
@@ -382,16 +381,16 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 		USART_InitStruct.USART_Parity              = parity ;
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 		USART_InitStruct.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
-		USART_Init(USART1, &USART_InitStruct);
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct);
 
 
-		USART_Cmd(USART1, ENABLE);
-		USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE);
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(USART1_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(USART1_IRQn);
 
 		break;
-	case _USART1:
+	case COM2:
 
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
@@ -413,16 +412,16 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 		USART_InitStruct.USART_Parity = parity; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(USART2, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(USART2, ENABLE); //Включаем USART2
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART2
 
-		USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(USART2_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(USART2_IRQn);
 
 		break;
-	case _USART2:
+	case COM3:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 		//Инициализации вывода PA9 - USART1_Tx
@@ -443,15 +442,15 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 		USART_InitStruct.USART_Parity = parity; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(USART3, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(USART3, ENABLE); //Включаем USART3
-		USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART3
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(USART3_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(USART3_IRQn);
 
 		break;
-	case _USART3:
+	case COM4:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 		//Инициализации вывода PA9 - USART1_Tx
@@ -472,15 +471,15 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 		USART_InitStruct.USART_Parity = parity; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(UART4, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(UART4, ENABLE); //Включаем USART4
-		USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART4
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(UART4_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(UART4_IRQn);
 
 		break;
-	case _USART4:
+	case COM5:
 		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC|RCC_APB2Periph_GPIOD|RCC_APB2Periph_AFIO, ENABLE);
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 		//Инициализации вывода PA9 - USART1_Tx
@@ -501,10 +500,10 @@ SerialPort::SerialPort(uint8_t port, uint16_t baud, uint16_t parity)
 		USART_InitStruct.USART_Parity = parity; //Без проверки четности
 		USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None; //Без аппаратного контроля
 		USART_InitStruct.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; //Включен передатчик и приемник USART1
-		USART_Init(UART5, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
+		USART_Init((USART_TypeDef*)Port, &USART_InitStruct); //Заданные настройки сохраняем в регистрах USART1
 
-		USART_Cmd(UART5, ENABLE); //Включаем USART4
-		USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);
+		USART_Cmd((USART_TypeDef*)Port, ENABLE); //Включаем USART4
+		USART_ITConfig((USART_TypeDef*)Port, USART_IT_RXNE, ENABLE);
 		InterruptController::SetHandler(UART5_IRQn,InterruptWraper);
 		InterruptController::EnableChannel(UART5_IRQn);
 
@@ -536,26 +535,26 @@ void SerialPort::WriteByte(uint8_t byte)
 	switch (Port)
 	{
 
-	case _USART0:
+	case COM1:
 		while(!(USART1->SR & USART_SR_TXE));
 		USART1->DR = byte;
 		break;
 
-	case _USART1:
+	case COM2:
 		while(!(USART2->SR & USART_SR_TXE));
 		USART2->DR = byte;
 		break;
 
-	case _USART2:
+	case COM3:
 		while(!(USART3->SR & USART_SR_TXE));
 		USART3->DR = byte;
 		break;
 
-	case _USART3:
+	case COM4:
 		while(!(UART4->SR & USART_SR_TXE));
 		UART4->DR = byte;
 		break;
-	case _USART4:
+	case COM5:
 		while(!(UART5->SR & USART_SR_TXE));
 		UART5->DR = byte;
 		break;
@@ -568,7 +567,6 @@ void SerialPort::WriteByte(uint8_t byte, uint8_t addr)
 	WriteByte(addr);
 	WriteByte(byte);
 }
-
 
 bool SerialPort::ReadByte(uint8_t* value, uint16_t timeOut)
 {
@@ -587,8 +585,6 @@ bool SerialPort::ReadByte(uint8_t* value, uint16_t timeOut)
 		return false;
 	}
 }
-
-
 
 uint8_t SerialPort::ReadByte()
 {
@@ -680,14 +676,17 @@ void SerialPort::ClearBuffer()
  {
 
  }
+
  void SerialPort::TxComplete()
  {
 
  }
+
  void SerialPort::RxHalfComplete()
  {
 
  }
+
  void SerialPort::TxHalfComplete()
  {
 

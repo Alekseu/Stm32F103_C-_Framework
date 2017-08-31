@@ -22,17 +22,17 @@ int main()
 	InterruptController _ic;
 	_ic.RemapToRam();
 
-	SerialPort* _port = new SerialPort(_USART0,9600);
+	SerialPort* _port = new SerialPort(SerialPort::COM1,9600);
 	_port->Init();
 
 	Led _led;
 	_led.Init();
 
-	I2c* _i2c = new I2c(400, 0xc, I2c::Master);
+	I2c* _i2c = new I2c(I2c::in_I2C1,0xc, I2c::Master,I2c::s_50kHz);
 
 	while(1)
 	{
-		//_port->SendData((uint8_t*)"Hello world\r\n",13);
+		_port->SendData((uint8_t*)"Hello world\r\n",13);
 		_led.On(1);
 		if(_port->GetAnswer(150))
 		{
