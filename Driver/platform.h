@@ -29,6 +29,7 @@ extern "C"
 
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_usart.h"
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_spi.h"
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_tim.h"
 
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_i2c.h"
 
@@ -95,6 +96,7 @@ extern "C"
  */
 #define timer
 
+#define TimInit TIM_TimeBaseInitTypeDef
 
 
 /*

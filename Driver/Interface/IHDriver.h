@@ -7,8 +7,23 @@
 
 #ifndef DRIVER_INTERFACE_IHDRIVER_H_
 #define DRIVER_INTERFACE_IHDRIVER_H_
+#include "../platform.h"
+
+namespace Driver
+{
+
+	class IHDriver : public Object
+	{
+	public:
+
+		IHDriver();
+		~IHDriver();
 
 
+
+	};
+
+}
 
 
 

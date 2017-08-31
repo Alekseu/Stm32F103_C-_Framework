@@ -41,7 +41,6 @@ Extention \
 Driver/usb \
 Driver/usart \
 Driver/timer \
-Driver/timer/tim \
 Driver/systic \
 Driver/spi \
 Driver/sdio \
@@ -58,6 +57,7 @@ Driver/dac \
 Driver/can \
 Driver/adc \
 Device/w5500 \
+Device/sdCard/src \
 Device/nrf2401 \
 Device/esp8266 \
 Device/enc28j60 \

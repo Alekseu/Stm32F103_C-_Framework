@@ -20,7 +20,6 @@ RM := rm -rf
 -include Extention/subdir.mk
 -include Driver/usb/subdir.mk
 -include Driver/usart/subdir.mk
--include Driver/timer/tim/subdir.mk
 -include Driver/timer/subdir.mk
 -include Driver/systic/subdir.mk
 -include Driver/spi/subdir.mk
@@ -38,6 +37,7 @@ RM := rm -rf
 -include Driver/can/subdir.mk
 -include Driver/adc/subdir.mk
 -include Device/w5500/subdir.mk
+-include Device/sdCard/src/subdir.mk
 -include Device/nrf2401/subdir.mk
 -include Device/esp8266/subdir.mk
 -include Device/enc28j60/subdir.mk

@@ -7,10 +7,10 @@
  */
 
 #include <stdio.h>
-#include "../../StdPeriph/cmsis_boot/stm32f10x.h"
-#include "../../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
-#include "../../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
-#include "../../StdPeriph/stm_lib/inc/stm32f10x_spi.h"
+#include "../../../StdPeriph/cmsis_boot/stm32f10x.h"
+#include "../../../StdPeriph/stm_lib/inc/stm32f10x_gpio.h"
+#include "../../../StdPeriph/stm_lib/inc/stm32f10x_rcc.h"
+#include "../../../StdPeriph/stm_lib/inc/stm32f10x_spi.h"
 
 /*
  * Code is split into 3 parts:
