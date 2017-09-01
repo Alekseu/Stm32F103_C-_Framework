@@ -9,6 +9,7 @@
 #include "Driver/nvic/nvic.h"
 
 #include "Driver/usart/usart.h"
+#include "Driver/spi/spi.h"
 #include "Driver/i2c/i2c.h"
 
 #include "Driver/led/led.h"
@@ -16,9 +17,12 @@
 
 #include "Driver/tim/tim.h"
 #include "Driver/systick/systick.h"
+#include "Driver/gpio/gpio.h"
 
 using namespace Driver;
 InterruptController _ic;
+Led _led;
+bool trigger;
 
 void TimerElapsed()
 {
@@ -31,6 +35,25 @@ void SysTickCallback1()
 }
 
 void SysTickCallback2()
+{
+	int a=0;
+}
+
+void GpioInterrupt1()
+{
+	if(trigger)
+	{
+		_led.On(2);
+		trigger = false;
+	}
+	else
+	{
+		_led.Off(2);
+		trigger = true;
+	}
+}
+
+void GpioInterrupt2()
 {
 	int a=0;
 }
@@ -48,11 +71,21 @@ int main()
 	SerialPort* _port = new SerialPort(SerialPort::COM1,9600);
 	_port->Init();
 
-	Led _led;
+
 	_led.Init();
 
-	I2c* _i2c = new I2c(I2c::in_I2C1,0xc, I2c::Master,I2c::s_50kHz);
-	_i2c->Init();
+//	I2c* _i2c = new I2c(I2c::in_I2C1,0xc, I2c::Master,I2c::s_50kHz);
+//	_i2c->Init();
+//
+//	Spi* _spi = new Spi(Spi::sn_SPI1,Spi::Master,Spi::Sys_div_128);
+//	_spi->Init();
+
+	GPIO* _gpio = new GPIO(GPIO::Port::PORTC,GPIO::Pin::Pin10,GPIO::Mode::IN_FLOATING,GPIO::Speed::Speed_2MHz);
+	_gpio->Init();
+	_gpio->SetCallback(GpioInterrupt1,GPIO::InterruptType::Rising);
+
+	GPIO* _gpio1 = new GPIO(GPIO::Port::PORTE,GPIO::Pin::Pin2);
+	_gpio1->Init();
 
 	Tim _tim(Tim::Timer2,15000,Tim::InterruptType::IT_Update);
 	_tim.OnElapsed = TimerElapsed;
@@ -63,6 +96,7 @@ int main()
 	{
 		_port->SendData((uint8_t*)"Hello world\r\n",13);
 		_led.On(1);
+		_gpio1->Write(true);
 		if(_port->GetAnswer(150))
 		{
 			_port->SendData((uint8_t*)_port->Data.ToString(),_port->Data.Lendth());
@@ -74,6 +108,7 @@ int main()
 
 
 		_led.Off(1);
+		_gpio1->Write(false);
 		_delay_ms(150);
 	}
 

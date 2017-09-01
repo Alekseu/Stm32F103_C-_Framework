@@ -830,8 +830,6 @@ ITStatus SPI_I2S_GetITStatus(SPI_TypeDef* SPIx, uint8_t SPI_I2S_IT)
   uint16_t itpos = 0, itmask = 0, enablestatus = 0;
 
   /* Check the parameters */
-  assert_param(IS_SPI_ALL_PERIPH(SPIx));
-  assert_param(IS_SPI_I2S_GET_IT(SPI_I2S_IT));
 
   /* Get the SPI/I2S IT index */
   itpos = 0x01 << (SPI_I2S_IT & 0x0F);
@@ -882,8 +880,7 @@ void SPI_I2S_ClearITPendingBit(SPI_TypeDef* SPIx, uint8_t SPI_I2S_IT)
 {
   uint16_t itpos = 0;
   /* Check the parameters */
-  assert_param(IS_SPI_ALL_PERIPH(SPIx));
-  assert_param(IS_SPI_I2S_CLEAR_IT(SPI_I2S_IT));
+
 
   /* Get the SPI IT index */
   itpos = 0x01 << (SPI_I2S_IT & 0x0F);

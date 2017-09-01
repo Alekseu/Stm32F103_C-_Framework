@@ -35,6 +35,7 @@ extern "C"
 
 
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_dma.h"
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_exti.h"
 	#include "../StdPeriph/stm_lib/inc/misc.h"
 }
 
