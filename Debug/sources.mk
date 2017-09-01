@@ -40,7 +40,7 @@ Extention/shareStorage \
 Extention \
 Driver/usb \
 Driver/usart \
-Driver/timer \
+Driver/tim \
 Driver/systick \
 Driver/spi \
 Driver/sdio \

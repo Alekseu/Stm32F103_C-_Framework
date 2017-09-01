@@ -9,14 +9,16 @@
 #define DRIVER_SPI_SPI_H_
 
 #include "../platform.h"
+#include "../nvic/nvic.h"
 #include "../Interface/CommunicationObject.h"
+#include "../../Extention/delay.h"
 
 namespace Driver
 {
 
 	class Spi :public ICommunicationObject
 	{
-		SpiInit SPI_InitStruct;
+		SpiInit   SPI_InitStruct;
 		GpioInit  GPIO_InitStruct;
 
 	public:
@@ -47,7 +49,9 @@ namespace Driver
 
 
 	public:
-		static Spi* SObj;
+		static Spi* S1Obj;
+		static Spi* S2Obj;
+		static Spi* S3Obj;
 
 		Spi(SpiNum spiNum, SpiType type, SpiSpeed speed );
 
@@ -88,6 +92,10 @@ namespace Driver
 		SpiNum _spiNum;
 		SpiType _type;
 		SpiSpeed _speed;
+
+		uint8_t* _ring;
+		volatile uint8_t _head, _tail;
+		uint16_t BuferSize;
 
 	};
 

@@ -20,7 +20,7 @@ RM := rm -rf
 -include Extention/subdir.mk
 -include Driver/usb/subdir.mk
 -include Driver/usart/subdir.mk
--include Driver/timer/subdir.mk
+-include Driver/tim/subdir.mk
 -include Driver/systick/subdir.mk
 -include Driver/spi/subdir.mk
 -include Driver/sdio/subdir.mk

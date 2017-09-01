@@ -14,7 +14,7 @@
 #include "Driver/led/led.h"
 #include "Extention/sPtr.h"
 
-#include "Driver/timer/tim.h"
+#include "Driver/tim/tim.h"
 #include "Driver/systick/systick.h"
 
 using namespace Driver;
@@ -54,7 +54,7 @@ int main()
 	I2c* _i2c = new I2c(I2c::in_I2C1,0xc, I2c::Master,I2c::s_50kHz);
 	_i2c->Init();
 
-	Tim _tim(Tim::Timer2,1500,Tim::InterruptType::IT_Update);
+	Tim _tim(Tim::Timer2,15000,Tim::InterruptType::IT_Update);
 	_tim.OnElapsed = TimerElapsed;
 	_tim.Init();
 	_tim.Enable();

@@ -71,14 +71,33 @@ extern "C"
 
 #define SpiInit SPI_InitTypeDef
 
-
+// пока без указаний пинов и возможных ремапов
+//#define SPI1_RCC_Pheriph
+//#define SpiMosi1
+//#define SpiMiso1
+//#define SpiSck1
+//#define SpiSS1
+//#define Remap_Spi1 0
+//
+//#define SPI2_RCC_Pheriph
+//#define SpiMosi2
+//#define SpiMiso2
+//#define SpiSck2
+//#define SpiSS2
+//#define Remap_Spi2 0
+//
+//#define SPI3_RCC_Pheriph
+//#define SpiMosi3
+//#define SpiMiso3
+//#define SpiSck3
+//#define SpiSS3
+//#define Remap_Spi3 0
 
 /*
  *  i2c's
  */
 #define  i2c
 #define  I2cInit I2C_InitTypeDef
-#define  I2C_NUM I2C1
 #define  Remap 0
 
 

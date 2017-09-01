@@ -10,7 +10,8 @@
 
 namespace Driver
 {
-	I2c* I2c::Iobj=0;
+	I2c* I2c::I1Obj=0;
+	I2c* I2c::I2Obj=0;
 
 	I2c::I2c(I2cNum i2cNum,uint8_t addr, I2CType type, I2CSpeed speed)
 	{
@@ -27,17 +28,37 @@ namespace Driver
 
 	void I2c::Init()
 	{
-		//RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB| RCC_APB2Periph_AFIO , ENABLE);//
-		RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 
-		GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
-		/* Configure I2C1 pins: PB8->SCL and PB9->SDA */
-		GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
-		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+		switch(_i2cNum)
+		{
+		case in_I2C1:
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);//
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
+			//GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
+			GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_7 | GPIO_Pin_6;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
 
-		GPIO_Init(GPIOB, &GPIO_InitStructure);
+			GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+			InterruptController::SetHandler(I2C1_EV_IRQn,InterruptWraper);
+			InterruptController::EnableChannel(I2C1_EV_IRQn);
+
+			break;
+		case in_I2C2:
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);//
+			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C2, ENABLE);
+			//GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
+			GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_10 | GPIO_Pin_11;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+
+			GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+			InterruptController::SetHandler(I2C2_EV_IRQn,InterruptWraper);
+			InterruptController::EnableChannel(I2C2_EV_IRQn);
+			break;
+		}
 
 		I2C_DeInit((I2C_TypeDef* )_i2cNum);
 		I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
@@ -52,8 +73,6 @@ namespace Driver
 		I2C_AcknowledgeConfig((I2C_TypeDef* )_i2cNum, ENABLE);
 		I2C_ITConfig((I2C_TypeDef* )_i2cNum,I2C_IT_EVT,ENABLE);
 
-		InterruptController::SetHandler(I2C1_EV_IRQn,InterruptWraper);
-		InterruptController::EnableChannel(I2C1_EV_IRQn);
 
 	}
 
@@ -68,48 +87,48 @@ namespace Driver
 		uint8_t tmp;
 		// I2C_Cmd(I2C_EE, ENABLE);
 		/* While the bus is busy */
-		while(I2C_GetFlagStatus(I2C_NUM, I2C_FLAG_BUSY));
+		while(I2C_GetFlagStatus((I2C_TypeDef* )_i2cNum, I2C_FLAG_BUSY));
 
 		/* Send START condition */
-		I2C_GenerateSTART(I2C_NUM, ENABLE);
+		I2C_GenerateSTART((I2C_TypeDef* )_i2cNum, ENABLE);
 
 		/* Test on EV5 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_MODE_SELECT));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_MODE_SELECT));
 
 		/* Send EEPROM address for write */
-		I2C_Send7bitAddress(I2C_NUM, _badr, I2C_Direction_Transmitter);
+		I2C_Send7bitAddress((I2C_TypeDef* )_i2cNum, _badr, I2C_Direction_Transmitter);
 
 		/* Test on EV6 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
 
 
 		/* Send the EEPROM's internal address to read from: MSB of the address first */
-		I2C_SendData(I2C_NUM, (uint8_t)(addr));
+		I2C_SendData((I2C_TypeDef* )_i2cNum, (uint8_t)(addr));
 
 		/* Test on EV8 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 
 		/* Send STRAT condition a second time */
-		I2C_GenerateSTART(I2C_NUM, ENABLE);
+		I2C_GenerateSTART((I2C_TypeDef* )_i2cNum, ENABLE);
 
 		/* Test on EV5 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_MODE_SELECT));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_MODE_SELECT));
 
-		I2C_Send7bitAddress(I2C_NUM, _badr, I2C_Direction_Receiver);
+		I2C_Send7bitAddress((I2C_TypeDef* )_i2cNum, _badr, I2C_Direction_Receiver);
 
 		/* Test on EV6 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM,I2C_EVENT_MASTER_BYTE_RECEIVED));//I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum,I2C_EVENT_MASTER_BYTE_RECEIVED));//I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED));
 
-		tmp=I2C_ReceiveData(I2C_NUM);
+		tmp=I2C_ReceiveData((I2C_TypeDef* )_i2cNum);
 
 
-		I2C_AcknowledgeConfig(I2C_NUM, DISABLE);
+		I2C_AcknowledgeConfig((I2C_TypeDef* )_i2cNum, DISABLE);
 
 		/* Send STOP Condition */
-		I2C_GenerateSTOP(I2C_NUM, ENABLE);
+		I2C_GenerateSTOP((I2C_TypeDef* )_i2cNum, ENABLE);
 
 		// I2C_Cmd(I2C_EE, DISABLE);
-		//_delay_ms(2);
+		_delay_ms(2);
 					return tmp;
 	}
 
@@ -125,35 +144,35 @@ namespace Driver
 
 	void I2c::WriteByte(uint8_t byte, uint8_t addr)
 	{
-		I2C_GenerateSTART(I2C_NUM, ENABLE);
+		I2C_GenerateSTART((I2C_TypeDef* )_i2cNum, ENABLE);
 
 		/* Test on EV5 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_MODE_SELECT));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_MODE_SELECT));
 
 
 		/* Send EEPROM address for write */
-		I2C_Send7bitAddress(I2C_NUM, _badr, I2C_Direction_Transmitter);
+		I2C_Send7bitAddress((I2C_TypeDef* )_i2cNum, _badr, I2C_Direction_Transmitter);
 
 		/* Test on EV6 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) ){};
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) ){};
 
 
 		/* Send the EEPROM's internal address to write to : MSB of the address first */
-		I2C_SendData(I2C_NUM, (uint8_t)(addr ));
+		I2C_SendData((I2C_TypeDef* )_i2cNum, (uint8_t)(addr ));
 
 		/* Test on EV8 and clear it */
-		while(!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 
-		I2C_SendData(I2C_NUM, byte);
+		I2C_SendData((I2C_TypeDef* )_i2cNum, byte);
 
 		/* Test on EV8 and clear it */
-		while (!I2C_CheckEvent(I2C_NUM, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+		while (!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
 
 		/* Send STOP condition */
-		I2C_GenerateSTOP(I2C_NUM, ENABLE);
+		I2C_GenerateSTOP((I2C_TypeDef* )_i2cNum, ENABLE);
 		// I2C_Cmd(I2C_EE, DISABLE);
 		//delay between write and read...not less 4ms
-			//_delay_ms(10);
+			_delay_ms(10);
 	}
 
 	uint16_t I2c::ReadWord()
@@ -169,7 +188,10 @@ namespace Driver
 
 	void I2c::SendData(uint8_t* data, uint16_t length)
 	{
-
+		for(int i=0;i<length;i++)
+		{
+			WriteByte(data[i]);
+		}
 	}
 
 	/*
@@ -186,8 +208,8 @@ namespace Driver
 	}
 
 	const char* I2c::toString()
-	 {
-		 return "I2C";
-	 }
+	{
+		return "I2C";
+	}
 
 }

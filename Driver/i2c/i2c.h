@@ -11,6 +11,7 @@
 #include "../platform.h"
 
 #include "../Interface/CommunicationObject.h"
+#include "../../Extention/delay.h"
 
 namespace Driver
 {
@@ -41,7 +42,8 @@ namespace Driver
 		};
 
 	public:
-		static I2c* Iobj;
+		static I2c* I1Obj;
+		static I2c* I2Obj;
 
 		I2c(I2cNum i2cNum, uint8_t addr, I2CType type, I2CSpeed speed);
 		~I2c();
