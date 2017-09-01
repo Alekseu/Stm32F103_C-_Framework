@@ -99,6 +99,10 @@ extern "C"
 #define TimInit TIM_TimeBaseInitTypeDef
 
 
+#define systim
+
+#define CallbackCount 10
+
 /*
  * Ow's
  */

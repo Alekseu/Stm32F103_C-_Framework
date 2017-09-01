@@ -11,15 +11,16 @@
 
 namespace Driver
 {
+	typedef void HDriverCallback(void);
 
 	class IHDriver : public Object
 	{
 	public:
 
-		IHDriver();
-		~IHDriver();
+		HDriverCallback* OnElapsed;
 
-
+		virtual void Enable()=0;
+		virtual void Disable()=0;
 
 	};
 

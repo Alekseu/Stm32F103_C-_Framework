@@ -21,7 +21,7 @@ RM := rm -rf
 -include Driver/usb/subdir.mk
 -include Driver/usart/subdir.mk
 -include Driver/timer/subdir.mk
--include Driver/systic/subdir.mk
+-include Driver/systick/subdir.mk
 -include Driver/spi/subdir.mk
 -include Driver/sdio/subdir.mk
 -include Driver/rtc/subdir.mk

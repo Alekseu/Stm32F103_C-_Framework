@@ -10,9 +10,11 @@
 
 #include "../platform.h"
 #include "../Interface/IHDriver.h"
+#include "../nvic/nvic.h"
 
 namespace Driver
 {
+
 	class Tim : public IHDriver
 	{
 		TimInit timerInitStructure;
@@ -43,24 +45,49 @@ namespace Driver
 			Div4 = 0x0200
 		};
 
+		enum InterruptType
+		{
+			IT_Update=0x0001,
+			IT_CC1=0x0002,
+			IT_CC2=0x0004,
+			IT_CC3=0x0008,
+			IT_CC4=0x0010,
+			IT_COM=0x0020,
+			IT_Trigger=0x0040,
+			IT_Break=0x0080,
+		};
+
 
 	  public:
 		 static Tim* TObj;
 
-		 Tim(TimerNum tNum, uint16_t Period );
-		 Tim(TimerNum tNum, uint16_t Period, CounterType type );
-		 Tim(TimerNum tNum, uint16_t Period, CounterType type, ClockDivision div );
+		 Tim(TimerNum tNum, uint16_t Period, InterruptType interupt);
+		 Tim(TimerNum tNum, uint16_t Period, CounterType type,InterruptType interupt );
+		 Tim(TimerNum tNum, uint16_t Period, CounterType type, ClockDivision div,InterruptType interupt );
 
 
 		 ~Tim();
 
 		 void Init();
 
+
+		 void Enable();
+		 void Disable();
+
 		 const char* toString();
+
+		 /*
+		  * Interrupt
+		  */
+		 static void InterruptWraper(void);
 
 	  private:
 		 TimerNum _tNum;
-
+		 CounterType _type;
+		 ClockDivision _div;
+		 uint16_t _period;
+		 InterruptType _interrupt;
+		 bool _enabled;
 	};
 }
 

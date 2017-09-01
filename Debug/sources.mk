@@ -41,7 +41,7 @@ Extention \
 Driver/usb \
 Driver/usart \
 Driver/timer \
-Driver/systic \
+Driver/systick \
 Driver/spi \
 Driver/sdio \
 Driver/rtc \
