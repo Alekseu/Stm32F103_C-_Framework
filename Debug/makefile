@@ -42,6 +42,7 @@ RM := rm -rf
 -include Device/esp8266/subdir.mk
 -include Device/enc28j60/subdir.mk
 -include Device/eeprom/subdir.mk
+-include Device/SGPIO/subdir.mk
 -include Device/RF433/subdir.mk
 -include subdir.mk
 -include objects.mk

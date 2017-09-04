@@ -18,8 +18,11 @@
 #include "Driver/tim/tim.h"
 #include "Driver/systick/systick.h"
 #include "Driver/gpio/gpio.h"
+#include "Device/SGPIO/SGPIO.h"
 
 using namespace Driver;
+using namespace Device;
+
 InterruptController _ic;
 Led _led;
 bool trigger;
@@ -58,6 +61,11 @@ void GpioInterrupt2()
 	int a=0;
 }
 
+void InputsInterrupt()
+{
+
+}
+
 int main()
 {
 	_ic.RemapToRam();
@@ -87,9 +95,16 @@ int main()
 	GPIO* _gpio1 = new GPIO(GPIO::Port::PORTE,GPIO::Pin::Pin2);
 	_gpio1->Init();
 
-	Tim _tim(Tim::Timer2,15000,Tim::InterruptType::IT_Update);
-	_tim.OnElapsed = TimerElapsed;
+	Tim _tim(Tim::Timer2,45000,Tim::InterruptType::IT_Update);
+	//_tim.OnElapsed = TimerElapsed;
 	_tim.Init();
+	//_tim.Enable();
+
+	SGPIO * _gpio2 = new SGPIO();
+	_gpio2->Init();
+	_gpio2->SetOutput(SGPIO::pin1, true);
+	_gpio2->SetTimer(&_tim);
+	_gpio2->SetCallback(InputsInterrupt);
 	_tim.Enable();
 
 	while(1)

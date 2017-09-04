@@ -62,5 +62,6 @@ Device/nrf2401 \
 Device/esp8266 \
 Device/enc28j60 \
 Device/eeprom \
+Device/SGPIO \
 Device/RF433 \
 

@@ -13,6 +13,18 @@
  *  так-же определяются определенные настройки для устройств (если нужно)
  */
 
+#define sgpio
+
+#define CLK		GPIO_Pin_13
+#define RD		GPIO_Pin_12
+#define DI	    GPIO_Pin_11
+#define INP_PORT GPIOE
+
+#define CLK1    GPIO_Pin_2
+#define DO		GPIO_Pin_0
+#define WR		GPIO_Pin_1
+#define OUT_PORT    GPIOC
+
 
 
 #endif /* DEVICE_DEVICECONFIG_H_ */
