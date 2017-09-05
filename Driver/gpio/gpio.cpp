@@ -24,6 +24,7 @@ namespace Driver
 		_type = InterruptType::Rising;
 		_portSource=0;
 		_pinSource=0;
+		_interruptNumber=0;
 	}
 
 	GPIO::GPIO(Port port, Pin pin, Mode mode, Speed speed)
@@ -36,6 +37,7 @@ namespace Driver
 		_type = InterruptType::Rising;
 		_portSource=0;
 		_pinSource=0;
+		_interruptNumber=0;
 	}
 
 	GPIO::~GPIO()
@@ -172,30 +174,30 @@ namespace Driver
 		EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 		EXTI_Init(&EXTI_InitStructure);
 
-		uint16_t InterruptNumber;
+		//uint16_t InterruptNumber;
 		switch(_pin)
 		{
 			case Pin0:
-				InterruptNumber = EXTI0_IRQn;
+				_interruptNumber = EXTI0_IRQn;
 				break;
 			case Pin1:
-				InterruptNumber = EXTI1_IRQn;
+				_interruptNumber = EXTI1_IRQn;
 				break;
 			case Pin2:
-				InterruptNumber = EXTI2_IRQn;
+				_interruptNumber = EXTI2_IRQn;
 				break;
 			case Pin3:
-				InterruptNumber = EXTI3_IRQn;
+				_interruptNumber = EXTI3_IRQn;
 				break;
 			case Pin4:
-				InterruptNumber = EXTI4_IRQn;
+				_interruptNumber = EXTI4_IRQn;
 				break;
 			case Pin5:
 			case Pin6:
 			case Pin7:
 			case Pin8:
 			case Pin9:
-				InterruptNumber = EXTI9_5_IRQn;
+				_interruptNumber = EXTI9_5_IRQn;
 				break;
 			case Pin10:
 			case Pin11:
@@ -203,12 +205,23 @@ namespace Driver
 			case Pin13:
 			case Pin14:
 			case Pin15:
-				InterruptNumber = EXTI15_10_IRQn;
+				_interruptNumber = EXTI15_10_IRQn;
 				break;
 		}
 
-		InterruptController::SetHandler((IRQn_Type)InterruptNumber,InterruptWraper);
-		InterruptController::EnableChannel((IRQn_Type)InterruptNumber);
+
+	}
+
+	void GPIO::EnableIrq()
+	{
+		InterruptController::SetHandler((IRQn_Type)_interruptNumber,InterruptWraper);
+				InterruptController::EnableChannel((IRQn_Type)_interruptNumber);
+	}
+
+	void GPIO::DisableIrq()
+	{
+		InterruptController::SetHandler((IRQn_Type)_interruptNumber,InterruptWraper);
+				InterruptController::DisableChannel((IRQn_Type)_interruptNumber);
 	}
 
 	void GPIO::InterruptWraper(void)

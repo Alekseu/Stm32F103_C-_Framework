@@ -87,6 +87,9 @@ namespace Driver
 
 		void Init();
 
+		void EnableIrq();
+		void DisableIrq();
+
 		void Write(bool state);
 		bool Read();
 
@@ -105,6 +108,7 @@ namespace Driver
 		uint8_t _pinSource;
 
 		GpioPinCallback* _callback;
+		uint16_t _interruptNumber;
 
 	};
 }
