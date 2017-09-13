@@ -373,9 +373,9 @@ namespace Driver
 		/* Enable the USB clock */
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
 
-		//usb interrupts
+//		//usb interrupts
 		//InterruptController::PriorityGroupConfig(NVIC_PriorityGroup_1);
-		//InterruptController::SetHandler(USB_LP_CAN1_RX0_IRQn,USB_LP_CAN1_RX0_IRQHandler);
+		InterruptController::SetHandler(USB_LP_CAN1_RX0_IRQn,USB_LP_CAN1_RX0_IRQHandler);
 
 		NVIC_InitTypeDef NVIC_InitStructure;
 
@@ -752,6 +752,7 @@ namespace Driver
 	 }
 
 	 uint8_t Usb::ReadByte(){return 0;}
+	 uint8_t Usb::ReadByte(uint8_t addr){return 0;}
 	 bool Usb::ReadByte(uint8_t* value, uint16_t timeOut){return false;}
 
 	 void Usb::WriteByte(uint8_t byte){
@@ -765,6 +766,10 @@ namespace Driver
 			 SetEPTxValid(ENDP1);
 			 TxBytes=0;
 		 }
+
+	 }
+	 void Usb::WriteByte(uint8_t byte, uint8_t addr)
+	 {
 
 	 }
 

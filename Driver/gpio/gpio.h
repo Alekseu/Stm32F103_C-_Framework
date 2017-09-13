@@ -23,44 +23,44 @@ namespace Driver
 		static GPIO* GObjs[15*5];
 		enum Pin
 		{
-			Pin0=0x0001,
-			Pin1=0x0002,
-			Pin2=0x0004,
-			Pin3=0x0008,
-			Pin4=0x0010,
-			Pin5=0x0020,
-			Pin6=0x0040,
-			Pin7=0x0080,
-			Pin8=0x0100,
-			Pin9=0x0200,
-			Pin10=0x0400,
-			Pin11=0x0800,
-			Pin12=0x1000,
-			Pin13=0x2000,
-			Pin14=0x4000,
-			Pin15=0x8000,
-			PinAll =0xFFFF
+			Pin0,
+			Pin1,
+			Pin2,
+			Pin3,
+			Pin4,
+			Pin5,
+			Pin6,
+			Pin7,
+			Pin8,
+			Pin9,
+			Pin10,
+			Pin11,
+			Pin12,
+			Pin13,
+			Pin14,
+			Pin15,
+			PinAll
 		};
 
 		enum Port
 		{
-			PORTA = GPIOA_BASE,
-			PORTB = GPIOB_BASE,
-			PORTC = GPIOC_BASE,
-			PORTD = GPIOD_BASE,
-			PORTE = GPIOE_BASE
+			PORTA ,
+			PORTB,
+			PORTC,
+			PORTD ,
+			PORTE
 		};
 
 		enum Mode
 		{
-			AIN = 0x0,
-			IN_FLOATING = 0x04,
-			IPD = 0x28,
-			IPU = 0x48,
-			Out_OD = 0x14,
-			Out_PP = 0x10,
-			AF_OD = 0x1C,
-			AF_PP = 0x18
+			AIN,
+			IN_FLOATING ,
+			IPD,
+			IPU,
+			Out_OD ,
+			Out_PP ,
+			AF_OD ,
+			AF_PP
 		};
 
 		enum Speed
@@ -72,9 +72,9 @@ namespace Driver
 
 		enum InterruptType
 		{
-			Rising = 0x08,
-			Falling = 0x0C,
-			Rising_Falling = 0x10
+			Rising,
+			Falling ,
+			Rising_Falling
 		};
 
 	public:
@@ -109,6 +109,10 @@ namespace Driver
 
 		GpioPinCallback* _callback;
 		uint16_t _interruptNumber;
+
+		GPIO_TypeDef * __port;
+		uint16_t GPIO_Pin;
+		uint32_t EXTI_Line;
 
 	};
 }

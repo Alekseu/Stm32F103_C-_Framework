@@ -32,6 +32,8 @@ namespace Device
 		void StartReceive();
 		void StopReceive();
 
+		char* getString();
+
 		void SetCallback(RF433Callback* callback);
 
 		virtual void Received(uint16_t inp);
@@ -47,7 +49,10 @@ namespace Device
 		GPIO* _gpio;
 		bool _oldState;
 		uint8_t _bitCount;
+		uint8_t _interruptCount;
 		uint16_t _input;
+		char _tail;
+		char _buff[5];
 
 	};
 }

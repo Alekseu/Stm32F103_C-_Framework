@@ -20,6 +20,7 @@
 #include "Driver/gpio/gpio.h"
 #include "Device/SGPIO/SGPIO.h"
 #include "Device/RF433/RF433.h"
+#include "Driver/usb/usb.h"
 
 using namespace Driver;
 using namespace Device;
@@ -72,11 +73,19 @@ int main()
 {
 	_ic.RemapToRam();
 
+
 	SystemTimer _systim(1000);
 	_systim.Init();
 	_systim.AddCallback(SysTickCallback1);
 	_systim.AddCallback(SysTickCallback2);
 	_systim.Enable();
+
+	Usb* _usb = new Usb();
+	_usb->RxBufferSize = 64;
+	_usb->TxBufferSize = 64;
+	_usb->TypeUsb = VirtualComPort;
+
+	_usb->Init();
 
 	SerialPort* _port = new SerialPort(SerialPort::COM1,9600);
 	_port->Init();
@@ -116,6 +125,7 @@ int main()
 	while(1)
 	{
 		_port->SendData((uint8_t*)"Hello world\r\n",13);
+		_usb->SendData((uint8_t*)_rf->getString(),5);
 		_led.On(1);
 		//_gpio1->Write(true);
 		if(_port->GetAnswer(150))

@@ -21,6 +21,8 @@ namespace Device
 		_gpio =0;
 		_bitCount = 11;
 		_input=0;
+		_interruptCount=0;
+		_tail=0;
 	}
 
 	RF433::~RF433()
@@ -31,12 +33,13 @@ namespace Device
 	void RF433::Init()
 	{
 		RF433::RFObj = this;
-		_timer = new Tim(Tim::Timer2,2400,Tim::InterruptType::IT_Update);
+		_timer = new Tim(Tim::Timer2,250,Tim::InterruptType::IT_Update);
 		_timer->OnElapsed = InterruptTimerWraper;
 
-		_gpio = new GPIO(GPIO::Port::PORTC,GPIO::Pin::Pin10,GPIO::Mode::IN_FLOATING,GPIO::Speed::Speed_2MHz);
-		_gpio->SetCallback(InterruptGpioWraper,GPIO::InterruptType::Rising_Falling);
+		_gpio = new GPIO(GPIO::Port::PORTA,GPIO::Pin::Pin0,GPIO::Mode::IN_FLOATING,GPIO::Speed::Speed_50MHz);
 		_gpio->Init();
+		_gpio->SetCallback(InterruptGpioWraper,GPIO::InterruptType::Rising_Falling);
+
 		//_gpio->EnableIrq();
 		//_oldState = if(GPIO_ReadInputDataBit((GPIO_TypeDef*)_port, _pin))
 	}
@@ -58,12 +61,18 @@ namespace Device
 
 	void RF433::Received(uint16_t inp)
 	{
+		_buff[_tail++] = inp>>8&0xFF;
+		if(_tail>=5)_tail=0;
+	}
 
+	char*  RF433::getString()
+	{
+		return _buff;
 	}
 
 	void RF433::InterruptTimerWraper()
 	{
-		if(RF433::RFObj==0) return;
+		//if(RF433::RFObj==0) return;
 
 		if(RF433::RFObj->_bitCount==0)
 		{
@@ -72,20 +81,45 @@ namespace Device
 			RF433::RFObj->_gpio->EnableIrq();
 		}
 
+//		if(RF433::RFObj->_interruptCount++==44)
+//		{
+//			//RF433::RFObj-> Received(0);
+//			RF433::RFObj->_timer->Disable();
+//			RF433::RFObj->_gpio->EnableIrq();
+//			RF433::RFObj->_interruptCount=0;
+//		}
+
 		bool _newState = RF433::RFObj->_gpio->Read();
 
-		if(_newState && !RF433::RFObj->_oldState)
-		{
-			RF433::RFObj->_input&=~(1<<RF433::RFObj->_bitCount-1);
-		}
+//		if(_newState != RF433::RFObj->_oldState)
+//		{
+			if(_newState)
+			{
+				RF433::RFObj->_input|=(1<<RF433::RFObj->_bitCount-1);
+				RF433::RFObj->_bitCount--;
+			}
+			else
+			{
+				RF433::RFObj->_input&=~(1<<RF433::RFObj->_bitCount-1);
+				RF433::RFObj->_bitCount--;
+			}
+//	}
 
-		if(!_newState && RF433::RFObj->_oldState)
-		{
-			RF433::RFObj->_input|=(1<<RF433::RFObj->_bitCount-1);
-		}
+//			if(_newState && !RF433::RFObj->_oldState)
+//			{
+//				RF433::RFObj->_input&=~(1<<RF433::RFObj->_bitCount-1);
+//				RF433::RFObj->_bitCount--;
+//			}
+//
+//			if(!_newState && RF433::RFObj->_oldState)
+//			{
+//				RF433::RFObj->_input|=(1<<RF433::RFObj->_bitCount-1);
+//				RF433::RFObj->_bitCount--;
+//			}
+
 
 		RF433::RFObj->_oldState = _newState;
-		RF433::RFObj->_bitCount--;
+		//RF433::RFObj->_bitCount--;
 
 	}
 
@@ -97,7 +131,7 @@ namespace Device
 		RF433::RFObj->_timer->Init();
 		RF433::RFObj->_timer->Enable();
 		RF433::RFObj->_input=0;
-		RF433::RFObj->_bitCount=11;
+		RF433::RFObj->_bitCount=22;
 	}
 
 	const char* RF433::toString()

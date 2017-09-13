@@ -27,7 +27,7 @@ namespace Driver
 	void Led::Init()
 	{
 		RCC_APB2PeriphClockCmd(LedRCC,ENABLE);
-		GPIO_InitStructure.GPIO_Pin =  LedPin1| LedPin2;
+		GPIO_InitStructure.GPIO_Pin =  LedPin1;//| LedPin2;
 		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 		GPIO_Init(LedPort, &GPIO_InitStructure);
@@ -41,7 +41,7 @@ namespace Driver
 			LedPort->BSRR = LedPin1;
 			break;
 		case 2:
-			LedPort->BSRR = LedPin2;
+			//LedPort->BSRR = LedPin2;
 			break;
 
 		}
@@ -55,7 +55,7 @@ namespace Driver
 			LedPort->BRR = LedPin1;
 			break;
 		case 2:
-			LedPort->BRR = LedPin2;
+			//LedPort->BRR = LedPin2;
 			break;
 
 		}

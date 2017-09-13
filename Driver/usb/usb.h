@@ -135,7 +135,9 @@ namespace Driver
 
 		 uint8_t ReadByte() ;
 		 bool ReadByte(uint8_t* value, uint16_t timeOut);
+		 uint8_t ReadByte(uint8_t addr);
 		 void WriteByte(uint8_t byte);
+		 void WriteByte(uint8_t byte, uint8_t addr);
 
 		 uint16_t ReadWord();
 		 void WriteWord(uint16_t word);
