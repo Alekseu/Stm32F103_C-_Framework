@@ -84,7 +84,7 @@ namespace Driver
 
 		 //init screen update timer
 
-		timerInitStructure.TIM_Period = _period;
+		timerInitStructure.TIM_Period = _period*2;
 		timerInitStructure.TIM_Prescaler = 32-1;
 		timerInitStructure.TIM_ClockDivision = (uint16_t)_div;
 		timerInitStructure.TIM_CounterMode = (uint16_t)_type;

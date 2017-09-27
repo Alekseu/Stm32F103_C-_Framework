@@ -36,7 +36,7 @@ namespace Device
 
 		void SetCallback(RF433Callback* callback);
 
-		virtual void Received(uint16_t inp);
+		virtual void Received(uint32_t inp);
 
 		static void InterruptTimerWraper();
 		static void InterruptGpioWraper();
@@ -47,12 +47,15 @@ namespace Device
 		RF433Callback* _callback;
 		Tim* _timer;
 		GPIO* _gpio;
+		GPIO* _gpio1;
 		bool _oldState;
 		uint8_t _bitCount;
 		uint8_t _interruptCount;
-		uint16_t _input;
+		uint32_t _input;
 		char _tail;
 		char _buff[5];
+
+
 
 	};
 }
