@@ -39,6 +39,7 @@ bool trigger;
 #define RES GPIO_Pin_4
 #define PORT GPIOA
 
+
  unsigned char width = 84;
  unsigned char height = 48;
 
@@ -561,6 +562,8 @@ unsigned char lcd_tx(unsigned char tx,unsigned char dc)
         	  GPIO_ResetBits(GPIOA,SCK);
          if ((tx&0x80)==0x00) GPIO_ResetBits(GPIOA,MOSI); else GPIO_SetBits(GPIOA,MOSI);
 
+
+
         // asm("nop");
          GPIO_SetBits(GPIOA,SCK);
 		//	asm("nop");
@@ -619,16 +622,6 @@ unsigned char lcd_clear()  //очистить экран
  return 0;
 }
 
-unsigned char lcd_clear_s()  //очистить экран
-{
-  for(int i=0;i<(84*48/8);i++)
-  {
-	  _buffer[i]=0;
-  }
-
- return 0;
-}
-
 void lcd_putchar(char f)
 {
 
@@ -644,7 +637,7 @@ void lcd_putchar(char f)
    for(char i=0;i<5;i++)
     {
 		 char charater = (char)(Font[f][i]);
-		 	 lcd_tx(charater,1);
+     lcd_tx(charater,1);
     }
    lcd_tx(0x00,1);
 
@@ -663,6 +656,30 @@ void lcd_putbyte(char byte)
 {
 	lcd_tx(byte,1);
 }
+
+int field_length = 6;
+const char* mass[]=
+{
+		"field 1234567890",
+		"field 1234567890",
+		"field 1234567890",
+		"field 1234567890",
+		"field 1234567890",
+		"field 1234567890"
+};
+
+
+
+unsigned char lcd_clear_s()  //очистить экран
+{
+  for(int i=0;i<(84*48/8);i++)
+  {
+	  _buffer[i]=0;
+  }
+
+ return 0;
+}
+
 
 void lcd_invalidate()
 {
@@ -881,6 +898,24 @@ int main()
 			_delay_ms(2000);
 
 
+			GPIO_InitTypeDef GPIO_InitStructure;
+
+			// Configure pin in output push/pull mode
+			GPIO_InitStructure.GPIO_Pin = SCK|MOSI|D_C|CS|RES;
+			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+			GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+
+			GPIO_ResetBits(GPIOA, RES);
+			_delay_ms(10);
+			GPIO_SetBits(GPIOA, RES);
+
+			GPIO_ResetBits(GPIOA, CS);
+
+			lcd_init();
+			lcd_clear();
+
 	//_ic.RemapToRam();
 //
 //
@@ -944,10 +979,8 @@ int main()
 //
 //		_st.Init();
 
-		//disp1color_DrawString(&buffer[0],0,0,1,(uint8_t*)"Hello",1);
 
 
-		//lcd_menu();
 
 		int _size =1;
 
@@ -955,10 +988,14 @@ int main()
 	{
 
 
-//		disp1color_DrawString(&buffer[0],0,0,1,(uint8_t*)"Hello",1);
-//
-//		disp1color_DrawString(&buffer[0],0,17,0,(uint8_t*)"world",1);
-//
+		char _counter[5];
+		_counter[0] = counter/1000+0x30;
+		_counter[1] = counter/100%10+0x30;
+		_counter[2] = (counter/10)%10+0x30;
+		_counter[3] = counter%10+0x30;
+		_counter[4] = 0;
+
+
 		char _counter[5];
 		_counter[0] = counter/1000%10+0x30;
 		_counter[1] = counter/100%10+0x30;
@@ -972,27 +1009,22 @@ int main()
 
 		if(counter>=1500)
 		{
+
 			counter=0;
 			_size++;
 			if(_size>=5)_size=1;
-
 		}
 
-//
-//		disp1color_DrawString(&buffer[0],0,25,0,(uint8_t*)_counter,1);
-//
-//		disp1color_DrawString(&buffer[0],0,33,1,(uint8_t*)"           ",1);
-//		disp1color_DrawString(&buffer[0],0,33,1,(uint8_t*)_counter,1);
-//
-//		lcd_gotoxy(0,0);
-//		for(int i=0;i<504;i++)
-//		{
-//			lcd_tx(buffer[i],1);
-//		}
 		counter++;
 		//_st.OneStep(t);
 		//lcd_tx(counter++,1);
 		//lcd_putchar(counter++);
+
+
+		//_st.OneStep(t);
+		//lcd_tx(counter++,1);
+		//lcd_putchar(counter++);
+
 
 //		_st.MultiStep(200,t);
 //

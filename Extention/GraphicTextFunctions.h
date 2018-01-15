@@ -134,7 +134,6 @@ uint8_t disp1color_DrawChar(uint8_t* buff, int16_t X, int16_t Y, uint8_t FontID,
     for (uint8_t row = 0; row < CharHeight; row++)
     {
       for (uint8_t col = 0; col < CharWidth; col++)
-
         disp1color_DrawPixel(buff,X + col, Y + row, pCharTable[row] & (1 << (7 - col)),color);
 
     }
