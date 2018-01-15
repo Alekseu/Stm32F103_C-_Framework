@@ -22,6 +22,7 @@
 #include "Device/RF433/RF433.h"
 #include "Driver/usb/usb.h"
 
+#include "Extention/GraphicTextFunctions.h"
 
 using namespace Driver;
 using namespace Device;
@@ -38,6 +39,9 @@ bool trigger;
 #define RES GPIO_Pin_4
 #define PORT GPIOA
 
+unsigned char width = 84;
+unsigned char height = 48;
+uint8_t buffer[504];
 
 //
 //void SysTickCallback1()
@@ -759,10 +763,35 @@ int main()
 //
 //		_st.Init();
 
-		lcd_menu();
+		disp1color_DrawString(&buffer[0],0,0,1,(uint8_t*)"Hello",1);
+
+
+		//lcd_menu();
 
 	while(1)
 	{
+		disp1color_DrawString(&buffer[0],0,0,1,(uint8_t*)"Hello",1);
+
+		disp1color_DrawString(&buffer[0],0,17,0,(uint8_t*)"world",1);
+
+		char _counter[5];
+		_counter[0] = counter/1000+0x30;
+		_counter[1] = counter/100%10+0x30;
+		_counter[2] = (counter/10)%10+0x30;
+		_counter[3] = counter%10+0x30;
+		_counter[4] = 0;
+
+		disp1color_DrawString(&buffer[0],0,25,0,(uint8_t*)_counter,1);
+
+		disp1color_DrawString(&buffer[0],0,33,1,(uint8_t*)"           ",1);
+		disp1color_DrawString(&buffer[0],0,33,1,(uint8_t*)_counter,1);
+
+		lcd_gotoxy(0,0);
+		for(int i=0;i<504;i++)
+		{
+			lcd_tx(buffer[i],1);
+		}
+		counter++;
 		//_st.OneStep(t);
 		//lcd_tx(counter++,1);
 		//lcd_putchar(counter++);

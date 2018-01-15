@@ -32,7 +32,7 @@ _write(int fd, char* ptr, int len)
 #elif defined(INCLUDE_TRACE_SEMIHOSTING_DEBUG)
       return _write_trace_semihosting_debug(ptr, len);
 #else
-#warning "no trace implementation"
+//#warning "no trace implementation"
 #endif
 
 #endif // DEBUG

@@ -8,6 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include fonts/subdir.mk
 -include StdPeriph/usb/src/subdir.mk
 -include StdPeriph/stm_lib/src/subdir.mk
 -include StdPeriph/newlib/subdir.mk
