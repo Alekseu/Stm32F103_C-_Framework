@@ -106,9 +106,9 @@ extern "C"
  * usb
  */
 #define usb
-#define RCC_APB2Periph_GPIO_DISCONNECT RCC_APB2Periph_GPIOA
-#define USB_DISCONNECT_PIN	GPIO_Pin_7
-#define USB_DISCONNECT  GPIOA
+#define RCC_APB2Periph_GPIO_DISCONNECT RCC_APB2Periph_GPIOC
+#define USB_DISCONNECT_PIN	GPIO_Pin_9
+#define USB_DISCONNECT  GPIOC
 
 
 /*
