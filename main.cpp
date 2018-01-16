@@ -24,6 +24,8 @@
 
 #include "Extention/GraphicTextFunctions.h"
 
+#include "ow.h"
+
 using namespace Driver;
 using namespace Device;
 
@@ -876,45 +878,27 @@ int main()
 			lcd_init();
 			lcd_clear();
 
+//
+//			lcd_clear_s();
+//			lcd_str_s(0,0,1,"Test");
+//			lcd_invalidate();
+//			_delay_ms(2000);
+//			lcd_str_s(0,8,2,"Test");
+//			lcd_invalidate();
+//			_delay_ms(2000);
+//			lcd_str_s(0,25,3,"Test");
+//			lcd_invalidate();
+//			_delay_ms(2000);
+//
+//			lcd_clear_s();
+//			lcd_str_s(0,0,4,"Test");
+//			lcd_invalidate();
+//			_delay_ms(2000);
+//			lcd_clear_s();
+//			lcd_str_s(0,0,5,"Test");
+//			lcd_invalidate();
+//			_delay_ms(2000);
 
-			lcd_clear_s();
-			lcd_str_s(0,0,1,"Test");
-			lcd_invalidate();
-			_delay_ms(2000);
-			lcd_str_s(0,8,2,"Test");
-			lcd_invalidate();
-			_delay_ms(2000);
-			lcd_str_s(0,25,3,"Test");
-			lcd_invalidate();
-			_delay_ms(2000);
-
-			lcd_clear_s();
-			lcd_str_s(0,0,4,"Test");
-			lcd_invalidate();
-			_delay_ms(2000);
-			lcd_clear_s();
-			lcd_str_s(0,0,5,"Test");
-			lcd_invalidate();
-			_delay_ms(2000);
-
-
-			GPIO_InitTypeDef GPIO_InitStructure;
-
-			// Configure pin in output push/pull mode
-			GPIO_InitStructure.GPIO_Pin = SCK|MOSI|D_C|CS|RES;
-			GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-			GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-			GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-
-			GPIO_ResetBits(GPIOA, RES);
-			_delay_ms(10);
-			GPIO_SetBits(GPIOA, RES);
-
-			GPIO_ResetBits(GPIOA, CS);
-
-			lcd_init();
-			lcd_clear();
 
 	//_ic.RemapToRam();
 //
@@ -982,38 +966,35 @@ int main()
 
 
 
-		int _size =1;
+		int _size =2;
+
+		char buf[64];
+
+		Init();
+		//therm_read_temperature(buf);
 
 	while(1)
 	{
-
-
-		char _counter[5];
-		_counter[0] = counter/1000+0x30;
-		_counter[1] = counter/100%10+0x30;
-		_counter[2] = (counter/10)%10+0x30;
-		_counter[3] = counter%10+0x30;
-		_counter[4] = 0;
-
-
-		char _counter[5];
-		_counter[0] = counter/1000%10+0x30;
-		_counter[1] = counter/100%10+0x30;
-		_counter[2] = (counter/10)%10+0x30;
-		_counter[3] = counter%10+0x30;
-		_counter[4] = 0;
+		//float temp = readTemp();
+		therm_read_temperature(buf);
+//		char _counter[5];
+//		_counter[0] = counter/1000%10+0x30;
+//		_counter[1] = counter/100%10+0x30;
+//		_counter[2] = (counter/10)%10+0x30;
+//		_counter[3] = counter%10+0x30;
+//		_counter[4] = 0;
 
 		lcd_clear_s();
-		lcd_str_s(0,5,_size,_counter);
+		lcd_str_s(0,8,_size,buf);
 		lcd_invalidate();
 
-		if(counter>=1500)
-		{
-
-			counter=0;
-			_size++;
-			if(_size>=5)_size=1;
-		}
+//		if(counter>=1500)
+//		{
+//
+//			counter=0;
+//			_size++;
+//			if(_size>=5)_size=1;
+//		}
 
 		counter++;
 		//_st.OneStep(t);
@@ -1116,7 +1097,7 @@ int main()
 //
 //		_led.Off(1);
 //		//_gpio1->Write(false);
-		_delay_ms(15);
+		_delay_ms(300);
 	}
 
 	return 0;
