@@ -103,7 +103,7 @@ uint8_t therm_read_bit(void){
     // читаем состо€ние
     bit=READINPUT();
     // ждем 45 мкс и возвращаем значение
-    _delay_us(45);
+    _delay_us(60);
     return bit;
 }
 
@@ -165,7 +165,7 @@ void therm_read_temperature(char *buffer){
     therm_write_byte(THERM_CMD_SKIPROM);
     therm_write_byte(THERM_CMD_CONVERTTEMP);
 
-   // while(!therm_read_bit());
+    //while(!therm_read_bit());
     _delay_us(750);
 
 
@@ -179,7 +179,7 @@ void therm_read_temperature(char *buffer){
     therm_reset();
 
 
-    uint16_t _temperature = temperature[0] | ( temperature[1] << 8);
+    uint16_t _temperature = (temperature[1]<<8) |  temperature[0] ;
 
 //    uint16_t temp =0;
 //    uint16_t temp_int=0;
