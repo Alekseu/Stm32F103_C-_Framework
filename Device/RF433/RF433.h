@@ -17,6 +17,14 @@ using namespace Driver;
 namespace Device
 {
 
+	/*
+	 * RF example
+	 * RF433* _rf = new RF433();
+	 * _rf->Init();
+	 * _rf->StartReceive();
+	 *
+	 */
+
 	typedef void RF433Callback(void);
 
 	class RF433

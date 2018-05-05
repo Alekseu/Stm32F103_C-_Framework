@@ -13,10 +13,28 @@
 
 namespace Protocol
 {
-using namespace Driver;
+
+	/*
+	 * CommandProcessor example
+	 *
+	 *  В конструктор можно передать ссылку на любой обьект типа ICommunicationObject (usb,serialport,spi,i2c ...)
+	 *
+	 *
+	 *  CommandProcessor _comProc((ICommunicationObject*)&_rs485);
+	 *  _comProc.OnCommand =OnProcessCommand;
+	 *   _comProc.Init();
+	 *   _comProc.SendCommand(0x10,0,0);
+	 *
+	 *	void OnProcessCommand(uint8_t com, uint8_t* data, uint16_t length)
+	 *	{
+	 *		обработка комманды
+	 *	}
+	 *
+	 */
 
 
-typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
+	using namespace Driver;
+	typedef void CommandProcessing(uint8_t, uint8_t*, uint16_t);
 
 	class CommandProcessor : public Object
 	{

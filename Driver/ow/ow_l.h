@@ -5,8 +5,8 @@
  *      Author: hudienko_a
  */
 
-#ifndef OW_H_
-#define OW_H_
+#ifndef OW_L_H_
+#define OW_L_H_
 
 #include "Driver/platform.h"
 #include "Extention/delay.h"
@@ -237,4 +237,4 @@ void therm_read_temperature(char *buffer){
 
 
 
-#endif /* OW_H_ */
+#endif /* OW_L_H_ */

@@ -65,4 +65,5 @@ Device/enc28j60 \
 Device/eeprom \
 Device/SGPIO \
 Device/RF433 \
+Device/Lcd \
 

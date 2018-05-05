@@ -26,5 +26,16 @@
 #define OUT_PORT    GPIOC
 
 
+/*
+ * Lcd N3310
+ */
+#define WIDTH 84
+#define HEIGHT 48
+
+/*
+ * Stepper config
+ */
+#define StepsStart 150
+
 
 #endif /* DEVICE_DEVICECONFIG_H_ */

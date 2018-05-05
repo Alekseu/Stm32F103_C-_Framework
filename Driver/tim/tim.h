@@ -15,6 +15,21 @@
 namespace Driver
 {
 
+	/*
+	 * Timer example
+	 *
+	 * Tim _tim(Tim::Timer2,1500,Tim::InterruptType::IT_Update);
+	 * _tim.OnElapsed = TimerElapsed;
+	 * _tim.Init();
+	 * _tim.Enable();
+	 *
+	 * void TimerElapsed()
+	 * {
+	 * 	do thomething
+	 * }
+	 *
+	 */
+
 	class Tim : public IHDriver
 	{
 		TimInit timerInitStructure;

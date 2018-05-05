@@ -15,6 +15,28 @@
 namespace Driver
 {
 
+	/*
+	 * System timer example
+	 *
+	 * SystemTimer _systim(1000);
+	 * _systim.Init();
+	 * _systim.AddCallback(SysTickCallback1);
+	 * _systim.AddCallback(SysTickCallback2);
+	 * _systim.Enable();
+	 *
+	 * void SysTickCallback1()
+	 * {
+	 *   do thomething
+	 * }
+	 *
+	 * void SysTickCallback2()
+	 * {
+	 * 	do thomething
+	 * }
+	 *
+	 */
+
+
 	typedef void SystemTimerCallback(void);
 
 	class SystemTimer

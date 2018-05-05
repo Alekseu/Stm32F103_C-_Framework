@@ -12,8 +12,15 @@
 
 namespace Protocol
 {
-	using namespace Driver;
+	/*
+	 * Rs485 example
+	 *
+	 *  Rs485 _rs485(_USART0,9600);
+	 *  _rs485.Init();
+	 *
+	 */
 
+	using namespace Driver;
 
 	class Rs485 : SerialPort
 	{

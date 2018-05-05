@@ -13,6 +13,16 @@
 namespace Driver
 {
 
+	/*
+	 * InterruptController example
+	 *
+	 * InterruptController _ic;
+	 * _ic.RemapToRam();
+	 * InterruptController::PriorityGroupConfig(NVIC_PriorityGroup_1);
+	 * InterruptController::SetHandler(IRQ ,Handler);
+	 *
+	 */
+
 	#define AIRCR_VECTKEY_MASK		((uint32_t)0x05FA0000)
 	#define AIRCR_SYSRESETREQ		((uint32_t)0x00000004)
 

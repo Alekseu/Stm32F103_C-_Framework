@@ -16,6 +16,13 @@
 namespace Driver
 {
 
+	/*
+	 * I2c example
+	 *
+	 * 	I2c* _i2c = new I2c(I2c::in_I2C1,0xc, I2c::Master,I2c::s_50kHz);
+	 * 	_i2c->Init();
+	 *
+	 */
 	class I2c :public ICommunicationObject
 	{
 		I2cInit  I2C_InitStructure;

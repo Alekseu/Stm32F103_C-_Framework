@@ -16,6 +16,13 @@
 namespace Driver
 {
 
+/*
+ * Spi example
+ * Spi* _spi = new Spi(Spi::sn_SPI1,Spi::Master,Spi::Sys_div_128);
+ * _spi->Init();
+ */
+
+
 	class Spi :public ICommunicationObject
 	{
 		SpiInit   SPI_InitStruct;

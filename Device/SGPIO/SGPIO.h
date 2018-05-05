@@ -20,6 +20,31 @@ using namespace Driver;
 namespace Device
 {
 
+	/*
+	 * SGPIO example
+	 *
+	 * Without timer
+	 * SGPIO * _gpio2 = new SGPIO();
+	 * _gpio2->Init();
+	 * _gpio2->SetOutput(SGPIO::pin1, true);
+	 * _gpio2->SetCallback(InputsInterrupt);
+	 * _gpio2->Invalidate(); /read inputs and write outputs
+	 *
+	 *
+	 *
+	 * With timer
+	 * Tim _tim(Tim::Timer2,1500,Tim::InterruptType::IT_Update);
+	 * _tim.OnElapsed = TimerElapsed;
+	 * _tim.Init();
+	 *
+	 * SGPIO * _gpio2 = new SGPIO();
+	 * _gpio2->Init();
+	 * _gpio2->SetOutput(SGPIO::pin1, true);
+	 * _gpio2->SetTimer(&_tim);
+	 * _gpio2->SetCallback(InputsInterrupt);
+	 * _tim.Enable();
+	 *
+	 */
 
 	typedef void SGpioPinCallback(void);
 

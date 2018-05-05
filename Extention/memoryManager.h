@@ -9,6 +9,28 @@
 #define EXTENTION_MEMORYMANAGER_H_
 
 
+/*
+ * MemoryManagment example
+ *
+ *
+ * MemoryManager mem((uint32_t)0x60000000,0x80000);
+ *
+ * 	ErrorStatus t = mem.Init();
+ *
+ * 	char* array = new (&mem) char[130];
+ * 	if(array!=0)
+ * 	{
+ * 	  memcpy(array,"Hello world  this is playcement new!!!!",strlen("Hello world  this is playcement new!!!!"));
+ * 	  mem.ShowMemory();
+ * 	  char* array = (char*)mem.Malloc(150);
+ * 	  memcpy(array,"Hello world !!!!",strlen("Hello world !!!!"));
+ * 	  mem.ShowMemory();
+ * 	  mem.Free(array);
+ * 	  mem.ShowMemory();
+ * 	}
+ *
+ */
+
 extern "C"
 {
 	#include "../StdPeriph/cmsis_boot/stm32f10x.h"

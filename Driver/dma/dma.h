@@ -22,6 +22,22 @@ namespace Driver
 	 */
 
 
+	/*
+	 * Dma example
+	 *
+	 * Пример копирования строк в оперативной памяти с использованием ДМА
+	 *  const char* _source  ="Htis is test!";
+	 *  char destanation[255];
+	 *  memset(destanation,0,255);
+	 *
+	 *  Dma _memcpyDma;
+	 *  _memcpyDma.Channel = CHANNEL_2;
+	 *  _memcpyDma.OnEvent = OnDMATxComplete;
+	 *  _memcpyDma.UseHalfInterrupts = true;
+	 *  _memcpyDma.Init();
+	 *  _memcpyDma.MemCpy((char*)_source,destanation,strlen(_source));
+	 *
+	 */
 
 
 	class Dma :public DriverObject

@@ -14,6 +14,30 @@
 
 namespace Driver
 {
+	/*
+	 * Gpio example
+	 *
+	 * void GpioInterrupt1()
+	 * {
+	 *  do thomething
+	 * }
+	 *
+	 * 	GPIO* _gpio = new GPIO(GPIO::Port::PORTC,GPIO::Pin::Pin10,GPIO::Mode::IN_FLOATING,GPIO::Speed::Speed_2MHz);
+	 * 	_gpio->Init();
+	 * 	_gpio->SetCallback(GpioInterrupt1,GPIO::InterruptType::Rising);
+	 *
+	 * 	GPIO* _gpio1 = new GPIO(GPIO::Port::PORTE,GPIO::Pin::Pin2);
+	 * 	_gpio1->Init();
+	 *
+	 *
+	 *  _gpio1->Write(true);
+	 *  _gpio1->Write(false);
+	 *
+	 *
+	 *
+	 */
+
+
 	typedef void GpioPinCallback(void);
 
 	class GPIO

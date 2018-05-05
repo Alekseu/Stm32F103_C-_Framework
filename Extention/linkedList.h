@@ -10,6 +10,18 @@
 
 #include <stddef.h>
 
+/*
+ * LinkedList example
+ *
+ * LList<char>* _list = new LList<char>();
+ * for(int i=0;i<10;i++)
+ * {
+ * 	 _list->add(i+1);
+ * 	}
+ *
+ */
+
+
 template <class T>
 struct Node
 {

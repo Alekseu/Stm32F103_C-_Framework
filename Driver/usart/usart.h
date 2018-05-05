@@ -18,6 +18,32 @@
 namespace Driver
 {
 
+	/*
+	 * SerialPort example
+	 * SerialPort* _port = new SerialPort(SerialPort::COM1,9600);
+	 * _port->Init();
+	 *
+	 * if(_port->GetAnswer(150))
+	 * 	{
+	 * 	_port->SendData((uint8_t*)_port->Data.ToString(),_port->Data.Lendth());
+	 * 	_port->WriteByte('\r');
+	 * 	_port->WriteByte('\n');
+	 * 	_port->ClearBuffer();
+	 * 	_port->Data.Clear();
+	 * 	}
+	 *
+	 *
+	 * SerialPort _port(_USART1, 9600);
+	 * Dma _usartDma;
+	 * _usartDma.Channel = CHANNEL_1;
+	 * _usartDma.Init();
+	 * передаем обьект драйвера коммуникативному устройству
+	 * _port.DriverObj = (DriverObject*)&_usartDma;
+	 * _port.Init();
+	 *
+	 *
+	 */
+
 	class SerialPort :public ICommunicationObject
 	{
 		UsartInit USART_InitStruct;

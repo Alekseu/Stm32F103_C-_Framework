@@ -14,6 +14,20 @@
 namespace Driver
 {
 
+	/*
+	 * Usb example
+	 *
+	 * Usb* _usb = new Usb();
+	 * _usb->RxBufferSize = 64;
+	 * _usb->TxBufferSize = 64;
+	 * _usb->TypeUsb = VirtualComPort; or _usb->TypeUsb = HumanInterfaceDevice;
+	 * _usb->Init();
+	 *
+	 * _usb->SendData((uint8_t*)"Hello\r\n",7);
+	 *
+	 */
+
+
 	//TODO Возможно необходимо разнести по разным классам - классы usb устройств
 
 
