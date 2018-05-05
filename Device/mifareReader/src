@@ -1,0 +1,473 @@
+/*
+ * Mrfc255.h
+ *
+ *  Created on: 15 мая 2017 г.
+ *      Author: hudienko_a
+ */
+
+#ifndef DRIVER_MFRC522_MFRC522_H_
+#define DRIVER_MFRC522_MFRC522_H_
+
+static char PCD_RESETPHASE = 0x0F;
+	static char PCD_IDLE = 0x00;
+	static char PCD_TRANSCEIVE = 0x0C;
+	static char PICC_REQIDL = 0x26;
+	static char PCD_CALCCRC = 0x03;
+	static char PICC_AUTHENT1A = 0x60;
+	static char PICC_AUTHENT1B = 0x61;
+	static char PCD_AUTHENT = 0x0E;
+	static char PICC_READ = 0x30;
+
+	static char CommandReg = 0x01;
+	static char TModeReg = 0x2A;
+	static char ModeReg = 0x11;
+	static char TPrescalerReg = 0x2B;
+	static char TReloadRegL = 0x2D;
+	static char TReloadRegH = 0x2C;
+	static char TxAutoReg = 0x15;
+	static char FIFOLevelReg = 0x0A;
+	static char FIFODataReg = 0x09;
+	static char RFCfgReg = 0x26;
+	static char TxControlReg = 0x14;
+	static char ErrorReg = 0x06;
+	static char BitFramingReg = 0x0D;
+	static char CommIEnReg = 0x02;
+	static char CommIrqReg = 0x04;
+	static char CollReg = 0x0E;
+	static char DivIrqReg = 0x05;
+	static char CRCResultRegM = 0x21;
+	static char CRCResultRegL = 0x22;
+	static char Status2Reg = 0x08;
+
+	class MFRC522: public SerialPort
+		{
+		public:
+
+			MFRC522(char port, long baud): SerialPort(port, baud)
+				    {
+						_security=0;
+						_block =1;
+						 init();
+				    }
+
+					bool IsCard()
+					{
+						Write(BitFramingReg, 0x07);
+						char bytes[1];
+						bytes[0] = PICC_REQIDL;
+						char outputData[2];
+						memset(outputData,0 ,2);
+						unsigned char outputLength=0;
+						if(Request(PCD_TRANSCEIVE,bytes,1,outputData,&outputLength))
+						{
+							if(outputLength<2)return false;
+							 if (outputData[0] == 0x44 && outputData[1] == 0x00) {_uidlength =7;return true;}
+							 if (outputData[0] == 0x04 && outputData[1] == 0x00) {_uidlength =4;return true;}
+							 if (outputData[0] == 0x02 && outputData[1] == 0x00) {_uidlength =4;return true;}
+						}
+						return false;
+					}
+
+					bool GetCardNumber(char* data)//работает
+					{
+						memset(data, 0, 20);
+
+						if (IsCard())
+						{
+							//Status =Active;
+							bool result =  Select(_lastUid);
+							if(result)
+							{
+								char position1 = 0;
+								char position2 = 1;
+
+								for (int i = 0; i < 4; i++)
+								{
+									uint8_to_asci(_lastUid[i], data, position1, position2);
+									position1 += 2;
+									position2 += 2;
+								}
+							}
+							ClearBitMask(Status2Reg,0x08); //обязательно что-бы потом работал select and login
+							return result;
+						}
+
+						return false;
+					}
+
+					bool GetSectorData(char* data, char* len)
+					{
+						if (!LoginSector(_block, 0xAA, _security)) return false;
+
+						bool result =  ReadBlock(_block, data);
+						ClearBitMask(Status2Reg,0x08); //обязательно что-бы потом работал select and login
+						return result;
+					}
+
+					bool SetSectorData(char* data, char* len)
+					{
+						bool prepareTag = strcmp("\xff\xff\xff\xff\xff\xff",_security);//true
+
+
+						if (!LoginSector(_block, 0xAA, (char*)"\xff\xff\xff\xff\xff\xff")) // Пробуем залогинится со стандартным ключем тип ключа АА
+						{
+
+								prepareTag = false;
+
+
+							if (!LoginSector(_block, 0xAA, _security)) // Пробуем залогинится с ключем секюрити тип ключа АА
+							{
+								return false;
+							}
+
+						}
+
+						if (prepareTag)
+						{
+							if (!WriteBlock((_block / 4 + 1) * 4 - 1, _security)) return false;
+							if (!LoginSector(_block, 0xAA, _security)) return false;
+						}
+
+						_delay_ms(150);
+
+						// записываем данные в установленный блок
+						bool result =  WriteBlock(_block, data);
+						ClearBitMask(Status2Reg,0x08); //обязательно что-бы потом работал select and login
+						return result;
+					}
+
+					bool SetSecurity(char* data, char block)
+					{
+						_security = new char[16];
+						memcpy(_security, data, 16);
+
+						_block = block;
+
+						return true;
+					}
+
+					bool SetCardNumber(char* data, char len)
+					{
+						return true;
+					}
+
+
+					~MFRC522() { }
+				private:
+					char _block;
+					char* _security;
+					char _uidlength;
+					char _lastUid[10];
+
+
+
+					bool Write(char addr, char val)
+					{
+						WriteByte(addr);
+						WriteByte(val);
+						char responce = 0;
+						if(ReadByte(&responce,5))
+						{
+							if(responce == addr) return true;
+						}
+						return false;
+					}
+
+					bool Read(char addr, char* data)
+					{
+						ClearBuffer();
+						WriteByte((addr|0x80));
+						if (ReadByte(data, 5))
+						{
+							return true;
+						}
+						return false;
+
+					}
+
+					void SetBitMask(char reg, char mask)
+					{
+					     char tmp;
+					     Read(reg,&tmp);
+					     Write(reg, (char)(tmp | mask));  // set bit mask
+					}
+
+					void ClearBitMask(char reg, char mask)
+					 {
+					     char tmp;
+					     Read(reg, &tmp);
+					     Write(reg, (char)(tmp & (~mask)));  // clear bit mask
+					 }
+
+					bool init()
+					{
+						Write(CommandReg, PCD_RESETPHASE);
+						char res =0;
+						Read(CommandReg, &res);
+						while ((res & (1 << 4)))
+						{
+						   // PCD still restarting - unlikely after waiting 50ms, but better safe than sorry.
+							Read(CommandReg, &res);
+						}
+						Write(TModeReg, 0x8D);
+						Write(TPrescalerReg, 0xa9);
+						Write(TReloadRegL, 30);
+						Write(TReloadRegH, 0x00);
+						Write(TxAutoReg, 0x40);
+						Write(ModeReg, 0x3D);
+						SetBitMask(FIFOLevelReg, 0x80);
+						char fifoLength =0;
+						Read(FIFOLevelReg,&fifoLength);
+						Write(RFCfgReg,0x78);
+						SetBitMask(TxControlReg,  0x03);
+						char error =0;
+						Read(ErrorReg,&error);
+						if (error != 0)
+						{
+							//Status = Error;
+							return false;
+						}
+						//Status = Active;
+						return true;
+					}
+
+					bool Request(char command,char* data, unsigned char length, char* outputData,unsigned char* datalength)
+					{
+						 Write(CommandReg, PCD_IDLE);
+						 Write(CommIEnReg, (0x80 | 0x77));
+						 Write(CommIrqReg, 0x7F);
+						 SetBitMask(FIFOLevelReg, 0x80);
+						 for(unsigned char i=0;i<length;i++)
+						 {
+							 Write(FIFODataReg, data[i]);
+						 }
+						 Write(CommandReg, command);
+						 SetBitMask(BitFramingReg,0x80);
+						 int j = 2000;
+						 char n = 0;
+							do
+							{
+								Read(CommIrqReg, &n);
+								j--;
+							} while ((j != 0) && !(n & 0x01)  && !(n & 0x30));
+
+						ClearBitMask(BitFramingReg,0x80);
+						char error =0;
+						Read(ErrorReg,&error);
+						if (error != 0)
+						{
+							//Status =Error;
+							return false;
+						}
+						char _length =0;
+						if(!Read(FIFOLevelReg,&_length))
+						{
+							//Status =Error;
+							return false;
+						}
+						 char readedData=0;
+						 for (unsigned char i = 0; i < _length; i++)
+						 {
+							 if(Read(FIFODataReg, &readedData))
+							 {
+								 outputData[i] = readedData;
+							 }
+							 else
+							 {
+								// Status =Error;
+								 return false;
+							 }
+						 }
+						 *datalength = _length;
+						 return true;
+					}
+
+					bool Select(char* uid)
+					{
+						 Write(BitFramingReg, 0x00);
+						 ClearBitMask(CollReg,0x80);
+						 char send[16];
+						 char _outputData[10];
+						 char _crc[2];
+						 unsigned char _outputlength=0;
+						 send[0] = 0x93;
+						 send[1] = 0x20;
+
+						 if(Request( PCD_TRANSCEIVE,send,2,_outputData,&_outputlength))
+						 {
+
+							 char crc=0;
+							 for (unsigned char i = 0; i < _outputlength- 1; i++)
+							 {
+							   crc ^= _outputData[i];
+							 }
+
+							 if(crc== _outputData[_outputlength-1])
+							 {
+								if(_uidlength==7)
+								{
+									//todo for ultralight
+								}
+
+								if(_uidlength==4)
+								{
+									for(int i=0;i<4;i++)
+									{
+										uid[i] = _outputData[i];
+									}
+
+									send[0] = 0x93;
+									send[1] = 0x70;
+
+									char len = _outputlength+4;
+									for(unsigned char i=0;i<_outputlength;i++)
+									{
+										send[i+2] = _outputData[i];
+									}
+									if(!CalcCrc(send,len-2,_crc))
+									{
+										return false;
+									}
+
+									send[_outputlength + 2] = _crc[0];
+									send[_outputlength + 3] = _crc[1];
+
+									if(Request( PCD_TRANSCEIVE,send,len,_outputData,&_outputlength))
+									{
+										 if (_outputlength > 0 && _outputData[0] == 0x08)
+										 {
+										   Write(BitFramingReg, _outputData[0]);
+										   return true;
+										 }
+									}
+								}
+							 }
+							 return false;
+						 }
+						// Status =Error;
+						 return false;
+					}
+
+					bool CalcCrc(char* inputData,char length, char* outputData)
+					{
+						ClearBitMask(DivIrqReg, 0x04);
+						SetBitMask(FIFOLevelReg, 0x80);
+						for (unsigned char i=0; i<length; i++)
+						{
+						    Write(FIFODataReg, inputData[i]);
+						}
+						Write(CommandReg, PCD_CALCCRC);
+						unsigned char i = 0xFF;
+						char n;
+						while (true)
+						{
+							Read(DivIrqReg, &n);
+							i--;
+							if ((n & 0x04) > 0)
+							{						// CRCIRq bit set - calculation done
+								break;
+							}
+							if (--i == 0)
+							{
+								// The emergency break. We will eventually terminate on this one after 89ms. Communication with the MFRC522 might be down.
+								return false;
+							}
+						}
+
+					    if(Read(CRCResultRegL,&n))
+					    {
+					    	outputData[0] = n;
+
+						    if(Read(CRCResultRegM,&n))
+						    {
+						    	outputData[1] = n;
+						    	return true;
+						    }
+					    }
+					    return false;
+					}
+
+					bool LoginSector(char block, char keyType, char*key)
+					{
+						char send[24];
+						memset(send,0,24);
+						send[0] = keyType==0xAA? PICC_AUTHENT1A: PICC_AUTHENT1B;
+						send[1] = block;
+						for(unsigned char i=0;i<6;i++)
+						{
+							send[i+2] = key[i];
+						}
+						for(unsigned char i=0;i<strlen(_lastUid);i++)
+						{
+							send[i+8] = _lastUid[i];
+						}
+						char _output[16];
+						unsigned char _length;
+
+						Request(PCD_AUTHENT,send,12,_output,&_length);
+						char err =0;
+						if(Read(Status2Reg,&err))
+						{
+							return err==0x08;
+						}
+
+						return false;
+					}
+
+					bool WriteBlock(char block, char* data)//?
+					{
+						//TODO пока не нужно
+						return true;
+					}
+
+					bool ReadBlock(char block, char* data)//?
+					{
+						char bytes[4];
+						char crc[2];
+						 bytes[0] = PICC_READ;
+						 bytes[1] = block;
+						 if(CalcCrc(bytes, 2,crc))
+						 {
+						   bytes[2] = crc[0];
+						   bytes[3] = crc[1];
+						 }
+						 char _output[18];
+						 unsigned char _length=0;
+						 if(Request(PCD_TRANSCEIVE,bytes,4, _output,&_length))
+						 {
+							char err = 0;
+							if (Read(Status2Reg, &err))
+							{
+								if(err==0x09)
+								{
+									if(_uidlength==4)
+									{
+										for(unsigned char i=0;i<16;i++)
+										{
+											data[i] = _output[i];
+										}
+										return true;
+									}
+								}
+							}
+						 }
+						return false;
+					}
+
+					void uint8_to_asci(char byte, char *ascii_str, unsigned char pos1,unsigned char pos2)//работает
+					{
+						unsigned char temp = byte;
+									temp >>= 4;
+									char mas[]={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+									ascii_str[pos1]  = mas[temp];
+
+									byte &= (~((1<<7)|(1<<6)|(1<<5)|(1<<4)));
+									ascii_str[pos2] = mas[(unsigned char)byte];
+
+					}
+
+		};
+
+
+
+#endif /* DRIVER_MFRC522_MFRC522_H_ */

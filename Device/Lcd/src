@@ -1,0 +1,995 @@
+class LcdMonitorColor:public ILcd
+{
+	public:
+	volatile char * WF43_COMMAND_ptr = ((char *)0x60000000);
+	    volatile char * WF43_DATA_ptr = ((char *)(0x60000000 + (1 << 16)));
+		static LcdMonitorColor* obj;
+
+		void init();
+		void sendString	(const char *str);
+		void sendStringX(char* data, char size);
+		void SetPixel(int x, int y, int bit, int32_t color);
+		void FULL_ON(unsigned long dat);
+		void WindowSet(unsigned int s_x,unsigned int e_x,unsigned int s_y,unsigned int e_y);
+		void SendData(uint32_t color);
+		void writeData		(char data);
+	private:
+		void setActivePlace	(char x, char y) ;
+		void writeCommand	(char cmd);
+
+
+
+
+		void putChar(int x, int y,char c);
+		void invalidate		();
+
+		void TFT_Draw_Fill_Rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t hieght, uint32_t color);
+		void Command_Write(unsigned char com, unsigned char data);
+
+
+		void disp1color_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int32_t color);
+		void disp1color_DrawRectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2,int32_t color);
+		void disp1color_DrawCircle(int16_t x0, int16_t y0, int16_t radius,int32_t color);
+
+		char buffer_[32];
+		unsigned char size =8;
+		unsigned char _r;
+		unsigned char _g;
+		unsigned char _b;
+};
+
+
+
+
+
+#define RD GPIO_Pin_4
+#define CS GPIO_Pin_7
+#define RW GPIO_Pin_5
+#define RS GPIO_Pin_11
+#define RES GPIO_Pin_6
+
+#define CONTROLL GPIOD
+
+#define D0 GPIO_Pin_14
+#define D1 GPIO_Pin_15
+#define D2 GPIO_Pin_0
+#define D3 GPIO_Pin_1
+#define NIBLE1_PORT GPIOD
+
+#define D4 GPIO_Pin_7
+#define D5 GPIO_Pin_8
+#define D6 GPIO_Pin_9
+#define D7 GPIO_Pin_10
+#define NIBLE2_PORT GPIOE
+
+
+    void LcdMonitorColor::init()
+    {
+
+    	FSMC_NORSRAMInitTypeDef  fsmc;
+    	FSMC_NORSRAMTimingInitTypeDef fsmcTiming;
+    	GPIO_InitTypeDef  GPIO_InitStructure;
+
+    	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB |RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_GPIOE|RCC_APB2Periph_AFIO , ENABLE);
+
+    	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_FSMC, ENABLE);
+
+    	/*!< SRAM Data lines configuration */
+    	GPIO_InitStructure.GPIO_Pin = D0 | D1 | D2 | D3;
+    	GPIO_InitStructure.GPIO_Mode =GPIO_Mode_Out_PP;
+    	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    	GPIO_Init(NIBLE1_PORT, &GPIO_InitStructure);
+
+    	GPIO_InitStructure.GPIO_Pin = D4 | D5 | D6 | D7;
+    	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    	GPIO_Init(NIBLE2_PORT, &GPIO_InitStructure);
+
+    	//A16 - pin 11
+
+    	GPIO_InitStructure.GPIO_Pin = RS ;
+    	GPIO_InitStructure.GPIO_Mode =GPIO_Mode_Out_PP;
+    	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    	GPIO_Init(CONTROLL, &GPIO_InitStructure);
+
+    	/*!< NOE and NWE configuration */
+    	GPIO_InitStructure.GPIO_Pin = RD | RW;
+    	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    	GPIO_Init(CONTROLL, &GPIO_InitStructure);
+
+    	/*!< NE1 configuration CS chip select*/
+    	GPIO_InitStructure.GPIO_Pin = CS;
+    	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    	GPIO_Init(CONTROLL, &GPIO_InitStructure);
+
+    	GPIO_InitStructure.GPIO_Pin = RES;
+    	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    	GPIO_Init(CONTROLL, &GPIO_InitStructure);
+
+
+//    	fsmcTiming.FSMC_AddressSetupTime = 1;
+//    	fsmcTiming.FSMC_AddressHoldTime = 0;
+//    	fsmcTiming.FSMC_DataSetupTime = 1;
+//    	fsmcTiming.FSMC_BusTurnAroundDuration = 0;
+//    	fsmcTiming.FSMC_CLKDivision = 0;
+//    	fsmcTiming.FSMC_DataLatency = 0;
+//    	fsmcTiming.FSMC_AccessMode = FSMC_AccessMode_A;
+//
+//    	fsmc.FSMC_Bank = FSMC_Bank1_NORSRAM1;
+//    	fsmc.FSMC_DataAddressMux = FSMC_DataAddressMux_Disable;
+//    	fsmc.FSMC_MemoryType = FSMC_MemoryType_SRAM;
+//    	fsmc.FSMC_MemoryDataWidth = FSMC_MemoryDataWidth_8b;
+//    	fsmc.FSMC_BurstAccessMode = FSMC_BurstAccessMode_Disable;
+//    	fsmc.FSMC_WaitSignalPolarity = FSMC_WaitSignalPolarity_Low;
+//    	fsmc.FSMC_WrapMode = FSMC_WrapMode_Disable;
+//    	fsmc.FSMC_WaitSignalActive = FSMC_WaitSignalActive_BeforeWaitState;
+//    	fsmc.FSMC_WriteOperation = FSMC_WriteOperation_Enable;
+//    	fsmc.FSMC_WaitSignal = FSMC_WaitSignal_Disable;
+//    	fsmc.FSMC_ExtendedMode = FSMC_ExtendedMode_Disable;
+//    	fsmc.FSMC_WriteBurst = FSMC_WriteBurst_Disable;
+//    	fsmc.FSMC_ReadWriteTimingStruct = &fsmcTiming;
+//    	fsmc.FSMC_WriteTimingStruct = &fsmcTiming;
+//
+//    	FSMC_NORSRAMInit(&fsmc);
+//    	FSMC_NORSRAMCmd(FSMC_Bank1_NORSRAM1, ENABLE);
+
+    	GPIO_ResetBits(CONTROLL,RES);
+    	_delay_ms(10);
+    	GPIO_SetBits(CONTROLL,RES);
+
+    	GPIO_SetBits(CONTROLL,RS);
+    	GPIO_ResetBits(CONTROLL,RS);
+    	GPIO_ResetBits(CONTROLL,CS);
+    	GPIO_ResetBits(CONTROLL,RD);
+    	GPIO_ResetBits(CONTROLL,RW);
+
+
+    	GPIO_ResetBits(NIBLE1_PORT, D0 | D1 | D2 | D3);
+    			GPIO_ResetBits(NIBLE2_PORT,  D4 | D5 | D6 | D7);
+    			GPIO_ResetBits(CONTROLL,RES);
+    			GPIO_ResetBits(CONTROLL,RS);
+    			GPIO_ResetBits(CONTROLL,CS);
+    			GPIO_ResetBits(CONTROLL,RD);
+    			GPIO_ResetBits(CONTROLL,RW);
+
+    			GPIO_ResetBits(CONTROLL,RES);
+    			_delay_ms(5);
+    			GPIO_SetBits(CONTROLL,RES);
+    			GPIO_SetBits(CONTROLL,CS);
+    			GPIO_SetBits(CONTROLL,RD);
+    			GPIO_SetBits(CONTROLL,RW);
+    			_delay_ms(5);
+    			GPIO_ResetBits(CONTROLL,CS);
+
+
+    	writeCommand(0x01);     //Software Reset
+    	writeCommand(0x01);
+    	writeCommand(0x01);
+    	_delay_ms(100);
+
+//    	//lcd 5"
+//    	writeCommand(0xE2);     //PLL multiplier, set PLL clock to 120M
+//    	writeData(0x23);        //N=0x36 for 6.5M, 0x23 for 10M crystal
+//    	writeData(0x02);
+//    	writeData(0x04);
+//
+//    	Command_Write(0xe0,0x01);    //START PLL
+//    	Command_Write(0xe0,0x03);    //LOCK PLL
+//
+//    	writeCommand(0x01);
+//    	_delay_ms(10);
+//
+//    	writeCommand(0xb0);        //LCD specification
+//    	writeData(0x20);            //SET TFT MODE & hsync+Vsync+DEN MODE
+//    	writeData(0x00);            //SET TFT MODE & hsync+Vsync+DEN MODE
+//    	writeData(0x03);            //SET horizontal size=800-1 HightByte
+//    	writeData(0x1f);            //SET horizontal size=800-1 LowByte
+//    	writeData(0x01);            //SET vertical size=480-1 HightByte
+//    	writeData(0xdf);            //SET vertical size=480-1 LowByte
+//    	writeData(0x00);            //SET even/odd line RGB seq.=RGB
+//    	_delay_ms(5);
+//
+//    	Command_Write(0xf0,0x00);    //SET pixel data I/F format=8bit
+//
+//    	Command_Write(0x3a,0x60);   // SET R G B format = 6 6 6
+//
+//    	writeCommand(0xb4);        //SET HBP,
+//    	writeData(0x03);            //SET HSYNC Total=928 HightByte
+//    	writeData(0xa0);            //SET HSYNC Total=928 LowByte
+//    	writeData(0x00);            //SET HBP 46 HightByte
+//    	writeData(0x2e);            //SET HBP 46 LowByte
+//    	writeData(0x30);            //SET VBP 48
+//    	writeData(0x00);            //SET Hsync pulse start position  (15 HighByte)
+//    	writeData(0x0f);            //15 LowByte
+//    	writeData(0x00);            //SET Hsync pulse subpixel start position
+//
+//    	writeCommand(0xb6);         //SET VBP,
+//    	writeData(0x02);            //SET Vsync total=525 HighByte
+//    	writeData(0x0d);            // 525 LowByte
+//    	writeData(0x00);            //SET VBP=16 HighByte
+//    	writeData(0x10);            // 16 LowByte
+//    	writeData(0x10);            //SET Vsync pulse 16
+//    	writeData(0x00);            //SET Vsync pulse start position (8 HighByte)
+//    	writeData(0x08);            //8 LowByte
+
+
+
+    	//lcd 7"
+    	    uint16_t  HDP=801;
+    	      uint16_t  HT=928;
+    	      uint16_t  HPS=46;
+    	      uint16_t  LPS=15;
+    	      uint8_t   HPW=48;
+
+    	      uint16_t  VDP=481;
+    	      uint16_t  VT=525;
+    	      uint16_t  VPS=16;
+    	      uint16_t  FPS=8;
+    	      uint8_t   VPW=16;
+
+    	      writeCommand(0xE2);     //PLL multiplier, set PLL clock to 120M
+    	      writeData(0x23);        //N=0x36 for 6.5M, 0x23 for 10M crystal
+    	      writeData(0x02);
+    	      writeData(0x04);
+
+    	      writeCommand(0xE0);  // PLL enable
+    	      writeData(0x01);
+    	      _delay_ms(20);
+
+    	      writeCommand(0xE0);
+    	      writeData(0x03);
+    	      _delay_ms(20);
+
+    	      writeCommand(0x01);
+    	      _delay_ms(20);
+
+    	      writeCommand(0xE6);     //PLL setting for PCLK, depends on resolution
+    	      writeData(0x03);
+    	      writeData(0xff);
+    	      writeData(0xff);
+
+    	      writeCommand(0xB0);     //LCD SPECIFICATION
+    	      writeData(0x00);
+    	      writeData(0x00);
+    	      writeData((HDP>>8)&0XFF);  //Set HDP
+    	      writeData(HDP&0XFF);
+    	      writeData((VDP>>8)&0XFF);  //Set VDP
+    	      writeData(VDP&0XFF);
+    	      writeData(0x00);
+
+    	      writeCommand(0xB4);     //HSYNC
+    	      writeData(0x03);  //Set HT
+    	      writeData(0x5E);
+    	      writeData(0x00);  //Set HPS
+    	      writeData(0x46);
+    	      writeData(0x09);                          //Set HPW
+    	      writeData(0x00);  //Set HPS
+    	      writeData(0x00);
+    	      writeData(0x00);
+
+    	      writeCommand(0xB6);     //VSYNC
+    	      writeData(0x01);   //Set VT
+    	      writeData(0xFE);
+    	      writeData(0x00);  //Set VPS
+    	      writeData(0x0C);
+    	      writeData(0x00);                          //Set VPW
+    	      writeData(0x00);  //Set FPS
+    	      writeData(0x00);
+
+    	      writeCommand(0xBA);
+    	      writeData(0x05);    //GPIO[3:0] out 1
+
+    	      writeCommand(0xB8);
+    	      writeData(0x07);    //GPIO3=input, GPIO[2:0]=output
+    	      writeData(0x01);    //GPIO0 normal
+
+    	      writeCommand(0x36); //rotation
+    	      writeData(0x09);
+
+    	      writeCommand(0xF0); //pixel data interface
+    	      writeData(0x00); // 8 bit
+    	      _delay_ms(10);
+
+    	      writeCommand(0x29); //display on
+
+    	      writeCommand(0xd0);
+    	      writeData(0x0d);
+
+
+
+    	    	  FULL_ON(0x000000);
+
+    	//FULL_ON(0x0000FF00);
+
+//
+//    	TFT_Draw_Fill_Rectangle(0, 0  , 266, 240, 0x00FF0000);
+//    	TFT_Draw_Fill_Rectangle(0, 240  , 266, 480, 0x0000FF00);
+//
+//    	TFT_Draw_Fill_Rectangle(266, 0, 799, 240, 0x000000FF);
+//    	TFT_Draw_Fill_Rectangle(266, 240, 799, 480, 0x00F05030);
+//
+//    	disp1color_DrawLine(0,0,240,522,0x00123456 );
+//    	disp1color_DrawLine(15,70,800,150,0x00F28456 );
+//    	disp1color_DrawLine(0,0,240,522,0x001F3F5F );
+//
+//
+//		disp1color_DrawRectangle(0,0,240,522,0x00123456 );
+//    	disp1color_DrawRectangle(15,70,800,150,0x00F28456 );
+//    	disp1color_DrawRectangle(0,0,240,522,0x001F3F5F );
+//
+//    	disp1color_DrawCircle(150,150,150,0x00FF0000);
+//
+//
+//    	TFT_Draw_Fill_Rectangle(0, 0  , 800, 160, 0x00FF0000);
+//    	TFT_Draw_Fill_Rectangle(0, 160, 800, 320, 0x0000FF00);
+//    	TFT_Draw_Fill_Rectangle(0, 320, 800, 480, 0x000000FF);
+
+    }
+
+    void LcdMonitorColor::SetPixel(int x, int y, int bit, int32_t color)
+    {
+    	WindowSet(x, x, y, y);
+
+    	if(bit)
+    	{
+    		SendData(color);
+    	}
+    	writeCommand(0x0);
+    }
+
+void LcdMonitorColor::WindowSet(unsigned int x1,unsigned int x2,unsigned int y1,unsigned int y2)
+{
+
+	writeCommand(0x2a);
+
+	writeData((x1>>8) & 0xff);
+	writeData(x1 & 0xff);
+	writeData((x2>>8 ) & 0xff);
+	writeData(x2 & 0xff);
+
+	writeCommand(0x2b);
+
+	writeData((y1 >> 8) & 0xff);
+	writeData(y1 & 0xff);
+	writeData((y2 >> 8) & 0xff);
+	writeData(y2 & 0xff);
+
+	writeCommand(0x2C);
+
+}
+
+void LcdMonitorColor::sendString	(const char *str)
+{
+	if (strcmp(buffer_, str) == 0)
+		return;
+
+	memset(buffer_, ' ', 32);
+
+	if (strlen(str) > 32)
+		memcpy(buffer_, str, 32);
+	else
+		memcpy(buffer_, str, strlen(str));
+
+	invalidate();
+}
+
+void LcdMonitorColor::sendStringX(char* data, char size)
+{
+
+}
+
+void LcdMonitorColor::setActivePlace	(char x, char y)
+{
+	 WindowSet(x,x+6,y,y+7);
+}
+
+void LcdMonitorColor::writeCommand	(char cmd)
+{
+	//*WF43_COMMAND_ptr = cmd;
+	CONTROLL->BRR = RS;
+
+
+	if (cmd & 0x01)
+	{
+		NIBLE1_PORT->BSRR=D0;
+	}
+	if (cmd & 0x02)
+	{
+		NIBLE1_PORT->BSRR= D1;
+	}
+	if (cmd & 0x04)
+	{
+		NIBLE1_PORT->BSRR= D2;
+	}
+	if (cmd & 0x08)
+	{
+		NIBLE1_PORT->BSRR= D3;
+	}
+	if (cmd & 0x10)
+	{
+		NIBLE2_PORT->BSRR= D4;
+	}
+	if (cmd & 0x20)
+	{
+		NIBLE2_PORT->BSRR= D5;
+	}
+	if (cmd & 0x40)
+	{
+		NIBLE2_PORT->BSRR= D6;
+	}
+	if (cmd & 0x80)
+	{
+		NIBLE2_PORT->BSRR= D7;
+	}
+
+
+
+	CONTROLL->BRR= RW; //reset
+	//_delay_ms(1);
+	CONTROLL->BSRR= RW; //set
+	//_delay_ms(2);
+
+	NIBLE1_PORT->BRR= D0 | D1 | D2 | D3;
+	NIBLE2_PORT->BRR=  D4 | D5 | D6 | D7;
+}
+
+void LcdMonitorColor::writeData		(char data)
+{
+	//*WF43_DATA_ptr = data;
+	CONTROLL->BSRR= RS;
+
+	if (data & 0x01)
+	{
+		NIBLE1_PORT->BSRR=D0;
+	}
+	if (data & 0x02)
+	{
+		NIBLE1_PORT->BSRR= D1;
+	}
+	if (data & 0x04)
+	{
+		NIBLE1_PORT->BSRR= D2;
+	}
+	if (data & 0x08)
+	{
+		NIBLE1_PORT->BSRR= D3;
+	}
+	if (data & 0x10)
+	{
+		NIBLE2_PORT->BSRR= D4;
+	}
+	if (data & 0x20)
+	{
+		NIBLE2_PORT->BSRR= D5;
+	}
+	if (data & 0x40)
+	{
+		NIBLE2_PORT->BSRR= D6;
+	}
+	if (data & 0x80)
+	{
+		NIBLE2_PORT->BSRR= D7;
+	}
+
+	CONTROLL->BRR= RW; //reset
+	//_delay_ms(1);
+	CONTROLL->BSRR= RW; //set
+	//_delay_ms(2);
+
+	NIBLE1_PORT->BRR= D0 | D1 | D2 | D3;
+	NIBLE2_PORT->BRR=  D4 | D5 | D6 | D7;
+}
+
+void LcdMonitorColor::Command_Write(unsigned char com, unsigned char data)
+{
+	writeCommand(com);
+	writeData(data);
+}
+
+void LcdMonitorColor::FULL_ON(unsigned long dat)
+{
+  unsigned int x,y;
+  WindowSet(0,800,0,480);
+
+  _r = ((dat)>>16)&0xFF;
+  _g = ((dat)>>8)&0xFF;
+  _b = dat&0xFF;
+
+  for (x=0;x<800;x++)
+  {
+    for (y= 0;y<481;y++)
+    {
+    	writeData(_r); // color is red
+    	writeData(_g);  // color is green
+    	writeData(_b);  		 // color is blue
+    }
+  }
+  return;
+}
+
+void LcdMonitorColor::SendData(uint32_t color)
+{
+
+	writeData(((color)>>16)&0xFF); // color is red
+		writeData(((color)>>8)&0xFF);  // color is green
+		writeData(color&0xFF);  		 // color is blue
+}
+
+void LcdMonitorColor::putChar(int x, int y,char f)
+{
+	char i,k;
+	if(f>0x7D) //если єто руские буквы
+	{
+		//отнимаем значение первой руской буквы
+		//и прибавляем длинну английского знакогенератора
+		f=f-0xC0+94;
+	}else
+	{
+		f=f-0x20; //
+	};
+
+	for(i=0;i<8;i++)
+	{
+		int x_p = x;
+		setActivePlace(x_p,y);
+		for(k = 0; k <5; k++)
+		{
+			char charater = (Font[f][k]);
+
+			if((charater & 1<<i)!=0)
+			{
+				if(size>1)
+				{													//    b	 G
+					TFT_Draw_Fill_Rectangle(x_p, y, x_p+size, y+size, 0x00F28456);
+				}
+				else
+				{
+					SendData(0xffffff);
+				}
+			}
+			else
+			{
+				if(size>1)
+				{
+					TFT_Draw_Fill_Rectangle(x_p, y, x_p+size, y+size, 0x0000FF00);
+				}
+				else
+				{
+					SendData(0x000000);
+				}
+			}
+			if(size>1)
+			{
+				x_p = x_p+size;
+			}
+		}
+		y+=size;
+	}
+
+	  return;
+}
+
+void  LcdMonitorColor::invalidate()
+{
+
+}
+
+void LcdMonitorColor::TFT_Draw_Fill_Rectangle(uint16_t x, uint16_t y, uint16_t width, uint16_t hieght, uint32_t color)
+{
+	uint32_t i=0,k=0;
+
+	for (i=x;i<width;i++)
+	{
+	   for(k=y;k<hieght;k++)
+	   {
+		   SetPixel(i,k,1,color);
+	   }
+	}
+}
+
+void LcdMonitorColor::disp1color_DrawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int32_t color)
+{
+  const int16_t deltaX = abs(x2 - x1);
+  const int16_t deltaY = abs(y2 - y1);
+  const int16_t signX = x1 < x2 ? 1 : -1;
+  const int16_t signY = y1 < y2 ? 1 : -1;
+
+  int16_t error = deltaX - deltaY;
+
+  SetPixel(x2, y2, 1,color);
+
+  while (x1 != x2 || y1 != y2)
+  {
+	  SetPixel(x1, y1, 1, color);
+    const int16_t error2 = error * 2;
+
+    if (error2 > -deltaY)
+    {
+      error -= deltaY;
+      x1 += signX;
+    }
+    if (error2 < deltaX)
+    {
+      error += deltaX;
+      y1 += signY;
+    }
+  }
+}
+
+void LcdMonitorColor::disp1color_DrawRectangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2,int32_t color)
+{
+  disp1color_DrawLine(x1, y1, x1, y2,color);
+  disp1color_DrawLine(x2, y1, x2, y2,color);
+  disp1color_DrawLine(x1, y1, x2, y1,color);
+  disp1color_DrawLine(x1, y2, x2, y2,color);
+}
+
+void LcdMonitorColor::disp1color_DrawCircle(int16_t x0, int16_t y0, int16_t radius,int32_t color)
+{
+  int x = 0;
+  int y = radius;
+  int delta = 1 - 2 * radius;
+  int error = 0;
+
+  while (y >= 0)
+  {
+	  SetPixel(x0 + x, y0 + y, 1,color);
+	  SetPixel(x0 + x, y0 - y, 1,color);
+	  SetPixel(x0 - x, y0 + y, 1,color);
+	  SetPixel(x0 - x, y0 - y, 1,color);
+    error = 2 * (delta + y) - 1;
+
+    if (delta < 0 && error <= 0)
+    {
+      ++x;
+      delta += 2 * x + 1;
+      continue;
+    }
+
+    error = 2 * (delta - x) - 1;
+
+    if (delta > 0 && error > 0)
+    {
+      --y;
+      delta += 1 - 2 * y;
+      continue;
+    }
+
+    ++x;
+    delta += 2 * (x - y);
+    --y;
+  }
+}
+
+
+
+
+//using
+
+
+
+#include "FTP/FTP.h"
+
+
+FTP _sm;
+LcdMonitorColor* monic;
+DMA_InitTypeDef DMA_InitStructure;
+NVIC_InitTypeDef NVIC_InitStructure;
+
+volatile unsigned char ShowComplete = 0;
+uint8_t  _buffer1[((800*3)+1)];
+
+
+
+
+extern "C"
+{
+
+FIL fp;
+FRESULT res;
+
+struct Header
+{
+	 unsigned short bfType;
+	 unsigned int bfSize;
+	 unsigned short Width;
+	 unsigned short Height;
+	 unsigned int bfOffBits;
+}__attribute__( (packed) );
+
+int counter_time = 0;
+Header h;
+uint32_t len;
+volatile int width =0;
+int counter = 0;
+volatile int readCounter=0;
+int i=0;
+int j=0;
+char read=0;
+char file_opened=0;
+UINT br; //счетчик прочитанных байт
+
+	void DMA1_Channel2_IRQHandler(void) //память память
+	{
+		if (DMA1->ISR & DMA1_IT_TC2)
+		{
+			DMA1->IFCR =DMA1_IT_TC2;
+
+			DMA_Cmd(DMA1_Channel2,DISABLE);
+
+			f_read(&fp,&_buffer1[(width/2)],(width/2),&br);
+
+			if(br>=(width/2))
+			{
+				DMA_Cmd(DMA1_Channel2,ENABLE);
+			}
+			else
+			{
+				ShowComplete =1;
+				f_close(&fp);
+			}
+		}
+
+		if (DMA1->ISR & DMA1_IT_HT2)
+		{
+			DMA1->IFCR =DMA1_IT_HT2;
+			DMA_Cmd(DMA1_Channel2,DISABLE);
+
+			f_read(&fp,&_buffer1[0],(width/2),&br);
+
+			if(br>=(width/2))
+			{
+				DMA_Cmd(DMA1_Channel2,ENABLE);
+			}
+			else
+			{
+				ShowComplete =1;
+				f_close(&fp);
+				DMA_Cmd(DMA1_Channel2,DISABLE);
+			}
+		}
+	}
+
+	void ChangePicture()
+	{
+		counter++;
+		if(counter==1)
+		{
+			res =f_open(&fp,"temp.bmp",FA_READ);
+
+		}
+		else
+			if(counter==2)
+			{
+
+				res =f_open(&fp,"temp1.bmp",FA_READ);
+
+			}
+			else if(counter == 3)
+			{
+
+
+				res =f_open(&fp,"temp2.bmp",FA_READ);
+			}
+			else if(counter == 4)
+						{
+
+
+							res =f_open(&fp,"temp3.bmp",FA_READ);
+						}
+			else if(counter == 5)
+						{
+
+
+							res =f_open(&fp,"temp4.bmp",FA_READ);
+						}
+			else if(counter == 6)
+						{
+							counter=0;
+
+							res =f_open(&fp,"temp5.bmp",FA_READ);
+						}
+
+		if(res==FR_OK)
+		{
+			file_opened=1;
+			ShowComplete = 0;
+			f_read(&fp,(char*)&h,14,&br);
+			res = f_lseek(&fp,h.bfOffBits);
+			f_lseek(&fp, 18);
+
+			f_read(&fp, (char*)&h.Width , 2, &br);
+
+			f_lseek(&fp, 22);
+
+			f_read(&fp, (char*)&h.Height , 2, &br);
+
+			f_lseek(&fp, h.bfOffBits);
+
+			monic->WindowSet(0,h.Width,0,h.Height);
+
+			width =(h.Width)*3;
+
+			len = (h.Height * h.Width)*3;
+
+			f_read(&fp,&_buffer1[0],width,&br);
+
+			DMA_Cmd(DMA1_Channel2,ENABLE);
+		}
+	}
+
+	void PicturePeriodic()
+	{
+		if(file_opened==1)
+		{
+			if(!read)
+			{
+				if(i<len+2)
+				{
+					f_read(&fp,_buffer1,width,&br);
+				}
+				else
+				{
+					f_close(&fp);
+					file_opened =0;
+					ChangePicture();
+					i=0;
+
+				}
+				read=1;
+			}
+			else
+			{
+				for(int j=0;j<width+1;j+=3)
+				{
+					monic->writeData(_buffer1[j]); //r
+					monic->writeData(_buffer1[j+1]);
+					monic->writeData( _buffer1[j+2]);
+				}
+
+				i+=width;
+
+				counter_time=0;
+				f_read(&fp,_buffer1,width,&br);
+				counter_time=0;
+				for(int j=0;j<width+1;j+=3)
+				{
+					monic->writeData(_buffer1[j]); //r
+					monic->writeData(_buffer1[j+1]);
+					monic->writeData( _buffer1[j+2]);
+
+				}
+
+				i+=width;
+				f_read(&fp,_buffer1,width,&br);
+
+				for(int j=0;j<width+1;j+=3)
+				{
+					monic->writeData(_buffer1[j]); //r
+					monic->writeData(_buffer1[j+1]);
+					monic->writeData( _buffer1[j+2]);
+				}
+
+				i+=width;
+				f_read(&fp,_buffer1,width,&br);
+
+				for(int j=0;j<width+1;j+=3)
+				{
+					monic->writeData(_buffer1[j]); //r
+					monic->writeData(_buffer1[j+1]);
+					monic->writeData( _buffer1[j+2]);
+				}
+
+				i+=width;
+				f_read(&fp,_buffer1,width,&br);
+
+				for(int j=0;j<width+1;j+=3)
+				{
+					monic->writeData(_buffer1[j]); //r
+					monic->writeData(_buffer1[j+1]);
+					monic->writeData( _buffer1[j+2]);
+				}
+
+					j=0;
+					read = 0;
+				i+=width;
+
+			}
+		}
+
+	}
+
+	void ShowPicture()
+	{
+
+		monic = (LcdMonitorColor*)_monitor;
+
+//		 res =f_open(&fp,"temp.bmp",FA_READ);
+//				if(res==FR_OK)
+//				{
+//					ShowComplete = 0;
+//					f_read(&fp,(char*)&h,14,&br);
+//					res = f_lseek(&fp,h.bfOffBits);
+//					    f_lseek(&fp, 18);
+//
+//					    f_read(&fp, (char*)&h.Width , 2, &br);
+//
+//					    f_lseek(&fp, 22);
+//
+//					    f_read(&fp, (char*)&h.Height , 2, &br);
+//
+//					    f_lseek(&fp, h.bfOffBits);
+//
+//					    monic->WindowSet(0,h.Width,0,h.Height);
+//
+//					    width =(h.Width)*3;
+//
+//					    len = (h.Height * h.Width)*3;
+//
+//					    f_read(&fp,&_buffer1[0],width,&br);
+//
+//					    NVIC_InitStructure.NVIC_IRQChannel =DMA1_Channel2_IRQn;
+//					    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//					    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+//					    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//					    NVIC_Init( &NVIC_InitStructure );
+//
+//					    DMA_DeInit(DMA1_Channel2);
+//					    DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)monic->WF43_DATA_ptr;//0x40013804;
+//					    DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)&_buffer1[0];
+//					    DMA_InitStructure.DMA_BufferSize =width;
+//					    DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
+//					    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+//					    DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+//					    DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+//					    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+//					    DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
+//					    DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;
+//					    DMA_InitStructure.DMA_M2M = DMA_M2M_Enable;
+//					    DMA_Init(DMA1_Channel2, &DMA_InitStructure);
+//
+//					    DMA_ClearFlag(DMA1_IT_TC2|DMA1_IT_HT2);
+//					    DMA_ITConfig(DMA1_Channel2, DMA_IT_TC|DMA_IT_HT, ENABLE);
+//					    DMA_Cmd(DMA1_Channel2,ENABLE);
+//
+//					    counter++;
+//				}
+
+		res =f_open(&fp,"temp3.bmp",FA_READ);
+		if(res==FR_OK)
+		{
+			file_opened=1;
+			f_read(&fp,(char*)&h,14,&br);
+			res = f_lseek(&fp,h.bfOffBits);
+			f_lseek(&fp, 18);
+
+			f_read(&fp, (char*)&h.Width , 2, &br);
+
+			f_lseek(&fp, 22);
+
+			f_read(&fp, (char*)&h.Height , 2, &br);
+
+			f_lseek(&fp, h.bfOffBits);
+
+			monic->WindowSet(0,h.Width,0,h.Height);
+
+			width =(h.Width)*3;
+
+			len = (h.Height * h.Width)*3;
+
+		}
+	}
+
+}
+
+
+
+
+ShowPicture();
+	while(true)
+	{
+		PicturePeriodic();
+	}
