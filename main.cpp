@@ -30,13 +30,29 @@ using namespace Driver;
 using namespace Device;
 
 InterruptController _ic;
-Led _led;
+Led _leds;
+
 bool trigger;
 
+extern "C"
+{
+	void Led_RW_ON()
+	{
+		LedPort->BSRR = LedPin2;
+	}
+
+	void  Led_RW_OFF()
+	{
+		LedPort->BRR = LedPin2;
+	}
+}
 
 int main()
 {
 
+	InterruptController::RemapToRam();
+
+	_leds.Init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
 
@@ -63,9 +79,26 @@ int main()
 //		therm_read_temperature(buf);
 
 
+	Usb _com;
+	_com.RxBufferSize = 64;
+	_com.TxBufferSize = 64;
+	_com.TypeUsb = MassStorageDevice;
+	_com.Init();
+
+	int a=0;
 	while(1)
 	{
-		_delay_ms(300);
+		if(a++>=150 && a< 300)
+			{
+			_leds.On(3);
+			}
+			else if(a>=300)
+			{
+				a=0;
+				_leds.Off(3);
+			}
+
+		_delay_ms(1);
 	}
 
 	return 0;

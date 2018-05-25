@@ -8,6 +8,7 @@
 #ifndef DEVICE_DEVICECONFIG_H_
 #define DEVICE_DEVICECONFIG_H_
 
+#include "../Extention/delay.h"
 
 extern "C"
 {

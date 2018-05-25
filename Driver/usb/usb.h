@@ -9,6 +9,7 @@
 #define DRIVER_USB_H_
 
 #include "../platform.h"
+#include "../nvic/nvic.h"
 
 namespace Driver
 {

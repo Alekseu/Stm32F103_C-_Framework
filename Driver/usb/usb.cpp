@@ -392,8 +392,8 @@ namespace Driver
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_USB, ENABLE);
 
 //		//usb interrupts
-		//InterruptController::PriorityGroupConfig(NVIC_PriorityGroup_1);
-		//InterruptController::SetHandler(USB_LP_CAN1_RX0_IRQn,USB_LP_CAN1_RX0_IRQHandler);
+		InterruptController::PriorityGroupConfig(NVIC_PriorityGroup_1);
+		InterruptController::SetHandler(USB_LP_CAN1_RX0_IRQn,USB_LP_CAN1_RX0_IRQHandler);
 
 		Device_Property.Init = UsbInit;
 		Device_Property.Reset = UsbReset;
@@ -419,20 +419,20 @@ namespace Driver
 		User_Standard_Requests.User_SetDeviceAddress = UsbSetDeviceAddress;
 
 
-		NVIC_InitTypeDef NVIC_InitStructure;
-
-		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-
-		NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-		NVIC_Init(&NVIC_InitStructure);
-
+//		NVIC_InitTypeDef NVIC_InitStructure;
+//
+//		NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
+//
+//		NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+//		NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+//		NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//		NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//		NVIC_Init(&NVIC_InitStructure);
+		InterruptController::EnableChannel(USB_LP_CAN1_RX0_IRQn);
 
 		USB_Init(&Device_Property,&User_Standard_Requests);
 
-		//InterruptController::EnableChannel(USB_LP_CAN1_RX0_IRQn);
+
 		int timeout = 1500;
 
 		while (bDeviceState != CONFIGURED && --timeout)

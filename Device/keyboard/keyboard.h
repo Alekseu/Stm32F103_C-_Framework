@@ -10,6 +10,8 @@
 
 #include "../deviceConfig.h"
 
+#include <string.h>
+
 namespace Device
 {
 

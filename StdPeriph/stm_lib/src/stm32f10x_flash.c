@@ -684,7 +684,6 @@ FLASH_Status FLASH_ProgramWord(uint32_t Address, uint32_t Data)
   __IO uint32_t tmp = 0;
 
   /* Check the parameters */
-  assert_param(IS_FLASH_ADDRESS(Address));
 
 #ifdef STM32F10X_XL
   if(Address < FLASH_BANK1_END_ADDRESS - 2)
@@ -1444,7 +1443,7 @@ void FLASH_ClearFlag(uint32_t FLASH_FLAG)
 {
 #ifdef STM32F10X_XL
   /* Check the parameters */
-  assert_param(IS_FLASH_CLEAR_FLAG(FLASH_FLAG)) ;
+
 
   if((FLASH_FLAG & 0x80000000) != 0x0)
   {
