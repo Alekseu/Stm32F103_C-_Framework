@@ -51,6 +51,8 @@
 #define ENDP2_TXADDR        (0x100)
 #define ENDP3_RXADDR        (0x110)
 
+#define ENDP1_TXADDR_        (0x100)
+#define ENDP1_RXADDR_        (0x140)
 
 /*-------------------------------------------------------------*/
 /* -------------------   ISTR events  -------------------------*/

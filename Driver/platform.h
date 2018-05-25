@@ -49,11 +49,11 @@ extern "C"
 /*
  * Leds
  */
-#define LedPin1 GPIO_Pin_5
-#define LedPin2 GPIO_Pin_6
-#define LedPin3 GPIO_Pin_7
-#define LedRCC  RCC_APB2Periph_GPIOB
-#define LedPort GPIOB
+#define LedPin1 GPIO_Pin_6
+#define LedPin2 GPIO_Pin_5
+#define LedPin3 GPIO_Pin_4
+#define LedRCC  RCC_APB2Periph_GPIOA
+#define LedPort GPIOA
 
 
 
@@ -109,9 +109,9 @@ extern "C"
  * usb
  */
 #define usb
-#define RCC_APB2Periph_GPIO_DISCONNECT RCC_APB2Periph_GPIOC
-#define USB_DISCONNECT_PIN	GPIO_Pin_9
-#define USB_DISCONNECT  GPIOC
+#define RCC_APB2Periph_GPIO_DISCONNECT RCC_APB2Periph_GPIOA
+#define USB_DISCONNECT_PIN	GPIO_Pin_7
+#define USB_DISCONNECT  GPIOA
 
 
 /*

@@ -82,23 +82,34 @@ int main()
 	Usb _com;
 	_com.RxBufferSize = 64;
 	_com.TxBufferSize = 64;
-	_com.TypeUsb = MassStorageDevice;
+	_com.TypeUsb = HumanInterfaceDevice;
+	_com.TypeHid = Hid_Keyboard;
 	_com.Init();
 
 	int a=0;
+	int index=0;
 	while(1)
 	{
 		if(a++>=150 && a< 300)
 			{
-			_leds.On(3);
+				_leds.On(1);
+
 			}
 			else if(a>=300)
 			{
 				a=0;
-				_leds.Off(3);
+				_leds.Off(1);
+
 			}
 
-		_delay_ms(1);
+		if(a==160)
+		{
+
+			//_com.KeyboardSend("hello");
+			_com.MouseMove(rand(),rand());
+		}
+
+		 _delay_ms(1);
 	}
 
 	return 0;

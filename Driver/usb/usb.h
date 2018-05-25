@@ -11,11 +11,12 @@
 #include "../platform.h"
 #include "../nvic/nvic.h"
 
+
 namespace Driver
 {
 
 	//TODO Возможно необходимо разнести по разным классам - классы usb устройств
-
+//#include "descriptors.h"
 
 
 
@@ -52,6 +53,13 @@ namespace Driver
 		MassStorageDevice
 	} UsbType;
 
+	typedef enum _HidType
+	{
+		Hid_Mouse,
+		Hid_Keyboard,
+		Hid_Joy,
+		Hid_manual
+	}HifType;
 	typedef void UsbReciveCallback(uint8_t);
 
 
@@ -69,9 +77,11 @@ namespace Driver
 
 		ONE_DESCRIPTOR Device_Descriptor;
 		ONE_DESCRIPTOR Config_Descriptor;
+		ONE_DESCRIPTOR Report_Descriptor;
 		ONE_DESCRIPTOR String_Descriptor[5];
 
 		UsbType TypeUsb;
+		HifType TypeHid;
 
 		unsigned int RxBufferSize;
 		unsigned int TxBufferSize;
@@ -110,6 +120,8 @@ namespace Driver
 		static uint8_t* UsbGetDeviceDescriptor(uint16_t Length);
 		static uint8_t* UsbGetConfigDescriptor(uint16_t Length);
 		static uint8_t* UsbGetStringDescriptor(uint16_t Length);
+		static uint8_t* UsbGetReportDescriptor(uint16_t Length);
+		static uint8_t* UsbGetHIDDescriptor(uint16_t Length);
 
 		//standart requests
 		static void UsbGetConfiguration();
@@ -122,6 +134,10 @@ namespace Driver
 		static void UsbSetDeviceFeature();
 		static void UsbSetDeviceAddress();
 		static uint8_t *Get_Max_Lun(uint16_t Length);
+		static uint8_t * UsbGetProtocolValue(uint16_t Length);
+		static uint8_t* UsbSetReport_Feature(uint16_t Length);
+		static RESULT UsbSetProtocol(void);
+
 
 		//for vcp
 		static uint8_t* LineCodingStamp(uint16_t t);
@@ -145,6 +161,17 @@ namespace Driver
 
 		 void SendData(uint8_t* data, uint16_t length);
 		 uint16_t ReadData(uint8_t* mass);
+
+		 /*
+		  * keyboard
+		  */
+		 void KeyboardSend(const char* msg);
+
+		 /*
+		  * Mouse
+		  */
+		 void MouseMove(int8_t x, int8_t y);
+
 		/*
 		 * interrupt
 		 */
@@ -156,6 +183,8 @@ namespace Driver
 
 		private:
 		GPIO_InitTypeDef GPIO_InitStructure;
+
+
 
 
 	};

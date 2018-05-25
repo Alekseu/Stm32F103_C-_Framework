@@ -13,16 +13,25 @@ namespace Driver
 
 	#include <string.h>
 
-	#include "descriptors.h"
+#include "descriptors.h"
 
 
 
 	Usb *Usb::pUsb = 0;
+	uint8_t Report_Buf[wMaxPacketSize];
+	uint32_t ProtocolValue;
 
 	extern "C"
 	{
 		#include "../../StdPeriph/usb/inc/usb_bot.h"
 		#include "../../StdPeriph/usb/inc/mass_mal.h"
+		#include "../../StdPeriph/usb/inc/usb_sil.h"
+		#include "keycodes.h"
+
+		#define release_key()  set_key_buf(0,0)
+		#define press_key(k)   press_key_mod(k, 0)
+
+		__IO uint8_t PrevXferComplete = 1;
 
 		u32 Max_Lun = 0;
 		extern __IO BOOL fSuspendEnabled;  /* true when suspend is possible */
@@ -120,6 +129,47 @@ namespace Driver
 				  Usb::pUsb->SendDataToUsb(0);
 				}
 			  }
+		}
+
+
+
+		void KEYBOARD_SEND_key_buf(void) {
+
+			USB_SIL_Write(EP1_IN, key_buf, 9);
+			PrevXferComplete = 0;
+			SetEPTxValid(ENDP1);
+			while (PrevXferComplete == 0)
+			{}
+
+		}
+
+		void KEYBOARD_SEND_Char(char ch) {
+			press_key(ch);
+			KEYBOARD_SEND_key_buf();
+			release_key();
+			KEYBOARD_SEND_key_buf();
+		}
+
+		void KEYBOARD_SEND_word(char *wrd){
+			do {
+				KEYBOARD_SEND_Char(*wrd);
+			} while(*(++wrd));
+		}
+
+		void MOUSE_move(int8_t x, int8_t y){
+			/*
+			 * buf[0]: 1 - report ID
+			 * buf[1]: bit2 - middle button, bit1 - right, bit0 - left
+			 * buf[2]: move X
+			 * buf[3]: move Y
+			 * buf[4]: wheel
+			 */
+
+			buf[2] = x; buf[3] = y;
+			USB_SIL_Write(EP1_IN, buf, 5);
+			PrevXferComplete = 0;
+			SetEPTxValid(ENDP1);
+
 		}
 
 
@@ -319,6 +369,7 @@ namespace Driver
 		TxBytes = 0;
 		RxBytes = 0;
 		TypeUsb = VirtualComPort;
+		TypeHid = Hid_manual;
 		bDeviceState = UNCONNECTED;
 		OnRecived=0;
 
@@ -347,17 +398,70 @@ namespace Driver
 			String_Descriptor[3] = {(uint8_t*)Virtual_Com_Port_StringSerial, VIRTUAL_COM_PORT_SIZ_STRING_SERIAL};
 			break;
 		case HumanInterfaceDevice:
-			Device_Descriptor.Descriptor = (uint8_t*)SomeDev_DeviceDescriptor;
-			Device_Descriptor.Descriptor_Size = SomeDev_SIZ_DEVICE_DESC;
+			switch(TypeHid)
+			{
+				case Hid_Mouse:
+				case Hid_Keyboard:
+					if(TypeHid==Hid_Mouse)
+					{
+						Device_Descriptor.Descriptor = (uint8_t*)RHID_DeviceDescriptor;
+						Device_Descriptor.Descriptor_Size = RHID_SIZ_DEVICE_DESC;
 
-			Config_Descriptor.Descriptor =(uint8_t*)SomeDev_ConfigDescriptor;
-			Config_Descriptor.Descriptor_Size = SomeDev_SIZ_CONFIG_DESC;
+						Config_Descriptor.Descriptor =(uint8_t*)RHID_MOUSE_ConfigDescriptor;
+						Config_Descriptor.Descriptor_Size = RHID_SIZ_CONFIG_DESC;
 
-			String_Descriptor[0] = {(uint8_t*)SomeDev_StringLangID};
-			String_Descriptor[1] = {(uint8_t*)SomeDev_StringVendor};
-			String_Descriptor[2] = {(uint8_t*)SomeDev_StringProduct};
-			String_Descriptor[3] = {(uint8_t*)SomeDev_StringSerial};
-			String_Descriptor[4] = {(uint8_t*)SomeDev_StringInterface};
+						Report_Descriptor.Descriptor =(uint8_t*)RHID_MouseReportDescriptor;
+						Report_Descriptor.Descriptor_Size = RHID_SIZ_MOUSE_REPORT_DESC;
+					}
+
+					if(TypeHid==Hid_Keyboard)
+					{
+						Device_Descriptor.Descriptor = (uint8_t*)RHID_DeviceDescriptor;
+						Device_Descriptor.Descriptor_Size = RHID_SIZ_DEVICE_DESC;
+
+						Config_Descriptor.Descriptor =(uint8_t*)RHID_KEYB_ConfigDescriptor;
+						Config_Descriptor.Descriptor_Size = RHID_SIZ_CONFIG_DESC;
+
+						Report_Descriptor.Descriptor =(uint8_t*)RHID_KeybReportDescriptor;
+						Report_Descriptor.Descriptor_Size = RHID_SIZ_KEYB_REPORT_DESC;
+					}
+
+					String_Descriptor[0] = {(uint8_t*)RHID_StringLangID,RHID_SIZ_STRING_LANGID};
+					String_Descriptor[1] = {(uint8_t*)RHID_StringVendor,RHID_SIZ_STRING_VENDOR};
+					String_Descriptor[2] = {(uint8_t*)RHID_StringProduct,RHID_SIZ_STRING_PRODUCT};
+					String_Descriptor[3] = {(uint8_t*)RHID_StringSerial,RHID_SIZ_STRING_SERIAL};
+					String_Descriptor[4] = {(uint8_t*)SomeDev_StringInterface};
+					break;
+				case Hid_Joy:
+//					Device_Descriptor.Descriptor = (uint8_t*)RHID_DeviceDescriptor;
+//					Device_Descriptor.Descriptor_Size = RHID_SIZ_DEVICE_DESC;
+//
+//					Config_Descriptor.Descriptor =(uint8_t*)RHID_ConfigDescriptor;
+//					Config_Descriptor.Descriptor_Size = RHID_SIZ_CONFIG_DESC;
+//
+//					Report_Descriptor.Descriptor =(uint8_t*)ARC_MOUSE_report_descriptor;
+//					Report_Descriptor.Descriptor_Size = RHID_SIZ_REPORT_DESC;
+//					String_Descriptor[0] = {(uint8_t*)RHID_StringLangID,RHID_SIZ_STRING_LANGID};
+//										String_Descriptor[1] = {(uint8_t*)RHID_StringVendor,RHID_SIZ_STRING_VENDOR};
+//										String_Descriptor[2] = {(uint8_t*)RHID_StringProduct,RHID_SIZ_STRING_PRODUCT};
+//										String_Descriptor[3] = {(uint8_t*)RHID_StringSerial,RHID_SIZ_STRING_SERIAL};
+//										String_Descriptor[4] = {(uint8_t*)SomeDev_StringInterface};
+//					break;
+
+				case Hid_manual:
+					Device_Descriptor.Descriptor = (uint8_t*)SomeDev_DeviceDescriptor;
+					Device_Descriptor.Descriptor_Size = SomeDev_SIZ_DEVICE_DESC;
+
+					Config_Descriptor.Descriptor =(uint8_t*)SomeDev_ConfigDescriptor;
+					Config_Descriptor.Descriptor_Size = SomeDev_SIZ_CONFIG_DESC;
+
+					String_Descriptor[0] = {(uint8_t*)SomeDev_StringLangID};
+					String_Descriptor[1] = {(uint8_t*)SomeDev_StringVendor};
+					String_Descriptor[2] = {(uint8_t*)SomeDev_StringProduct};
+					String_Descriptor[3] = {(uint8_t*)SomeDev_StringSerial};
+					String_Descriptor[4] = {(uint8_t*)SomeDev_StringInterface};
+				break;
+			}
 			break;
 		case MassStorageDevice:
 
@@ -515,7 +619,30 @@ namespace Driver
 
 			    SetEPRxCount(ENDP0, Usb::pUsb->Device_Property.MaxPacketSize);
 			    SetEPRxValid(ENDP0);
+			    CBW.dSignature = BOT_CBW_SIGNATURE;
+			  	Bot_State = BOT_IDLE;
+		  }
+		  else  if(Usb::pUsb->TypeUsb==HumanInterfaceDevice && Usb::pUsb->TypeHid!=Hid_manual)
+		  {
 
+			   SetBTABLE(BTABLE_ADDRESS);
+			   /* Initialize Endpoint 0 */
+			   SetEPType(ENDP0, EP_CONTROL);
+			   SetEPTxStatus(ENDP0, EP_TX_STALL);
+			   SetEPRxAddr(ENDP0, ENDP0_RXADDR);
+			   SetEPTxAddr(ENDP0, ENDP0_TXADDR);
+			   Clear_Status_Out(ENDP0);
+			   SetEPRxCount(ENDP0, Usb::pUsb->Device_Property.MaxPacketSize);
+			   SetEPRxValid(ENDP0);
+
+			   /* Initialize Endpoint 1 */
+			   SetEPType(ENDP1, EP_INTERRUPT);
+			   SetEPTxAddr(ENDP1, ENDP1_TXADDR_);
+			   SetEPRxAddr(ENDP1, ENDP1_RXADDR_);
+			   SetEPTxCount(ENDP1, EP1TxCount);
+			   SetEPRxCount(ENDP1, EP1RxCount);
+			   SetEPRxStatus(ENDP1, EP_RX_VALID);
+			   SetEPTxStatus(ENDP1, EP_TX_NAK);
 		  }
 		  else
 		  {
@@ -554,8 +681,7 @@ namespace Driver
 
 		  Usb::pUsb->bDeviceState = ATTACHED;
 
-		  CBW.dSignature = BOT_CBW_SIGNATURE;
-		 			     Bot_State = BOT_IDLE;
+
 	 }
 
 	 void Usb::UsbStatus_In()
@@ -601,6 +727,54 @@ namespace Driver
 			  return USB_SUCCESS;
 		 }
 		 else
+			 if(Usb::pUsb->TypeUsb==HumanInterfaceDevice && Usb::pUsb->TypeHid!=Hid_manual )
+			 {
+				 uint8_t *(*CopyRoutine)(uint16_t);
+
+				   CopyRoutine = NULL;
+				   if ((RequestNo == GET_DESCRIPTOR)
+				       && (Type_Recipient == (STANDARD_REQUEST | INTERFACE_RECIPIENT))
+				       && (pInformation->USBwIndex0 == 0))
+				   {
+				     if (pInformation->USBwValue1 == REPORT_DESCRIPTOR)
+				     {
+				       CopyRoutine = UsbGetReportDescriptor;
+				     }
+				     else if (pInformation->USBwValue1 == HID_DESCRIPTOR_TYPE)
+				     {
+				       CopyRoutine = UsbGetHIDDescriptor;
+				     }
+
+				   } /* End of GET_DESCRIPTOR */
+
+				   /*** GET_PROTOCOL, GET_REPORT, SET_REPORT ***/
+				   else if ( (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT)) )
+				   {
+				     switch( RequestNo )
+				     {
+				     case GET_PROTOCOL:
+				       CopyRoutine = UsbGetProtocolValue;
+				       break;
+				     case SET_REPORT:
+				       CopyRoutine = UsbSetReport_Feature;
+				       Usb::pUsb->Request = SET_REPORT;
+				       break;
+				     default:
+				       break;
+				     }
+				   }
+
+				   if (CopyRoutine == NULL)
+				   {
+				     return USB_UNSUPPORT;
+				   }
+				   pInformation->Ctrl_Info.CopyData = CopyRoutine;
+				   pInformation->Ctrl_Info.Usb_wOffset = 0;
+				   (*CopyRoutine)(0);
+				   return USB_SUCCESS;
+		}
+
+		else
 		 {
 		 uint8_t    *(*CopyRoutine)(uint16_t);
 
@@ -656,6 +830,20 @@ namespace Driver
 			 }
 		 }
 		 else
+			 if(Usb::pUsb->TypeUsb==HumanInterfaceDevice&& Usb::pUsb->TypeHid!=Hid_manual)
+			 {
+				 if ((Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
+				       && (RequestNo == SET_PROTOCOL))
+				   {
+				     return UsbSetProtocol();
+				   }
+
+				   else
+				   {
+				     return USB_UNSUPPORT;
+				   }
+			 }
+			 else
 		 {
 			 if (Type_Recipient == (CLASS_REQUEST | INTERFACE_RECIPIENT))
 			 {
@@ -672,6 +860,13 @@ namespace Driver
 		 }
 
 		 return USB_UNSUPPORT;
+	 }
+
+	 RESULT Usb::UsbSetProtocol(void)
+	 {
+	   uint8_t wValue0 = pInformation->USBwValue0;
+	   ProtocolValue = wValue0;
+	   return USB_SUCCESS;
 	 }
 
 	 RESULT Usb::UsbGet_Interface_Setting(uint8_t Interface, uint8_t AlternateSetting)
@@ -695,6 +890,40 @@ namespace Driver
 	 uint8_t* Usb::UsbGetConfigDescriptor(uint16_t Length)
 	 {
 		 return Standard_GetDescriptorData(Length, &Usb::pUsb->Config_Descriptor);
+	 }
+	 uint8_t* Usb::UsbGetReportDescriptor(uint16_t Length)
+	 {
+	   return Standard_GetDescriptorData(Length, &Usb::pUsb->Report_Descriptor);
+	 }
+	 uint8_t* Usb::UsbGetHIDDescriptor(uint16_t Length)
+	 {
+	   return Standard_GetDescriptorData(Length, &Usb::pUsb->Config_Descriptor);
+	 }
+
+	 uint8_t* Usb::UsbGetProtocolValue(uint16_t Length)
+	 {
+	   if (Length == 0)
+	   {
+	     pInformation->Ctrl_Info.Usb_wLength = 1;
+	     return NULL;
+	   }
+	   else
+	   {
+	     return (uint8_t *)(&ProtocolValue);
+	   }
+	 }
+
+	 uint8_t* Usb::UsbSetReport_Feature(uint16_t Length)
+	 {
+	   if (Length == 0)
+	   {
+	     pInformation->Ctrl_Info.Usb_wLength = wMaxPacketSize;
+	     return NULL;
+	   }
+	   else
+	   {
+	     return Report_Buf;
+	   }
 	 }
 
 	 uint8_t* Usb::UsbGetStringDescriptor(uint16_t Length)
@@ -795,6 +1024,14 @@ namespace Driver
 			 return;
 		 }
 		 else
+			 if(TypeUsb==HumanInterfaceDevice && TypeHid!=Hid_manual)
+			 {
+				 if( endpoint==1)
+				 {
+					 PrevXferComplete = 1;
+				 }
+			 }
+		 else
 		 {
 
 			 if(endpoint == 0)
@@ -831,6 +1068,15 @@ namespace Driver
 			 }
 			 return;
 		 }
+		 else
+		 			 if(TypeUsb==HumanInterfaceDevice && TypeHid!=Hid_manual)
+		 			 {
+		 				 if( endpoint==1)
+		 				 {
+		 					 PrevXferComplete = 1;
+		 				 }
+		 			 }
+
 		 else
 		 {
 			 if(RxBytes+VIRTUAL_COM_PORT_DATA_SIZE>RxBufferSize) RxBytes =0;
@@ -903,5 +1149,27 @@ namespace Driver
 	 uint16_t Usb::ReadWord(){return 0;}
 	 void Usb::WriteWord(uint16_t word){}
 
+
+	 /*
+	  * Keyboard
+	  */
+	 void Usb::KeyboardSend(const char* msg)
+	 {
+		 if(bDeviceState == CONFIGURED)
+		 {
+		 KEYBOARD_SEND_word((char*)msg);
+		 }
+	 }
+
+	 /*
+	  * Mouse
+	  */
+	 void Usb::MouseMove(int8_t x, int8_t y)
+	 {
+		 if(bDeviceState==CONFIGURED)
+		 {
+		 MOUSE_move(x,y);
+		 }
+	 }
 }
 

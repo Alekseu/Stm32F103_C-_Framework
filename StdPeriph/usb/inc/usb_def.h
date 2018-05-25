@@ -46,6 +46,17 @@ typedef enum _STANDARD_REQUESTS
   SYNCH_FRAME = 12
 } STANDARD_REQUESTS;
 
+typedef enum _HID_REQUESTS
+{
+  GET_REPORT = 1,
+  GET_IDLE,
+  GET_PROTOCOL,
+
+  SET_REPORT = 9,
+  SET_IDLE,
+  SET_PROTOCOL
+} HID_REQUESTS;
+
 /* Definition of "USBwValue" */
 typedef enum _DESCRIPTOR_TYPE
 {
@@ -69,6 +80,7 @@ typedef enum _FEATURE_SELECTOR
 #define STANDARD_REQUEST  0x00  /* Standard request */
 #define CLASS_REQUEST     0x20  /* Class request */
 #define VENDOR_REQUEST    0x40  /* Vendor request */
+#define REPORT_DESCRIPTOR                  0x22
 
 #define RECIPIENT         0x1F  /* Mask to get recipient */
 
