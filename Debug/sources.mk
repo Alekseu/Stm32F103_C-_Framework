@@ -33,6 +33,7 @@ StdPeriph/usb/src \
 StdPeriph/stm_lib/src \
 StdPeriph/newlib \
 StdPeriph/cmsis_boot \
+Protocols/mqtt \
 Protocols/commandProcessor \
 Protocols/Rs485 \
 Protocols/Rs422 \
@@ -42,8 +43,10 @@ Extention \
 Driver/usb \
 Driver/usart \
 Driver/tim \
+Driver/tcp_ip_stack \
 Driver/systick \
 Driver/spi \
+Driver/soundProcessor \
 Driver/sdio \
 Driver/rtc \
 Driver/pwm \
@@ -58,12 +61,17 @@ Driver/dac \
 Driver/can \
 Driver/adc \
 Device/w5500 \
+Device/w5500/Ethernet \
+Device/w5500/Ethernet/W5500 \
+Device/w5500/Ethernet/DHCP \
 Device/sdCard/src \
 Device/nrf2401 \
+Device/keyboard \
 Device/esp8266 \
 Device/enc28j60 \
 Device/eeprom \
 Device/SGPIO \
 Device/RF433 \
+Device/MatrixMono \
 Device/Lcd \
 
