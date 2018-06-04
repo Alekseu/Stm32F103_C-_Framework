@@ -84,4 +84,17 @@ extern "C"
 #define COL_3 GPIO_Pin_7
 #define COL_4 GPIO_Pin_0
 
+
+
+/*
+ * Encoder
+ */
+#define ENCODER_PORT GPIOA
+#define ENCODER_RCC RCC_APB2Periph_GPIOA
+
+#define ENCODER_KEY_PIN GPIO_Pin_0
+#define ENCODER_PIN1 GPIO_Pin_1
+#define ENCODER_PIN2 GPIO_Pin_2
+
+
 #endif /* DEVICE_DEVICECONFIG_H_ */

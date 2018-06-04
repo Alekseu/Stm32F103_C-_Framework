@@ -68,6 +68,7 @@ Device/sdCard/src \
 Device/nrf2401 \
 Device/keyboard \
 Device/esp8266 \
+Device/encoder \
 Device/enc28j60 \
 Device/eeprom \
 Device/SGPIO \

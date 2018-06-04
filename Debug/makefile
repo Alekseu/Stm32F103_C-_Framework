@@ -48,6 +48,7 @@ RM := rm -rf
 -include Device/nrf2401/subdir.mk
 -include Device/keyboard/subdir.mk
 -include Device/esp8266/subdir.mk
+-include Device/encoder/subdir.mk
 -include Device/enc28j60/subdir.mk
 -include Device/eeprom/subdir.mk
 -include Device/SGPIO/subdir.mk
