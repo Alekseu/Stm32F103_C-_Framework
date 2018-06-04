@@ -513,36 +513,38 @@ uint8_t _Virtual_Com_Port_Device_Descriptor[] =  {
 #define RPT4_COUNT 0x04 //STM32->PC
 
 
-#define RHID_SIZ_MOUSE_REPORT_DESC                52
+#define RHID_SIZ_MOUSE_REPORT_DESC                115
 #define RHID_SIZ_KEYB_REPORT_DESC                65
+#define RHID_SIZ_REPORT_DESC                115
+
 
 	const uint8_t RHID_DeviceDescriptor[RHID_SIZ_DEVICE_DESC] =
 	  {
-			    RHID_SIZ_DEVICE_DESC,         // îáùàÿ äëèíà äåñêðèïòîðà óñòðîéñòâà â áàéòàõ
-			    USB_DEVICE_DESCRIPTOR_TYPE, // bDescriptorType - ïîêàçûâàåò, ÷òî ýòî çà äåñêðèïòîð. Â äàííîì ñëó÷àå - Device descriptor
-			    0x00, 0x02,                 // bcdUSB - êàêóþ âåðñèþ ñòàíäàðòà USB ïîääåðæèâàåò óñòðîéñòâî. 2.0
+			    RHID_SIZ_DEVICE_DESC,         // общая длина дескриптора устройства в байтах
+			    USB_DEVICE_DESCRIPTOR_TYPE, // bDescriptorType - показывает, что это за дескриптор. В данном случае - Device descriptor
+			    0x00, 0x02,                 // bcdUSB - какую версию стандарта USB поддерживает устройство. 2.0
 
-				// êëàññ, ïîäêëàññ óñòðîéñòâà è ïðîòîêîë, ïî ñòàíäàðòó USB. Ó íàñ íóëè, îçíà÷àåò êàæäûé èíòåðôåéñ ñàì çà ñåáÿ
+				// класс, подкласс устройства и протокол, по стандарту USB. У нас нули, означает каждый интерфейс сам за себя
 			    0x00,                       //bDeviceClass
 			    0x00,                       //bDeviceSubClass
 			    0x00,                       //bDeviceProtocol
 
-			    0x40,                       //bMaxPacketSize - ìàêñèìàëüíûé ðàçìåð ïàêåòîâ äëÿ Endpoint 0 (ïðè êîíôèãóðèðîâàíèè)
+			    0x40,                       //bMaxPacketSize - максимальный размер пакетов для Endpoint 0 (при конфигурировании)
 
-				// òå ñàìûå ïðåñëîâóòûå VID è PID,  ïî êîòîðûì è îïðåäåëÿåòñÿ, ÷òî æå ýòî çà óñòðîéñòâî.
-				// â ðåàëüíûõ óñòðîéñòâàõ íàäî ïîêóïàòü VID, ÷òîáû óñòðîéñòâà ìîæíî áûëî ðàçëè÷àòü è ïîäñîâûâàòü íóæíûå äðàéâåðà
+				// те самые пресловутые VID и PID,  по которым и определяется, что же это за устройство.
+				// в реальных устройствах надо покупать VID, чтобы устройства можно было различать и подсовывать нужные драйвера
 			    0x83, 0x04,                 //idVendor (0x0483)
 			    0x10, 0x57,                 //idProduct (0x5711)
 
-			    DEVICE_VER_L, DEVICE_VER_H,                 // bcdDevice rel. DEVICE_VER_H.DEVICE_VER_L  íîìåð ðåëèçà óñòðîéñòâà
+			    DEVICE_VER_L, DEVICE_VER_H,                 // bcdDevice rel. DEVICE_VER_H.DEVICE_VER_L  номер релиза устройства
 
-				// äàëüøå èäóò èíäåêñû ñòðîê, îïèñûâàþùèõ ïðîèçâîäèòåëÿ, óñòðîéñòâî è ñåðèéíûé íîìåð.
-				// Îòîáðàæàþòñÿ â ñâîéñòâàõ óñòðîéñòâà â äèñïåò÷åðå óñòðîéñòâ
-				// À ïî ñåðèéíîìó íîìåðó ïîäêëþ÷åííûå óñòðîéñòâà ñ îäèíàêîâûì VID/PID ðàçëè÷àþòñÿ ñèñòåìîé.
+				// дальше идут индексы строк, описывающих производителя, устройство и серийный номер.
+				// Отображаются в свойствах устройства в диспетчере устройств
+				// А по серийному номеру подключенные устройства с одинаковым VID/PID различаются системой.
 			    1,                          //Index of string descriptor describing manufacturer
 			    2,                          //Index of string descriptor describing product
 			    3,                          //Index of string descriptor describing the device serial number
-			    0x01                        // bNumConfigurations - êîëè÷åñòâî âîçìîæíûõ êîíôèãóðàöèé. Ó íàñ îäíà.
+			    0x01                        // bNumConfigurations - количество возможных конфигураций. У нас одна.
 	  }
 	  ; /* CustomHID_DeviceDescriptor */
 
@@ -551,90 +553,94 @@ uint8_t _Virtual_Com_Port_Device_Descriptor[] =  {
 	/*   All Descriptors (Configuration, Interface, Endpoint, Class, Vendor */
 	const uint8_t RHID_MOUSE_ConfigDescriptor[RHID_SIZ_CONFIG_DESC] =
 	  {
-			    0x09, 			// bLength: äëèíà äåñêðèïòîðà êîíôèãóðàöèè
-			    USB_CONFIGURATION_DESCRIPTOR_TYPE, // bDescriptorType: òèï äåñêðèïòîðà - êîíôèãóðàöèÿ
-			    RHID_SIZ_CONFIG_DESC, 0x00, // wTotalLength: îáùèé ðàçìåð âñåãî äåðåâà ïîä äàííîé êîíôèãóðàöèåé â áàéòàõ
+			  0x09, 			// bLength: длина дескриптора конфигурации
+			  		    USB_CONFIGURATION_DESCRIPTOR_TYPE, // bDescriptorType: тип дескриптора - конфигурация
+			  		    RHID_SIZ_CONFIG_DESC, 0x00, // wTotalLength: общий размер всего дерева под данной конфигурацией в байтах
 
-			    0x01,         // bNumInterfaces: â êîíôèãóðàöèè âñåãî îäèí èíòåðôåéñ
-			    0x01,         // bConfigurationValue: èíäåêñ äàííîé êîíôèãóðàöèè
-			    0x00,         // iConfiguration: èíäåêñ ñòðîêè, êîòîðàÿ îïèñûâàåò ýòó êîíôèãóðàöèþ
-			    0xE0,         // bmAttributes: ïðèçíàê òîãî, ÷òî óñòðîéñòâî áóäåò ïèòàòüñÿ îò øèíû USB
-			    0x32,         // MaxPower 100 mA: è åìó õâàòèò 100 ìÀ
+			  		    0x01,         // bNumInterfaces: в конфигурации всего один интерфейс
+			  		    0x01,         // bConfigurationValue: индекс данной конфигурации
+			  		    0x00,         // iConfiguration: индекс строки, которая описывает эту конфигурацию
+			  		    0xE0,         // bmAttributes: признак того, что устройство будет питаться от шины USB
+			  		    0x32,         // MaxPower 100 mA: и ему хватит 100 мА
 
-					/************** Äåñêðèïòîð èíòåðôåéñà ****************/
-					0x09,         // bLength: ðàçìåð äåñêðèïòîðà èíòåðôåéñà
-					USB_INTERFACE_DESCRIPTOR_TYPE, // bDescriptorType: òèï äåñêðèïòîðà - èíòåðôåéñ
-					0x00,         // bInterfaceNumber: ïîðÿäêîâûé íîìåð èíòåðôåéñà - 0
-					0x00,         // bAlternateSetting: ïðèçíàê àëüòåðíàòèâíîãî èíòåðôåéñà, ó íàñ íå èñïîëüçóåòñÿ
-					0x02,         // bNumEndpoints - êîëè÷åñòâî ýíäïîèíòîâ.
+			  				/************** Дескриптор интерфейса ****************/
+			  				0x09,         // bLength: размер дескриптора интерфейса
+			  				USB_INTERFACE_DESCRIPTOR_TYPE, // bDescriptorType: тип дескриптора - интерфейс
+			  				0x00,         // bInterfaceNumber: порядковый номер интерфейса - 0
+			  				0x00,         // bAlternateSetting: признак альтернативного интерфейса, у нас не используется
+			  				0x02,         // bNumEndpoints - количество эндпоинтов.
 
-					0x03,         // bInterfaceClass: êëàññ èíòåðôåñà - HID
-					// åñëè áû ìû êîñèëè ïîä ñòàíäàðòíîå óñòðîéñòâî, íàïðèìåð êëàâèàòóðó èëè ìûøü, òî íàäî áûëî áû óêàçàòü ïðàâèëüíî êëàññ è ïîäêëàññ
-					// à òàê ó íàñ îáùåå HID-óñòðîéñòâî
-					0x00,         // bInterfaceSubClass : ïîäêëàññ èíòåðôåéñà.
-					0x00,         // nInterfaceProtocol : ïðîòîêîë èíòåðôåéñà
+			  				0x03,         // bInterfaceClass: класс интерфеса - HID
+			  				// если бы мы косили под стандартное устройство, например клавиатуру или мышь, то надо было бы указать правильно класс и подкласс
+			  				// а так у нас общее HID-устройство
+			  				0x00,         // bInterfaceSubClass : подкласс интерфейса.
+			  				0x00,         // nInterfaceProtocol : протокол интерфейса
 
-					0,            // iInterface: èíäåêñ ñòðîêè, îïèñûâàþùåé èíòåðôåéñ
+			  				0,            // iInterface: индекс строки, описывающей интерфейс
 
-						// òåïåðü îòäåëüíûé äåñêðèïòîð äëÿ óòî÷íåíèÿ òîãî, ÷òî äàííûé èíòåðôåéñ - ýòî HID óñòðîéñòâî
-						/******************** HID äåñêðèïòîð ********************/
-						0x09,         // bLength: äëèíà HID-äåñêðèïòîðà
-						HID_DESCRIPTOR_TYPE, // bDescriptorType: òèï äåñêðèïòîðà - HID
-						0x01, 0x01,   // bcdHID: íîìåð âåðñèè HID 1.1
-						0x00,         // bCountryCode: êîä ñòðàíû (åñëè íóæåí)
-						0x01,         // bNumDescriptors: Ñêîëüêî äàëüøå áóäåò report äåñêðèïòîðîâ
-							HID_REPORT_DESCRIPTOR_TYPE,         // bDescriptorType: Òèï äåñêðèïòîðà - report
-							RHID_SIZ_MOUSE_REPORT_DESC,	0x00, // wItemLength: äëèíà report-äåñêðèïòîðà
+			  					// теперь отдельный дескриптор для уточнения того, что данный интерфейс - это HID устройство
+			  					/******************** HID дескриптор ********************/
+			  					0x09,         // bLength: длина HID-дескриптора
+			  					HID_DESCRIPTOR_TYPE, // bDescriptorType: тип дескриптора - HID
+			  					0x01, 0x01,   // bcdHID: номер версии HID 1.1
+			  					0x00,         // bCountryCode: код страны (если нужен)
+			  					0x01,         // bNumDescriptors: Сколько дальше будет report дескрипторов
+			  						HID_REPORT_DESCRIPTOR_TYPE,         // bDescriptorType: Тип дескриптора - report
+			  						RHID_SIZ_REPORT_DESC,	0x00, // wItemLength: длина report-дескриптора
 
 
-						/******************** äåñêðèïòîð êîíå÷íûõ òî÷åê (endpoints) ********************/
-						0x07,          // bLength: äëèíà äåñêðèïòîðà
-						USB_ENDPOINT_DESCRIPTOR_TYPE, // òèï äåñêðèïòîðà - endpoints
+			  					/******************** дескриптор конечных точек (endpoints) ********************/
+			  					0x07,          // bLength: длина дескриптора
+			  					USB_ENDPOINT_DESCRIPTOR_TYPE, // тип дескриптора - endpoints
 
-						0x81,          // bEndpointAddress: àäðåñ êîíå÷íîé òî÷êè è íàïðàâëåíèå 1(IN)
-						0x03,          // bmAttributes: òèï êîíå÷íîé òî÷êè - Interrupt endpoint
-						wMaxPacketSize, 0x00,    // wMaxPacketSize:  Bytes max
-						0x20,          // bInterval: Polling Interval (32 ms)
+			  					0x81,          // bEndpointAddress: адрес конечной точки и направление 1(IN)
+			  					0x03,          // bmAttributes: тип конечной точки - Interrupt endpoint
+			  					wMaxPacketSize, 0x00,    // wMaxPacketSize:  Bytes max
+			  					0x20,          // bInterval: Polling Interval (32 ms)
 
-	          0x07,	/* bLength: Endpoint Descriptor size */
-	          USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType: */
-	            /*	Endpoint descriptor type */
-	          0x01,	/* bEndpointAddress: */
-	            /*	Endpoint Address (OUT) */
-	          0x03,	/* bmAttributes: Interrupt endpoint */
-	          wMaxPacketSize,	/* wMaxPacketSize:  Bytes max  */
-	          0x00,
-	          0x20,	/* bInterval: Polling Interval (32 ms) */
+			            0x07,	/* bLength: Endpoint Descriptor size */
+			            USB_ENDPOINT_DESCRIPTOR_TYPE,	/* bDescriptorType: */
+			              /*	Endpoint descriptor type */
+			            0x01,	/* bEndpointAddress: */
+			              /*	Endpoint Address (OUT) */
+			            0x03,	/* bmAttributes: Interrupt endpoint */
+			            wMaxPacketSize,	/* wMaxPacketSize:  Bytes max  */
+			            0x00,
+			            0x20,	/* bInterval: Polling Interval (32 ms) */
 	};
 //	   /* RHID_ConfigDescriptor */
 	const uint8_t RHID_MouseReportDescriptor[RHID_SIZ_MOUSE_REPORT_DESC] =
 	  {
-			    0x05, 0x01, /* Usage Page (Generic Desktop)             */
-			    0x09, 0x02, /* Usage (Mouse)                            */
-			    0xA1, 0x01, /* Collection (Application)                 */
-			    0x09, 0x01, /*  Usage (Pointer)                         */
-			    0xA1, 0x00, /*  Collection (Physical)                   */
-			    0x85, 0x01,  /*   Report ID  */
-			    0x05, 0x09, /*      Usage Page (Buttons)                */
-			    0x19, 0x01, /*      Usage Minimum (01)                  */
-			    0x29, 0x03, /*      Usage Maximum (03)                  */
-			    0x15, 0x00, /*      Logical Minimum (0)                 */
-			    0x25, 0x01, /*      Logical Maximum (0)                 */
-			    0x95, 0x03, /*      Report Count (3)                    */
-			    0x75, 0x01, /*      Report Size (1)                     */
-			    0x81, 0x02, /*      Input (Data, Variable, Absolute)    */
-			    0x95, 0x01, /*      Report Count (1)                    */
-			    0x75, 0x05, /*      Report Size (5)                     */
-			    0x81, 0x01, /*      Input (Constant)    ;5 bit padding  */
-			    0x05, 0x01, /*      Usage Page (Generic Desktop)        */
-			    0x09, 0x30, /*      Usage (X)                           */
-			    0x09, 0x31, /*      Usage (Y)                           */
-			    0x15, 0x81, /*      Logical Minimum (-127)              */
-			    0x25, 0x7F, /*      Logical Maximum (127)               */
-			    0x75, 0x08, /*      Report Size (8)                     */
-			    0x95, 0x02, /*      Report Count (2)                    */
-			    0x81, 0x06, /*      Input (Data, Variable, Relative)    */
-			    0xC0, 0xC0,/* End Collection,End Collection            */
+			  0x05,   0x01, // USAGE_PAGE (Generic Desktop)
+			    0x09,   0x05, // USAGE (Game Pad)
+			    0xA1,   0x01, // COLLECTION (Application)
+
+			    0xA1,   0x00, // COLLECTION (Physical)
+			    0x05,   0x09, // USAGE_PAGE (Button)
+			    0x19,   0x01, // USAGE_MINIMUM (Button 1)
+			    0x29,   0x03, // USAGE_MAXIMUM (Button 3)
+
+			    0x15,   0x00, // LOGICAL_MINIMUM (0)
+			    0x25,   0x01, // LOGICAL_MAXIMUM (1)
+			    0x95,   0x03, // REPORT_COUNT (3)
+			    0x75,   0x01, // REPORT_SIZE (1)
+
+			    0x81,   0x02, // INPUT (Data,Var,Abs)
+			    0x95,   0x01, // REPORT_COUNT (1)
+			    0x75,   0x05, // REPORT_SIZE (5)
+			    0x81,   0x07, // INPUT (Cnst,Var,Rel)
+
+			    0x05,   0x01, // USAGE_PAGE (Generic Desktop)
+			    0x09,   0x30, // USAGE (X)
+			    0x09,   0x31, // USAGE (Y)
+
+			    0x15,   0x81, // LOGICAL_MINIMUM (-127)
+			    0x25,   0x7F, // LOGICAL_MAXIMUM (127)
+			    0x75,   0x08, // REPORT_SIZE (8)
+			    0x95,   0x02, // REPORT_COUNT (2)
+
+			    0x81,   0x02, // INPUT (Data,Var,Abs)
+			    0xC0,   0xC0  // END_COLLECTION x2
 	  };
 
 
@@ -735,163 +741,7 @@ uint8_t _Virtual_Com_Port_Device_Descriptor[] =  {
 			    0xC0 /* 		End Collection,End Collection       */
 	};
 
-//	const uint8_t ARC_KB_report_descriptor[ARC_KB_SIZE_REPORT_DESC] =
-//	  {
-//	      0x05, 0x01,                         // Usage Page (Generic Desktop)
-//	      0x09, 0x06,                         // Usage (Keyboard)
-//	      0xA1, 0x01,                         // Collection (Application)
-//	      0x05, 0x07,                         //     Usage Page (Key Codes)
-//	      0x19, 0xe0,                         //     Usage Minimum (224)
-//	      0x29, 0xe7,                         //     Usage Maximum (231)
-//	      0x15, 0x00,                         //     Logical Minimum (0)
-//	      0x25, 0x01,                         //     Logical Maximum (1)
-//
-//	      0x75, 0x01,                         //     Report Size (1)
-//	      0x95, 0x08,                         //     Report Count (8)
-//	      0x81, 0x02,                         //     Input (Data, Variable, Absolute)
-//
-//	      0x95, 0x01,                         //     Report Count (1)
-//	      0x75, 0x08,                         //     Report Size (8)
-//	      0x81, 0x01,                         //     Input (Constant) reserved byte(1)
-//
-//	      0x95, USB_KB_REPORT_KEYMAP_SIZE,            //     Report Count (normally 6)
-//	      0x75, 0x08,                         //     Report Size (8)
-//	      0x26, 0xff, 0x00,
-//	      0x05, 0x07,                         //     Usage Page (Key codes)
-//	      0x19, 0x00,                         //     Usage Minimum (0)
-//	      0x29, 0xbc,                         //     Usage Maximum (188)
-//	      0x81, 0x00,                         //     Input (Data, Array) Key array(6 bytes)
-//
-//	      0x95, 0x03,                         //     Report Count (3)
-//	      0x75, 0x01,                         //     Report Size (1)
-//	      0x05, 0x08,                         //     Usage Page (Page# for LEDs)
-//	      0x19, 0x01,                         //     Usage Minimum (1)
-//	      0x29, 0x03,                         //     Usage Maximum (3)
-//	      0x91, 0x02,                         //     Output (Data, Variable, Absolute), Led report
-//	      0x95, 0x05,                         //     Report Count (5)
-//	      0x75, 0x01,                         //     Report Size (1)
-//	      0x91, 0x01,                         //     Output (Data, Variable, Absolute), Led report padding
-//
-//	      0xC0                                // End Collection (Application)
-//
-//	  };
 
-//	const uint8_t ARC_MOUSE_report_descriptor[ARC_MOUSE_SIZE_REPORT_DESC] =
-//	  {
-//	      0x05,          /*Usage Page(Generic Desktop)*/
-//	      0x01,
-//	      0x09,          /*Usage(Mouse)*/
-//	      0x02,
-//	      0xA1,          /*Collection(Logical)*/
-//	      0x01,
-//	      0x09,          /*Usage(Pointer)*/
-//	      0x01,
-//	      /* 8 */
-//	      0xA1,          /*Collection(Linked)*/
-//	      0x00,
-//	      0x05,          /*Usage Page(Buttons)*/
-//	      0x09,
-//	      0x19,          /*Usage Minimum(1)*/
-//	      0x01,
-//	      0x29,          /*Usage Maximum(3)*/
-//	      0x03,
-//	      /* 16 */
-//	      0x15,          /*Logical Minimum(0)*/
-//	      0x00,
-//	      0x25,          /*Logical Maximum(1)*/
-//	      0x01,
-//	      0x95,          /*Report Count(3)*/
-//	      0x03,
-//	      0x75,          /*Report Size(1)*/
-//	      0x01,
-//	      /* 24 */
-//	      0x81,          /*Input(Variable)*/
-//	      0x02,
-//	      0x95,          /*Report Count(1)*/
-//	      0x01,
-//	      0x75,          /*Report Size(5)*/
-//	      0x05,
-//	      0x81,          /*Input(Constant,Array)*/
-//	      0x01,
-//	      /* 32 */
-//	      0x05,          /*Usage Page(Generic Desktop)*/
-//	      0x01,
-//	      0x09,          /*Usage(X axis)*/
-//	      0x30,
-//	      0x09,          /*Usage(Y axis)*/
-//	      0x31,
-//	      0x09,          /*Usage(Wheel)*/
-//	      0x38,
-//	      /* 40 */
-//	      0x15,          /*Logical Minimum(-127)*/
-//	      0x81,
-//	      0x25,          /*Logical Maximum(127)*/
-//	      0x7F,
-//	      0x75,          /*Report Size(8)*/
-//	      0x08,
-//	      0x95,          /*Report Count(3)*/
-//	      0x03,
-//	      /* 48 */
-//	      0x81,          /*Input(Variable, Relative)*/
-//	      0x06,
-//	      0xC0,          /*End Collection*/
-//	      0x09,
-//	      0x3c,
-//	      0x05,
-//	      0xff,
-//	      0x09,
-//	      /* 56 */
-//	      0x01,
-//	      0x15,
-//	      0x00,
-//	      0x25,
-//	      0x01,
-//	      0x75,
-//	      0x01,
-//	      0x95,
-//	      /* 64 */
-//	      0x02,
-//	      0xb1,
-//	      0x22,
-//	      0x75,
-//	      0x06,
-//	      0x95,
-//	      0x01,
-//	      0xb1,
-//	      /* 72 */
-//	      0x01,
-//	      0xc0
-//
-//	  };
-//
-//	const uint8_t ARC_JOYSTICK_report_descriptor[ARC_JOYSTICK_SIZE_REPORT_DESC] =
-//	  {
-//	      0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-//	      0x09, 0x04,                    // USAGE (Joystick)
-//	      0xa1, 0x01,                    // COLLECTION (Application)
-//	      0x15, 0x81,                    //   LOGICAL_MINIMUM (-127)
-//	      0x25, 0x7f,                    //   LOGICAL_MAXIMUM (127)
-//	      0x05, 0x01,                    //   USAGE_PAGE (Generic Desktop)
-//	      0x09, 0x01,                    //   USAGE (Pointer)
-//	      0xa1, 0x00,                    //   COLLECTION (Physical)
-//	      0x09, 0x30,                    //     USAGE (X)
-//	      0x09, 0x31,                    //     USAGE (Y)
-//	      0x75, 0x08,                    //     REPORT_SIZE (8)
-//	      0x95, 0x02,                    //     REPORT_COUNT (2)
-//	      0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-//	      0xc0,                          //   END_COLLECTION
-//	      0x05, 0x09,                    //   USAGE_PAGE (Button)
-//	      0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
-//	      0x29, 0x08,                    //   USAGE_MAXIMUM (Button 8)
-//	      0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-//	      0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-//	      0x75, 0x01,                    //   REPORT_SIZE (1)
-//	      0x95, 0x10,                    //   REPORT_COUNT (16)
-//	      0x55, 0x00,                    //   UNIT_EXPONENT (0)
-//	      0x65, 0x00,                    //   UNIT (None)
-//	      0x81, 0x02,                    //   INPUT (Data,Var,Abs)
-//	      0xc0                           // END_COLLECTION
-//	      };
 
 	/* USB String Descriptors (optional) */
 	const uint8_t RHID_StringLangID[RHID_SIZ_STRING_LANGID] =

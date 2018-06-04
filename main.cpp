@@ -83,7 +83,7 @@ int main()
 	_com.RxBufferSize = 64;
 	_com.TxBufferSize = 64;
 	_com.TypeUsb = HumanInterfaceDevice;
-	_com.TypeHid = Hid_Keyboard;
+	_com.TypeHid = Hid_Mouse;
 	_com.Init();
 
 	int a=0;
