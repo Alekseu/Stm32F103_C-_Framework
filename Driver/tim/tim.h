@@ -90,7 +90,8 @@ namespace Driver
 		 void Disable();
 
 		 const char* toString();
-
+		 const char* ToString(char* buf);
+		 const char* Name();
 		 /*
 		  * Interrupt
 		  */

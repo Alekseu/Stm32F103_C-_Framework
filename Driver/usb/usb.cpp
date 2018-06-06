@@ -372,6 +372,7 @@ namespace Driver
 		TypeHid = Hid_manual;
 		bDeviceState = UNCONNECTED;
 		OnRecived=0;
+		_current=0;
 
 	}
 
@@ -382,6 +383,7 @@ namespace Driver
 		MAL_Init(0);
 		RxBuffer = new unsigned char[RxBufferSize];
 		TxBuffer = new unsigned char[TxBufferSize];
+		_current = RxBuffer;
 
 		switch(TypeUsb)
 		{
@@ -1103,10 +1105,14 @@ namespace Driver
 
 	 uint16_t Usb::ReadData(uint8_t* mass)
 	 {
+		 if(RxBytes>0)
+		 {
 		 uint16_t length = RxBytes;
 		 memcpy(mass,RxBuffer,RxBytes);
 		 RxBytes=0;
 		 return length;
+		 }
+		 return 0;
 	 }
 
 	 uint8_t* Usb::LineCodingStamp(uint16_t t)
@@ -1124,7 +1130,19 @@ namespace Driver
 
 	 }
 
-	 uint8_t Usb::ReadByte(){return 0;}
+	 uint8_t Usb::ReadByte(){
+		 if(RxBytes>0)
+		 {
+			 RxBytes--;
+			 char data = _current[0];
+			 _current++;
+		 }
+		 else
+		 {
+
+		 }
+		 return 0;
+	 }
 	 uint8_t Usb::ReadByte(uint8_t addr){return 0;}
 	 bool Usb::ReadByte(uint8_t* value, uint16_t timeOut){return false;}
 
@@ -1143,11 +1161,20 @@ namespace Driver
 	 }
 	 void Usb::WriteByte(uint8_t byte, uint8_t addr)
 	 {
-
+		 WriteByte(addr);
+		 WriteByte(byte);
 	 }
 
 	 uint16_t Usb::ReadWord(){return 0;}
-	 void Usb::WriteWord(uint16_t word){}
+	 void Usb::WriteWord(uint16_t word){
+		 WriteByte((word/10000%10)+0x30);
+		 WriteByte((word/1000%10)+0x30);
+		 WriteByte((word/100%10)+0x30);
+		 WriteByte((word/10%10)+0x30);
+		 WriteByte((word%10)+0x30);
+		 WriteByte(' ');
+		 WriteByte('\r');
+	 }
 
 
 	 /*

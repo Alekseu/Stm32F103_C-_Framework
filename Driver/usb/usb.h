@@ -183,7 +183,7 @@ namespace Driver
 
 		private:
 		GPIO_InitTypeDef GPIO_InitStructure;
-
+		unsigned char* _current;
 
 
 

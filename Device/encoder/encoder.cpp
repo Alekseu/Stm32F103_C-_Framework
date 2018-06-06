@@ -51,6 +51,7 @@ namespace Device
 		GPIO_Init(ENCODER_PORT, &GPIO_InitStructure);
 		_timer = timer_;
 		_timer->OnElapsed =TimerElapsedWrapper;
+		_timer->Init();
 			eObj = this;
 	}
 
@@ -82,10 +83,15 @@ namespace Device
 
 	uint32_t Encoder::GetEncoderData()
 	{
-		return _encData;
+		return _encData/4;
 	}
 
-	void TimerElapsedWrapper()
+	void Encoder::ClearCounter()
+	{
+		_encData=0;
+	}
+
+	void Encoder::TimerElapsedWrapper(void)
 	{
 		if(Encoder::eObj!=0)
 		{
@@ -97,12 +103,12 @@ namespace Device
 	{
 		uint8_t New=0;
 
-		if(GPIO_ReadInputDataBit(ENCODER_PORT, GPIO_Pin_1))
+		if(GPIO_ReadInputDataBit(ENCODER_PORT, ENCODER_PIN1))
 			New|=(1<<0);
 		else
 			New&=~(1<<0);
 
-		if(GPIO_ReadInputDataBit(ENCODER_PORT, GPIO_Pin_2))
+		if(GPIO_ReadInputDataBit(ENCODER_PORT, ENCODER_PIN2))
 			New|=(1<<1);
 		else
 			New&=~(1<<1);
@@ -122,27 +128,27 @@ namespace Device
 		{
 		case 2:
 		{
-			if(New == 3) {_encData++;_preEvent(true);}
-			if(New == 0) {_encData--;_preEvent(false);}
+			if(New == 3) {_encData++; _preEvent(true);}
+			if(New == 0) {_encData--; _preEvent(false);}
 			break;
 		}
 
 		case 0:
 		{
-			if(New == 2) {_encData++;_preEvent(true);}
-			if(New == 1) {_encData--;_preEvent(false);}
+			if(New == 2) { _encData++; _preEvent(true);}
+			if(New == 1) { _encData--; _preEvent(false);}
 			break;
 		}
 		case 1:
 		{
-			if(New == 0) {_encData++;_preEvent(true);}
-			if(New == 3) {_encData--;_preEvent(false);}
+			if(New == 0) {_encData++; _preEvent(true);}
+			if(New == 3) {_encData--; _preEvent(false);}
 			break;
 		}
 		case 3:
 		{
-			if(New == 1) {_encData++;_preEvent(true);}
-			if(New == 2) {_encData--;_preEvent(false);}
+			if(New == 1) {  _encData++; _preEvent(true);}
+			if(New == 2) {  _encData--; _preEvent(false);}
 			break;
 		}
 		}

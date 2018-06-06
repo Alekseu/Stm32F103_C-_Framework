@@ -22,6 +22,8 @@
 #include "Device/RF433/RF433.h"
 #include "Driver/usb/usb.h"
 
+#include "Device/encoder/encoder.h"
+
 #include "Extention/GraphicTextFunctions.h"
 
 //#include "ow.h"
@@ -47,69 +49,90 @@ extern "C"
 	}
 }
 
+Encoder* _enc_;
+
+void OnUsbReceive(unsigned char byte)
+{
+	if(byte=='A')
+	{
+		_enc_->ClearCounter();
+	}
+}
+
 int main()
 {
-
 	InterruptController::RemapToRam();
+
+	//Tim _tim(Tim::Timer2,10,Tim::InterruptType::IT_Update);
+	Encoder _enc;
+
+	//_enc.StartScan();
+	_enc_ = &_enc;
 
 	_leds.Init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-
-
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	// Configure pin in output push/pull mode
-	GPIO_InitStructure.GPIO_Pin = SCK|MOSI|D_C|CS|RES;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-
-	GPIO_ResetBits(GPIOA, RES);
-	_delay_ms(10);
-	GPIO_SetBits(GPIOA, RES);
-
-	GPIO_ResetBits(GPIOA, CS);
-
-
-//		Init();
-//		char buf[64];
-//		therm_read_temperature(buf);
-
+//
+//
+//	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+//
+//	GPIO_InitTypeDef GPIO_InitStructure;
+//
+//	// Configure pin in output push/pull mode
+//	GPIO_InitStructure.GPIO_Pin = SCK|MOSI|D_C|CS|RES;
+//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+//	GPIO_Init(GPIOA, &GPIO_InitStructure);
+//
+//
+//	GPIO_ResetBits(GPIOA, RES);
+//	_delay_ms(10);
+//	GPIO_SetBits(GPIOA, RES);
+//
+//	GPIO_ResetBits(GPIOA, CS);
+//
+//
+////		Init();
+////		char buf[64];
+////		therm_read_temperature(buf);
+//
+//
 
 	Usb _com;
 	_com.RxBufferSize = 64;
 	_com.TxBufferSize = 64;
-	_com.TypeUsb = HumanInterfaceDevice;
-	_com.TypeHid = Hid_Mouse;
+	_com.TypeUsb = VirtualComPort;
+
 	_com.Init();
 
+
+	_com.OnRecived = OnUsbReceive;
+
 	int a=0;
-	int index=0;
+//	int index=0;
 	while(1)
 	{
-		if(a++>=150 && a< 300)
+		_enc.Process();
+		if(a++>=15000 && a< 30000)
 			{
 				_leds.On(1);
 
 			}
-			else if(a>=300)
+			else if(a>=30000)
 			{
 				a=0;
 				_leds.Off(1);
 
 			}
 
-		if(a==160)
+		if(a==16000)
 		{
-
 			//_com.KeyboardSend("hello");
-			_com.MouseMove(rand(),rand());
+			//_com.MouseMove(rand(),rand());
+			_com.WriteWord(_enc.GetEncoderData());
+
 		}
 
-		 _delay_ms(1);
+		// _delay_ms(1);
 	}
 
 	return 0;

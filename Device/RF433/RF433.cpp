@@ -172,10 +172,8 @@ namespace Device
 
 	}
 
-	const char* RF433::toString()
-	{
-		return "RF433";
-	}
+
+
 }
 
 

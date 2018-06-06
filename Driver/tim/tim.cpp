@@ -167,6 +167,16 @@ namespace Driver
 		}
 
 	}
+
+	const char* Tim::ToString(char* buf)
+	{
+		return "TIM";
+	}
+
+	const char* Tim::Name()
+	{
+		return "TIM";
+	}
 }
 
 

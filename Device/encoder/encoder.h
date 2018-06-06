@@ -37,20 +37,21 @@ namespace Device
 		void Process();
 
 		uint32_t GetEncoderData();
+		void ClearCounter();
 
 		EncoderKeyPressed* OnKeyPress;
 		EncoderMove*       OnMove;
 
-		static void TimerElapsedWrapper();
+		static void TimerElapsedWrapper(void);
 
-		void _encoderScan(void);
+
 	private:
 		GpioInit  GPIO_InitStructure;
 		uint8_t _encState;
 		uint32_t _encData;
 		IHDriver* _timer;
 
-
+		void _encoderScan(void);
 		void _preEvent(bool type);
 	};
 
