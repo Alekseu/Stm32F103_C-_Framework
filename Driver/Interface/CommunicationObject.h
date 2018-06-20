@@ -15,7 +15,7 @@ namespace Driver
 {
 	typedef void OnRecivedCallBack(uint8_t);
 
-	class ICommunicationObject:public Object
+	class ICommunicationObject
 	{
 		public:
 		OnRecivedCallBack* OnRecived;

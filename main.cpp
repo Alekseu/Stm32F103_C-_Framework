@@ -26,6 +26,8 @@
 
 #include "Extention/GraphicTextFunctions.h"
 
+#include "Device/Lcd/SSD1306.h"
+
 //#include "ow.h"
 
 using namespace Driver;
@@ -71,6 +73,18 @@ int main()
 
 	_leds.Init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+
+
+	SSD1306 _lcd_;
+	I2c _i2c(I2c::in_I2C1,LCD_ADDR,I2c::Master,I2c::s_50kHz);
+	_i2c.Init();
+	_lcd_.Init(&_i2c, false);
+
+	_lcd_.Clear();
+	_lcd_.PutStr("Hello world");
+
+
+
 //
 //
 //	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);

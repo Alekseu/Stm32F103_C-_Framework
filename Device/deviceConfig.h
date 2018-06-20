@@ -53,10 +53,26 @@ extern "C"
 
 
 /*
- * Lcd N3310
+ * Lcd monitors
+ *-------------------------
  */
 #define WIDTH 84
 #define HEIGHT 48
+
+/*
+ * Lcd N3310
+ */
+
+
+/*
+ * SSD1306
+ */
+#define LCD_ADDR 0x78
+
+
+/*
+ * ----------------------------
+ */
 
 /*
  * Stepper config
@@ -95,6 +111,10 @@ extern "C"
 #define ENCODER_KEY_PIN GPIO_Pin_0
 #define ENCODER_PIN1 GPIO_Pin_1
 #define ENCODER_PIN2 GPIO_Pin_2
+
+
+
+
 
 
 #endif /* DEVICE_DEVICECONFIG_H_ */

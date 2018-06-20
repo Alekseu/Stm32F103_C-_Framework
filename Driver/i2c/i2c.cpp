@@ -32,7 +32,7 @@ namespace Driver
 		switch(_i2cNum)
 		{
 		case in_I2C1:
-			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);//
+			RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB| RCC_APB2Periph_AFIO , ENABLE);//
 			RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 			//GPIO_PinRemapConfig(GPIO_Remap_I2C1, ENABLE);
 			GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_7 | GPIO_Pin_6;
@@ -173,6 +173,73 @@ namespace Driver
 		// I2C_Cmd(I2C_EE, DISABLE);
 		//delay between write and read...not less 4ms
 			_delay_ms(10);
+	}
+
+	void I2c::WriteByte(uint8_t byte, uint8_t baddr, uint8_t addr)
+	{
+		I2C_GenerateSTART((I2C_TypeDef* )_i2cNum, ENABLE);
+
+		/* Test on EV5 and clear it */
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_MODE_SELECT));
+
+
+		/* Send EEPROM address for write */
+		I2C_Send7bitAddress((I2C_TypeDef* )_i2cNum, baddr, I2C_Direction_Transmitter);
+
+		/* Test on EV6 and clear it */
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) ){};
+
+
+		/* Send the EEPROM's internal address to write to : MSB of the address first */
+		I2C_SendData((I2C_TypeDef* )_i2cNum, (uint8_t)(addr ));
+
+		/* Test on EV8 and clear it */
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+		I2C_SendData((I2C_TypeDef* )_i2cNum, byte);
+
+		/* Test on EV8 and clear it */
+		while (!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+		/* Send STOP condition */
+		I2C_GenerateSTOP((I2C_TypeDef* )_i2cNum, ENABLE);
+		// I2C_Cmd(I2C_EE, DISABLE);
+		//delay between write and read...not less 4ms
+		_delay_ms(10);
+	}
+
+	void I2c::WriteByte(uint8_t* val, uint16_t size, uint8_t baddr, uint8_t addr)
+	{
+
+		/* Send START condition */
+		I2C_GenerateSTART((I2C_TypeDef* )_i2cNum, ENABLE);
+
+		/* Test on EV5 and clear it */
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_MODE_SELECT));
+
+
+		/* Send EEPROM address for write */
+		I2C_Send7bitAddress((I2C_TypeDef* )_i2cNum, baddr, I2C_Direction_Transmitter);
+
+		/* Test on EV6 and clear it */
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED) ){};
+
+
+		/* Send the EEPROM's internal address to write to : MSB of the address first */
+		I2C_SendData((I2C_TypeDef* )_i2cNum, (uint8_t)(addr ));
+
+		/* Test on EV8 and clear it */
+		while(!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+
+		for(int i=0;i<size;i++)
+		{
+			((I2C_TypeDef* )_i2cNum)->DR = val[i];
+			while (!I2C_CheckEvent((I2C_TypeDef* )_i2cNum, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+		}
+
+		I2C_GenerateSTOP((I2C_TypeDef* )_i2cNum, ENABLE);
+		_delay_ms(2);
+
 	}
 
 	uint16_t I2c::ReadWord()
