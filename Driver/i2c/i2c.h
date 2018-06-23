@@ -69,7 +69,7 @@ namespace Driver
 
 		void WriteByte(uint8_t byte, uint8_t baddr, uint8_t addr);
 
-		void WriteByte(uint8_t* val, uint16_t size, uint8_t baddr, uint8_t addr);
+		void WriteBytes(uint8_t* val, uint16_t size, uint8_t baddr, uint8_t addr);
 
 		uint16_t ReadWord();
 

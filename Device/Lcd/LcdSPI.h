@@ -18,13 +18,14 @@ namespace Device
 	/*
 	 * Graphic lcd example
 	 *
-	 * LcdSPI* lcd = new LcdSPI();
-	 * lcd->Init();
-	 *
+	 * LcdSPI _lcdSpi;
+	 * _lcdSpi.Init(&_pspi);
+	 * _lcdSpi.Clear();
+	 * _lcdSpi.PutStr(0,0,3,"Тест ");
 	 *
 	 */
 
-	class LcdSPI
+	class LcdSPI :public IDisplay
 	{
 	public:
 		// todo возможно переделать с дефайнов на эти переменные
@@ -35,7 +36,7 @@ namespace Device
 		~LcdSPI();
 
 
-		void Init(bool with_buff = true);
+		void Init(ICommunicationObject* obj, bool with_buff = true);
 
 		//with buffer
 		void SetPixel( char X, char Y, char State );
@@ -44,22 +45,28 @@ namespace Device
 		void DrawFillRactangle(char x1, char y1, char x2, char y2 , char state);
 		void PutChar(char f, char x, char y, char size);
 		void PutStr(char x, char y, char size, const char *str);
+		void PutInt(char x , char y,char size, int i);
 		void Invalidate();
 
 		//without buffer
-		unsigned char Clear();
+		void Clear();
 		void GotoXY(char x , char y);
 		void PutChar(char f);
 		void PutStr(const char *str);
+		void PutInt(char x , char y, int i);
+
+		void WriteBytes(char* _buffer, int frame_size,int size);
 
 	private:
+		ICommunicationObject* _obj;
 		unsigned char* _buffer;
+		char _int_buffer[5];
+
 		bool _with_buffer;
 
-		unsigned char lcd_tx(unsigned char tx,unsigned char dc);
-
-		void lcd_putbyte(char byte);
-		unsigned char lcd_clear_s();
+//		unsigned char lcd_tx(unsigned char tx,unsigned char dc);
+//		void lcd_putbyte(char byte);
+//		unsigned char lcd_clear_s();
 	};
 
 }

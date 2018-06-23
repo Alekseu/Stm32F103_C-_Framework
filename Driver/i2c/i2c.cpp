@@ -41,8 +41,8 @@ namespace Driver
 
 			GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-			InterruptController::SetHandler(I2C1_EV_IRQn,InterruptWraper);
-			InterruptController::EnableChannel(I2C1_EV_IRQn);
+			//InterruptController::SetHandler(I2C1_EV_IRQn,InterruptWraper);
+			//InterruptController::EnableChannel(I2C1_EV_IRQn);
 
 			break;
 		case in_I2C2:
@@ -208,7 +208,7 @@ namespace Driver
 		_delay_ms(10);
 	}
 
-	void I2c::WriteByte(uint8_t* val, uint16_t size, uint8_t baddr, uint8_t addr)
+	void I2c::WriteBytes(uint8_t* val, uint16_t size, uint8_t baddr, uint8_t addr)
 	{
 
 		/* Send START condition */

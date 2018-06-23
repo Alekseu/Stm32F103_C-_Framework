@@ -9,14 +9,15 @@
 namespace Device
 {
 
-	void SSD1306::Init(I2c* _i2c,bool with_buff =true)
+	void SSD1306::Init(ICommunicationObject* obj,bool with_buff =true)
 	{
-		_obj = _i2c;
+		_obj = obj;
 
 		_with_buffer = with_buff;
 		if(_with_buffer)
 		{
 			_buffer = new unsigned char[(WIDTH*HEIGHT)/8+1];
+			memset(_buffer,0,(WIDTH*HEIGHT)/8+1);
 		}
 
 			_obj->WriteByte(0xAE,LCD_ADDR,0x00);
@@ -179,9 +180,13 @@ namespace Device
 					for(char j=1;j<8;j++)
 					{
 						if((charater&(1<<(j-1))))
+						{
 							DrawFillRactangle(x+(i*size), y+(j*size), size,size ,1);
+						}
 						else
+						{
 							DrawFillRactangle(x+(i*size), y+(j*size), size, size ,0);
+						}
 					}
 
 				}
@@ -205,14 +210,25 @@ namespace Device
 		}
 	}
 
+	void SSD1306::PutInt(char x , char y,char size, int i)
+	{
+		_int_buffer[0] = i/1000%10+0x30;
+		_int_buffer[1] = i/100%10+0x30;
+		_int_buffer[2] = i/10%10+0x30;
+		_int_buffer[3] = i%10+0x30;
+		_int_buffer[4] = 0;
+		PutStr(x,y,size,_int_buffer);
+	}
+
 	void SSD1306::Invalidate()
 	{
 		if(_with_buffer)
 		{
 			GotoXY(0,0);
-			for(int i=0;i<((WIDTH*HEIGHT)/8);i++)
+			int counter=0;
+			for(int i=0;i<((HEIGHT)/8);i++)
 			{
-				_obj->WriteByte((unsigned char* )&_buffer[0],128,LCD_ADDR,0x40);
+				_obj->WriteBytes((unsigned char* )&_buffer[i*(WIDTH)],WIDTH,LCD_ADDR,0x40);
 			}
 		}
 	}
@@ -220,12 +236,19 @@ namespace Device
 	//without buffer
 	void SSD1306::Clear()
 	{
-		GotoXY(0,0);
-		for(int i=0;i<8;i++)
+		if (_with_buffer)
 		{
-			for(int i=0;i<128;i++)
+			memset(_buffer,0,(WIDTH*HEIGHT)/8+1);
+		}
+		else
+		{
+		GotoXY(0,0);
+			for(int i=0;i<HEIGHT/8;i++)
 			{
-				_obj->WriteByte(0,LCD_ADDR,0x40);
+				for(int i=0;i<WIDTH;i++)
+				{
+					_obj->WriteByte(0,LCD_ADDR,0x40);
+				}
 			}
 		}
 	}
@@ -263,6 +286,27 @@ namespace Device
 		  while (k=*str++) {PutChar(k);}
 	}
 
+	void SSD1306::PutInt(char x , char y, int i)
+	{
+		GotoXY(x,y);
+		_int_buffer[0] = i/1000%10+0x30;
+		_int_buffer[1] = i/100%10+0x30;
+		_int_buffer[2] = i/10%10+0x30;
+		_int_buffer[3] = i%10+0x30;
+		_int_buffer[4] = 0;
+		PutStr(_int_buffer);
+	}
+
+	void SSD1306::WriteBytes(char* _buffer, int frame_size, int size)
+	{
+		int frame_count = size/frame_size;
+		GotoXY(0,0);
+		for(int i=0;i<frame_count;i++)
+		{
+			_obj->WriteBytes((unsigned char* )&_buffer[i*frame_size],frame_size,LCD_ADDR,0x40);
+		}
+
+	}
 }
 
 

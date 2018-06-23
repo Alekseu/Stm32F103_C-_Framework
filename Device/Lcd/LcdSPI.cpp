@@ -10,28 +10,40 @@
 namespace Device
 {
 
-	void LcdSPI::Init(bool with_buff)
+		LcdSPI::LcdSPI()
+		{
+			_with_buffer = false;
+			_obj=0;
+			Width=0;
+			Height=0;
+			_buffer=0;
+		}
+		 LcdSPI::~LcdSPI(){}
+
+	void LcdSPI::Init(ICommunicationObject* obj,bool with_buff)
 	{
+		_obj = obj;
 		_with_buffer = with_buff;
 		if(_with_buffer)
 		{
 			_buffer = new unsigned char[(WIDTH*HEIGHT)/8+1];
 		}
-		lcd_tx(0x21,0);
+
+		_obj->WriteByte(0x21,0);
 		asm("nop");
-		lcd_tx(0x09,0);
+		_obj->WriteByte(0x09,0);
 		asm("nop");
-		lcd_tx(0xe0,0);
+		_obj->WriteByte(0xe0,0);
 		asm("nop");
-		lcd_tx(0x14,0);
+		_obj->WriteByte(0x14,0);
 		asm("nop");
-		lcd_tx(0x05,0);
+		_obj->WriteByte(0x05,0);
 		asm("nop");
-		lcd_tx(0x20,0);
+		_obj->WriteByte(0x20,0);
 		asm("nop");
-		lcd_tx(0x0c,0);
+		_obj->WriteByte(0x0c,0);
 		asm("nop");
-		lcd_tx(0x80,0);
+		_obj->WriteByte(0x80,0);
 		asm("nop");
 		asm("nop");
 	}
@@ -176,6 +188,16 @@ namespace Device
 		}
 	}
 
+	void LcdSPI::PutInt(char x , char y,char size, int i)
+	{
+		_int_buffer[0] = i/1000%10+0x30;
+		_int_buffer[1] = i/100%10+0x30;
+		_int_buffer[2] = i/10%10+0x30;
+		_int_buffer[3] = i%10+0x30;
+		_int_buffer[4] = 0;
+		PutStr(x,y,size,_int_buffer);
+	}
+
 	void LcdSPI::Invalidate()
 	{
 		if(_with_buffer)
@@ -183,7 +205,7 @@ namespace Device
 			GotoXY(0,0);
 			for(int i=0;i<((WIDTH*HEIGHT)/8);i++)
 			{
-				lcd_putbyte(_buffer[i]);
+				_obj->WriteByte(_buffer[i],1);
 			}
 		}
 	}
@@ -192,11 +214,11 @@ namespace Device
 
 	void LcdSPI::GotoXY(char x , char y)  //переместить на позицию ху
 	{
-		lcd_tx(0x80+x,0);//x direction
-		lcd_tx(0x40+y,0);//y direction
+		_obj->WriteByte(0x80+x,0);//x direction
+		_obj->WriteByte(0x40+y,0);//y direction
 	}
 
-	unsigned char LcdSPI::Clear()  //очистить экран
+	void LcdSPI::Clear()  //очистить экран
 	{
 		char x,y;
 		x=0;y=0;
@@ -206,13 +228,11 @@ namespace Device
 			x=0;
 			while(x<101)
 			{
-				lcd_tx(0x00,1);
+				_obj->WriteByte(0x00,1);
 				x++;
 			}
 			y++;
 		}
-
-		return 0;
 	}
 
 	void LcdSPI::PutChar(char f)
@@ -230,9 +250,9 @@ namespace Device
 		for(char i=0;i<5;i++)
 		{
 			char charater = (char)(Font[f][i]);
-			lcd_tx(charater,1);
+			_obj->WriteByte(charater,1);
 		}
-		lcd_tx(0x00,1);
+		_obj->WriteByte(0x00,1);
 
 	}
 
@@ -245,41 +265,62 @@ namespace Device
 		}
 	}
 
+	void LcdSPI::PutInt(char x , char y, int i)
+	{
+		GotoXY(x,y);
+		_int_buffer[0] = i/1000%10+0x30;
+		_int_buffer[1] = i/100%10+0x30;
+		_int_buffer[2] = i/10%10+0x30;
+		_int_buffer[3] = i%10+0x30;
+		_int_buffer[4] = 0;
+		PutStr(_int_buffer);
+	}
+
+	void LcdSPI::WriteBytes(char* _buffer, int frame_size,int size)
+	{
+		int frame_count = size/frame_size;
+		GotoXY(0,0);
+		for(int i=0;i<frame_count;i++)
+		{
+			_obj->WriteBytes((unsigned char* )&_buffer[i*frame_size],frame_size,LCD_ADDR,0x40);
+		}
+	}
+
 	//private
-	unsigned char LcdSPI::lcd_tx(unsigned char tx,unsigned char dc)
-	{
-		unsigned char i=0;
-
-		if (dc==0x00)GPIO_ResetBits(LCD_PORT,D_C); else GPIO_SetBits(LCD_PORT,D_C);
-
-		for( i = 0; i < 8; i++)
-		{
-			GPIO_ResetBits(GPIOA,SCK);
-			if ((tx&0x80)==0x00) GPIO_ResetBits(LCD_PORT,MOSI); else GPIO_SetBits(LCD_PORT,MOSI);
-
-			GPIO_SetBits(LCD_PORT,SCK);
-			tx<<=1;
-		}
-		GPIO_ResetBits(LCD_PORT,SCK);
-		return 0;
-	}
-
-	void LcdSPI::lcd_putbyte(char byte)
-	{
-		lcd_tx(byte,1);
-	}
-
-	unsigned char LcdSPI::lcd_clear_s()  //очистить экран
-	{
-		if(_with_buffer)
-		{
-			for(int i=0;i<(WIDTH*HEIGHT/8);i++)
-			{
-				_buffer[i]=0;
-			}
-		}
-		return 0;
-	}
+//	unsigned char LcdSPI::lcd_tx(unsigned char tx,unsigned char dc)
+//	{
+//		unsigned char i=0;
+//
+//		if (dc==0x00)GPIO_ResetBits(LCD_PORT,D_C); else GPIO_SetBits(LCD_PORT,D_C);
+//
+//		for( i = 0; i < 8; i++)
+//		{
+//			GPIO_ResetBits(GPIOA,SCK);
+//			if ((tx&0x80)==0x00) GPIO_ResetBits(LCD_PORT,MOSI); else GPIO_SetBits(LCD_PORT,MOSI);
+//
+//			GPIO_SetBits(LCD_PORT,SCK);
+//			tx<<=1;
+//		}
+//		GPIO_ResetBits(LCD_PORT,SCK);
+//		return 0;
+//	}
+//
+//	void LcdSPI::lcd_putbyte(char byte)
+//	{
+//		_obj->WriteByte(byte,1);
+//	}
+//
+//	unsigned char LcdSPI::lcd_clear_s()  //очистить экран
+//	{
+//		if(_with_buffer)
+//		{
+//			for(int i=0;i<(WIDTH*HEIGHT/8);i++)
+//			{
+//				_buffer[i]=0;
+//			}
+//		}
+//		return 0;
+//	}
 
 
 }

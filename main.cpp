@@ -10,6 +10,7 @@
 
 #include "Driver/usart/usart.h"
 #include "Driver/spi/spi.h"
+#include "Driver/spi/PSpi.h"
 #include "Driver/i2c/i2c.h"
 
 #include "Driver/led/led.h"
@@ -27,6 +28,9 @@
 #include "Extention/GraphicTextFunctions.h"
 
 #include "Device/Lcd/SSD1306.h"
+#include "Device/Lcd/LcdSPI.h"
+
+#include "Extention/animationProcessor/LoadingTable.h"
 
 //#include "ow.h"
 
@@ -74,14 +78,27 @@ int main()
 	_leds.Init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
+	PSpi _pspi(PSpi::Master);
+	_pspi.Init();
+
+	LcdSPI _lcdSpi;
+	_lcdSpi.Init(&_pspi);
+	_lcdSpi.Clear();
+	_lcdSpi.PutStr(0,0,3,"Тест ");
 
 	SSD1306 _lcd_;
-	I2c _i2c(I2c::in_I2C1,LCD_ADDR,I2c::Master,I2c::s_50kHz);
+	I2c _i2c(I2c::in_I2C1,LCD_ADDR,I2c::Master,I2c::s_400kHz);
 	_i2c.Init();
-	_lcd_.Init(&_i2c, false);
+	_lcd_.Init(&_i2c, true);
 
 	_lcd_.Clear();
-	_lcd_.PutStr("Hello world");
+	//_lcd_.PutStr(0,0,1,"Типа русский текст");
+	_lcd_.Invalidate();
+	for(int i=0;i<50;i++)
+	{
+	ShowLoading(&_lcd_);
+	//_delay_ms(15);
+	}
 
 
 
@@ -110,42 +127,59 @@ int main()
 ////		therm_read_temperature(buf);
 //
 //
-
-	Usb _com;
-	_com.RxBufferSize = 64;
-	_com.TxBufferSize = 64;
-	_com.TypeUsb = VirtualComPort;
-
-	_com.Init();
-
-
-	_com.OnRecived = OnUsbReceive;
+//
+//	Usb _com;
+//	_com.RxBufferSize = 64;
+//	_com.TxBufferSize = 64;
+//	_com.TypeUsb = VirtualComPort;
+//
+//	_com.Init();
+//
+//
+//	_com.OnRecived = OnUsbReceive;
 
 	int a=0;
-//	int index=0;
+
+	char data[100];
+
+	int index=0, change=0,invalidate=0;
+
 	while(1)
 	{
 		_enc.Process();
-		if(a++>=15000 && a< 30000)
+		if(a++>=1500 && a< 3000)
 			{
 				_leds.On(1);
 
 			}
-			else if(a>=30000)
+			else if(a>=3000)
 			{
 				a=0;
 				_leds.Off(1);
-
 			}
 
-		if(a==16000)
+		if(change++==10)
 		{
 			//_com.KeyboardSend("hello");
 			//_com.MouseMove(rand(),rand());
-			_com.WriteWord(_enc.GetEncoderData());
+			//_com.WriteWord(_enc.GetEncoderData());
+			_lcd_.Clear();
+			_lcd_.PutStr(index,0,3,"Тест ");
+			if(index>= 120)
+			{
+				index=-65;
+			}
+			index+=5;
+			change=0;
 
+			_lcd_.PutInt(0,27,2,a);
 		}
 
+		if(invalidate++==10)
+		{
+			invalidate=0;
+			_lcd_.Invalidate();
+		}
 		// _delay_ms(1);
 	}
 

@@ -202,6 +202,16 @@ namespace Driver
 		WriteByte(byte);
 	}
 
+	void Spi::WriteByte(uint8_t byte, uint8_t baddr, uint8_t addr)
+	{
+
+	}
+
+	void Spi::WriteByte(uint8_t* val, uint16_t size, uint8_t baddr, uint8_t addr)
+	{
+
+	}
+
 	uint16_t Spi::ReadWord()
 	{
 		uint8_t byte =0;

@@ -178,12 +178,13 @@ extern "C"
 
 
 /*
- * Lcd (spi) pin port config
+ * HSpi pin port config
  */
 #define LCD_RCC  RCC_APB2Periph_GPIOC
 #define LCD_PORT GPIOA
 #define SCK GPIO_Pin_0
 #define MOSI GPIO_Pin_1
+#define MISO GPIO_Pin_0
 #define D_C GPIO_Pin_2
 #define CS GPIO_Pin_3
 #define RES GPIO_Pin_4

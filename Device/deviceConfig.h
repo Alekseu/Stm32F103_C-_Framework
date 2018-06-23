@@ -8,6 +8,8 @@
 #ifndef DEVICE_DEVICECONFIG_H_
 #define DEVICE_DEVICECONFIG_H_
 
+#include "Interface/IDisplay.h"
+
 #include "../Extention/delay.h"
 
 extern "C"
@@ -56,8 +58,8 @@ extern "C"
  * Lcd monitors
  *-------------------------
  */
-#define WIDTH 84
-#define HEIGHT 48
+#define WIDTH 128
+#define HEIGHT 64
 
 /*
  * Lcd N3310
