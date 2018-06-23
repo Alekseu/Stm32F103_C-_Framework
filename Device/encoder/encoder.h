@@ -12,6 +12,18 @@
 
 namespace Device
 {
+	/*
+	 * Example
+	 *
+	 * Encoder _enc;
+	 * _enc.StartScan();
+	 * 	_enc.GetEncoderData()
+	 *
+	 * Tim _tim(Tim::Timer2,10,Tim::InterruptType::IT_Update);
+	 * 	_enc.SetTimer(&_tim);
+	 *
+	 */
+
 	using namespace Driver;
 	class Encoder
 	{

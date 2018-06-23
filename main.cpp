@@ -71,6 +71,7 @@ int main()
 
 	//Tim _tim(Tim::Timer2,10,Tim::InterruptType::IT_Update);
 	Encoder _enc;
+	//_enc.SetTimer(&_tim);
 
 	//_enc.StartScan();
 	_enc_ = &_enc;
@@ -78,13 +79,13 @@ int main()
 	_leds.Init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
-	PSpi _pspi(PSpi::Master);
-	_pspi.Init();
-
-	LcdSPI _lcdSpi;
-	_lcdSpi.Init(&_pspi);
-	_lcdSpi.Clear();
-	_lcdSpi.PutStr(0,0,3,"Тест ");
+//	PSpi _pspi(PSpi::Master);
+//	_pspi.Init();
+//
+//	LcdSPI _lcdSpi;
+//	_lcdSpi.Init(&_pspi);
+//	_lcdSpi.Clear();
+//	_lcdSpi.PutStr(0,0,3,"Тест ");
 
 	SSD1306 _lcd_;
 	I2c _i2c(I2c::in_I2C1,LCD_ADDR,I2c::Master,I2c::s_400kHz);
@@ -96,7 +97,7 @@ int main()
 	_lcd_.Invalidate();
 	for(int i=0;i<50;i++)
 	{
-	ShowLoading(&_lcd_);
+		ShowLoading(&_lcd_);
 	//_delay_ms(15);
 	}
 
