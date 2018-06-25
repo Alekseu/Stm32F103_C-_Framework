@@ -840,14 +840,6 @@ void ShowLoading(SSD1306* _monic)
 
 
 	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][0],128,1024);
-//	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][128],128);
-//	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][256],128);
-//	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][384],128);
-//	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][512],128);
-//	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][640],128);
-//	_monic->WriteBytes((char*)&LoadingTable[loadingTable_counter][768],128);
-	//_sysMon.WriteBytes(&LoadingTable[loadingTable_counter][896],128);
-
 	if(loadingTable_counter++>=11)loadingTable_counter=0;
 
 }

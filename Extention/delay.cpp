@@ -6,6 +6,7 @@
  */
 
 #include"delay.h"
+#include "../Driver/platform.h"
 
 extern "C"
 {
@@ -15,12 +16,9 @@ extern "C"
 }
 void _delay_ms(int ms)
 {
-//	  volatile uint32_t nCount;
-//	        RCC_ClocksTypeDef RCC_Clocks;
-//	    RCC_GetClocksFreq (&RCC_Clocks);
-//
-//	        nCount=(RCC_Clocks.HCLK_Frequency/20000)*ms;
-//	        for (; nCount!=0; nCount--);
+	//if(WITH_OS)  __asm__ __volatile__ ("cpsid i");
+
+
 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4,ENABLE);
 
@@ -32,6 +30,8 @@ void _delay_ms(int ms)
 	     TIM4->EGR |= TIM_EGR_UG;	//Генерируем Событие обновления для записи данных в регистры PSC и ARR
 	     TIM4->CR1 |= TIM_CR1_CEN|TIM_CR1_OPM;	//Запускаем таймер записью бита CEN и устанавливаем режим Одного прохода установкой бита OPM
 	     while (TIM4->CR1&TIM_CR1_CEN!=0);
+
+	//     if(WITH_OS)  __asm__ __volatile__ ("cpsie i");
 }
 
 

@@ -45,6 +45,7 @@ namespace Driver
 			{
 				_callpacks[i]=0;
 			}
+			_total_Callbacks=0;
 		}
 	}
 
@@ -61,13 +62,16 @@ namespace Driver
 	uint8_t SystemTimer::AddCallback(SystemTimerCallback* callback)
 	{
 		_callpacks[_currentPosition++] = callback;
+		_total_Callbacks++;
 		return _currentPosition-1;
+
 	}
 
 	void SystemTimer::RemoveCallback(uint8_t id)
 	{
 		if(id>CallbackCount) return;
 		_callpacks[id] =0;
+		_total_Callbacks--;
 	}
 
 	const char* SystemTimer::toString()
@@ -79,7 +83,7 @@ namespace Driver
 	{
 		if(SystemTimer::SysObj->_enabled)
 		{
-			for(int i=0;i<CallbackCount;i++)
+			for(int i=0;i<SystemTimer::SysObj->_total_Callbacks;i++)
 			{
 				if(SystemTimer::SysObj->_callpacks[i]!=0)
 				{

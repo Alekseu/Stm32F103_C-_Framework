@@ -1,0 +1,857 @@
+kernel.h
+
+/*
+ * Kernel.h
+ *
+ *  Created on: 17 окт. 2014 г.
+ *      Author: hudienko_a
+ */
+
+#pragma once
+#include "../../StdPeriph/include/stm32f4xx.h"
+
+extern unsigned long ThreadTicks;
+
+typedef struct {
+		uint32_t r4 __attribute__ ((packed));
+		uint32_t r5 __attribute__ ((packed));
+		uint32_t r6 __attribute__ ((packed));
+		uint32_t r7 __attribute__ ((packed));
+		uint32_t r8 __attribute__ ((packed));
+		uint32_t r9 __attribute__ ((packed));
+		uint32_t r10 __attribute__ ((packed));
+		uint32_t r11 __attribute__ ((packed));
+		uint32_t r0 __attribute__ ((packed));
+		uint32_t r1 __attribute__ ((packed));
+		uint32_t r2 __attribute__ ((packed));
+		uint32_t r3 __attribute__ ((packed));
+		uint32_t r12 __attribute__ ((packed));
+		uint32_t lr __attribute__ ((packed));
+		void (*pc)(void) __attribute__ ((packed));
+		uint32_t psr __attribute__ ((packed));
+	} InitStack;
+
+	class Wait
+			{
+			public:
+
+				Wait(unsigned int wait)
+				{
+					_wait = wait;
+
+					_stamp = ThreadTicks;
+				}
+
+				void SetWait(unsigned int wait)
+				{
+					_wait = wait;
+
+					_stamp = ThreadTicks;
+				}
+
+				bool IsElapsed()
+				{
+					if (_stamp > ThreadTicks) return true;
+
+					if (_stamp + _wait < ThreadTicks) return true;
+
+					return false;
+				}
+
+				void Reset() { _stamp = ThreadTicks; }
+
+			private:
+
+				unsigned int 	_wait;
+				unsigned long 	_stamp;
+			};
+
+	class SimpleKernel
+	{
+
+	public:
+
+		struct Task
+		{
+			char* TaskName;				 // имя задачи
+			unsigned char name_length;	 //
+			unsigned int *stk_top; 		 // вершина стека (последний сохраненный в стек элемент)
+			unsigned int *stk_start; 	 // начало памяти, зарезервированной под стек
+			unsigned int stk_size; 		 // размер стека задачи
+			unsigned char task_priority; // приоритет задачи
+			unsigned char task_state;    //
+			unsigned char taskID;	     // идентификатор задачи
+			bool firstStart;		     // флаг первого старта задачи
+			char deletedTask;            // флаг удаленной задачи
+			void (*task_func)(void);     // указатель на функцию задачи
+			Wait* _wait;                 // задержка типа слип
+			unsigned char* data_stack;   // указатель на стек
+			unsigned char* heap;		 // указатель на кучу процесса
+			void* pointerobj;		     // указатель на объект если это класс наследник Thread или делегат
+			bool Is_delegate;			 //
+			InitStack *sp_;
+		};
+
+		typedef enum _taskPriority
+		{
+			RealTime =0,
+			Higest =1,
+			Middle =2,
+			Lowest =3,
+			Idle =4
+		} TaskPriority;
+
+		typedef enum _taskstate
+		{
+			Running=0,
+			Suspended=1
+		}TaskState;
+
+	public:
+		static SimpleKernel* KernelPointer;
+		unsigned int _tasklength;
+		//unsigned int _currenttask;
+		unsigned int allTaskCount;
+
+		Task _taskList[10];
+		char* kernelHeap;
+
+		 SimpleKernel(unsigned int heapSize);
+		~SimpleKernel();
+
+		 void StartScheduler();
+
+		 int AddTask(void (*method)(void), int stacksize, unsigned char priority, char* taskname, void* obj , bool delegate);
+		 void DeleteTask(char taskId);
+		 void Delay(unsigned int del);
+		 void Yeld();
+		 void EnterCritical();
+		 void ExitCritical();
+
+		 void setpoint();
+		 void ChangeContext();
+		 void Collect();
+
+	private:
+		 unsigned int collectCount;
+		 bool first_start;
+
+		 void _initTaskSlots();
+
+	};
+
+
+Kernel.cpp
+
+
+/*
+ * Kernel.cpp
+ *
+ *  Created on: 20 окт. 2014 г.
+ *      Author: hudienko_a
+ */
+#include <string.h>
+#include "Kernel.h"
+
+#include "../../StdPeriph/include/stm32f4xx.h"
+#include "../../StdPeriph/include/stm32f4xx_gpio.h"
+#include "../port/Port.h"
+#include "../../Global.h"
+#include "../../Pointer/SmartPtr.h"
+
+extern pointerHelper* globalTable;
+extern unsigned long ThreadTicks;
+unsigned int cpuLoad;
+
+	// хрень завершатор задачи
+	static void schedExit(void* return_value)
+	 {
+		SimpleKernel::KernelPointer->_taskList[currentLoadTask].deletedTask=0;
+		delete[] SimpleKernel::KernelPointer->_taskList[currentLoadTask].data_stack;
+		delete[] SimpleKernel::KernelPointer->_taskList[currentLoadTask].heap;
+		SimpleKernel::KernelPointer->ChangeContext();
+	 }
+
+	void IdleTask()
+	{
+		static long LastTick;
+		static unsigned int count;             //наш труд¤га счетчик
+		static unsigned int max_count ;
+
+		while(1)
+		{
+					  //максимальное значение счетчика, вычисл¤етс¤ при калибровке и соответствует 100% CPU idle
+			count++;  //приращение счетчика
+
+			if((ThreadTicks-LastTick > 1000)|| LastTick-ThreadTicks>1000)
+			{ //если прошло 1000 тиков (1 сек дл¤ моей платфрмы)
+				LastTick = ThreadTicks;
+				if(count > max_count) max_count = count;          //это калибровка
+				cpuLoad =  (100 * count / max_count);         //вычисл¤ем текущую загрузку
+				count = 0;     //обнул¤ем счетчик
+
+			}
+
+
+
+		}
+	}
+
+
+
+
+	// ====================   –еализаци¤  ернел ==========================
+#include "../../operators.h"
+
+	SimpleKernel::SimpleKernel(unsigned int heapSize)
+	{
+		allTaskCount =10;
+		_initTaskSlots();
+
+		first_start=true;
+
+		collectCount=0;
+		kernelHeap = new char[heapSize];
+		//_currenttask =0;
+		_tasklength=0;
+		KernelPointer = this;
+
+		Task idle;
+		idle.TaskName = (char*)"IDLE";
+		idle.name_length = 4;
+		idle.stk_size = 256;
+		idle.data_stack = new (kernelHeap) unsigned char[idle.stk_size];
+		memset(idle.data_stack , 0 ,idle.stk_size);
+		idle.stk_start = (unsigned int*)(&idle.data_stack[idle.stk_size-1]);
+		idle.stk_top = (unsigned int*)(&idle.data_stack[idle.stk_size-1]);
+		idle.task_func = IdleTask;
+		idle.task_priority = 4;
+		idle.heap = new (kernelHeap) unsigned char[idle.stk_size];
+
+		InitStack *stack_frame = (InitStack*)((uint32_t)idle.data_stack + (uint32_t)idle.stk_size - (uint32_t)sizeof(InitStack));
+		stack_frame->psr =  0x01000000UL ;
+		stack_frame->pc = idle.task_func;
+		// Reset value for return, shoudln't get reached
+		stack_frame->lr = (uint32_t)&schedExit;
+
+		// Save stack pointer
+		idle.sp_ = stack_frame;
+		 __set_PSP((uint32_t)idle.sp_ + 8 * 4);
+
+		 idle._wait = new Wait(0);
+		 idle.deletedTask =1;
+
+		// _taskList.add(idle);
+		_taskList[_tasklength++] = idle;
+		currentLoadTask =255;
+	}
+	SimpleKernel::~SimpleKernel()
+	{
+	}
+
+	void SimpleKernel::StartScheduler()
+	{
+		enable_interrupts();
+		SetUpNvic();
+		SetupSysTick(1000);
+		Svc();
+	}
+
+	void SimpleKernel::EnterCritical()
+	{
+		enterCritical();
+	}
+
+	void SimpleKernel:: ExitCritical()
+	{
+		exitCritical();
+	}
+
+	int SimpleKernel::AddTask(void (*method)(void), int stacksize ,  unsigned char priority, char* taskname, void* obj, bool delegate )
+	{
+		EnterCritical();
+		Task task;
+		if(stacksize!=0)
+		{
+			task.stk_size = stacksize;
+		}
+		else
+		{
+			task.stk_size = 256;
+		}
+
+		task.TaskName = taskname;
+		task.name_length = strlen(taskname);
+		task.data_stack = new unsigned char[task.stk_size];//new (kernelHeap) unsigned char[task.stk_size]; //размещающий new
+		memset(task.data_stack , 0 ,task.stk_size);
+		task.stk_start = (unsigned int*)(&task.data_stack[task.stk_size-1]);
+		task.stk_top = (unsigned int*)(&task.data_stack[task.stk_size-1]);
+		task.heap = new unsigned char[task.stk_size];//new (kernelHeap) unsigned char[task.stk_size];
+
+		task.task_func = method;
+		task.task_priority = priority;
+
+		 InitStack *stack_frame = (InitStack*)((uint32_t)task.data_stack + (uint32_t)task.stk_size - (uint32_t)sizeof(InitStack));
+
+		 stack_frame->psr =  0x01000000UL ;
+		 stack_frame->pc = task.task_func;
+		 // Reset value for return, shoudln't get reached
+		 stack_frame->lr = (uint32_t)&schedExit;
+
+		 task._wait = new Wait(0);
+		 // Save stack pointer
+		 task.sp_ = stack_frame;
+
+		 task.pointerobj = obj;
+
+
+		 task.taskID = _tasklength;
+		 task.Is_delegate = delegate;
+		 task.firstStart = obj==0? true:false;
+
+		 task.deletedTask =1;
+
+		// _taskList.add(task);
+		 int taskid=0;
+		 //ищем свободный слот
+		 for(int i=1;i<allTaskCount;i++)
+		 {
+			 if(_taskList[i].deletedTask==0)
+			 {
+				 _taskList[i] = task;
+				 taskid=i;
+				 break;
+			 }
+		 }
+
+
+		ExitCritical();
+		return taskid;
+	}
+
+	void SimpleKernel::DeleteTask(char taskId)
+	{
+		EnterCritical();
+		_taskList[taskId].deletedTask =0;
+		_tasklength--;
+
+		// освобождаем пам¤ть
+		delete[] _taskList[taskId].data_stack;
+		delete[] _taskList[taskId].heap;
+		// тут необходимо освободить пам¤ть перенастройть все указатели если используем размещающий new
+
+
+		ChangeContext();
+		ExitCritical();
+	}
+
+	void SimpleKernel::Delay(unsigned int del)
+	{
+		EnterCritical();
+		_taskList[currentLoadTask]._wait->SetWait(del);
+		_taskList[currentLoadTask]._wait->Reset();
+		ExitCritical();
+		ChangeContext();
+	}
+
+	void SimpleKernel::Yeld()
+	{
+		_taskList[currentLoadTask]._wait->SetWait(1);
+		_taskList[currentLoadTask]._wait->Reset();
+		ChangeContext();
+	}
+
+	void SimpleKernel::setpoint()
+	{
+		PendSV();
+	}
+
+//	void SimpleKernel::Collect()
+//	{
+//		collectCount=0;
+//		for(int i=0;i<100;i++)
+//		{
+//			if(!globalTable[i].active)
+//			{
+//				for(int j=i;j<100-i;j++)
+//				{
+//					if(globalTable[j].active)
+//					{
+//						globalTable[i].active = globalTable[j].active;
+//						if(globalTable[i].pointer!=0){((SmartPtr*)globalTable[i].pointer)->~SmartPtr();}
+//						globalTable[i].pointer = globalTable[j].pointer;
+//						globalTable[i].pointer_count = globalTable[j].pointer_count;
+//						//((SmartPtr*)globalTable[i].pointer)->position = i;
+//
+//						globalTable[j].active = false;
+//						globalTable[j].pointer=0;
+//						globalTable[j].pointer_count=0;
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+
+	void SimpleKernel::ChangeContext()
+	{
+		if(first_start)
+		{
+			first_start=false;
+			TaskToLoad =0;
+			setpoint();
+			return ;
+		}
+
+		// set idele task by deafult
+
+			if(_taskList[currentLoadTask]._wait->IsElapsed())
+			{
+				TaskToLoad =currentLoadTask;
+			}
+			else
+			{
+				TaskToLoad=0;
+			}
+
+		// пока что просто пробегаем по всем слотам дл¤ задач провер¤ем какую необходимо вызвать (без приоритетов)
+		for(int i=1;i<allTaskCount-1;i++)
+		{
+			bool task1_elapsed = _taskList[i]._wait->IsElapsed();
+			bool task2_elapsed = _taskList[i+1]._wait->IsElapsed();
+			//if(_taskList[i].deletedTask&&_taskList[i]._wait->IsElapsed() )
+			if((task1_elapsed && _taskList[i].deletedTask) &&  (_taskList[i].task_priority<_taskList[i+1].task_priority) && (( task2_elapsed && _taskList[i+1].deletedTask)||( task2_elapsed && !_taskList[i+1].deletedTask)) )
+			{
+				TaskToLoad = i;
+				break;
+			}
+		}
+
+		//если не получилось найти задачу на запуск по времени и приоритетам, то запускаем любую котора¤ готова к выполнению
+		if(TaskToLoad==currentLoadTask)
+		{
+			for(int i=1;i<allTaskCount;i++)
+			{
+
+				if(_taskList[i].deletedTask && _taskList[i]._wait->IsElapsed())
+				{
+					TaskToLoad = i;
+					break;
+				}
+			}
+		}
+		_taskList[currentLoadTask].task_state = SimpleKernel::Suspended;
+		_taskList[TaskToLoad].task_state = SimpleKernel::Running;
+
+		// в противном случае будет запущен IDLE
+		setpoint();
+	}
+
+
+	 void  SimpleKernel::_initTaskSlots()
+	 {
+		 for(int i=0;i<allTaskCount;i++)
+		 {
+			 _taskList[i].deletedTask=0;
+			 _taskList[i].data_stack=0;
+			 _taskList[i]._wait=0;
+			 _taskList[i].heap=0;
+			 _taskList[i].firstStart = true;
+			 _taskList[i].pointerobj=0;
+			 _taskList[i].stk_size=0;
+			 _taskList[i].stk_start=0;
+			 _taskList[i].stk_top=0;
+			 _taskList[i].taskID=0;
+			 _taskList[i].task_func=0;
+			 _taskList[i].task_priority=255;
+			 _taskList[i].task_state = 1;
+			 _taskList[i].Is_delegate=false;
+
+		 }
+	 }
+
+
+/*
+ * Thread.h
+ *
+ *  Created on: 17 окт. 2014 г.
+ *      Author: hudienko_a
+ */
+
+#pragma once
+
+#include "../../StdPeriph/include/stm32f4xx.h"
+#include "../../delegate/delegate.h"
+
+#include "../kernel/Kernel.h"
+
+//extern IKernel* kernel;
+
+
+class Thread
+{
+private:
+
+public:
+	int handle=0;
+	int heapPointer=0;
+public:
+
+// конструкторы для класса наследника
+	Thread()
+	{
+		handle = SimpleKernel::KernelPointer->AddTask(Task,256, SimpleKernel::Lowest, (char*)"Uncnown", this, false);//для класса наследника
+	};
+
+	Thread(int stacksize)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(Task,stacksize,SimpleKernel::Lowest,(char*)"With stack", this, false); //для класса наследника с указанием размера стека
+	};
+
+	Thread(char* name)
+	{
+		handle = SimpleKernel::KernelPointer->AddTask(Task,256,SimpleKernel::Lowest,name, this, false);//для класса наследника c указанием имени
+	};
+
+	Thread(char* name, SimpleKernel::_taskPriority pr)
+	{
+		handle = SimpleKernel::KernelPointer->AddTask(Task,256,pr,name, this, false);//для класса наследника c указанием имени и приоритета
+	};
+
+	Thread(char* name, int stacksize, SimpleKernel::_taskPriority pr)
+	{
+		handle = SimpleKernel::KernelPointer->AddTask(Task,stacksize,pr,name, this, false);//для класса наследника c указанием имени приоритета и размера стека
+	};
+
+// конструкторы для функций
+	Thread(void(*method)(void))
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(method,256,SimpleKernel::Lowest,(char*)"Function thread", 0, false);//для обычной функции
+	};
+
+	Thread(void(*method)(void), char* name)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(method,256,SimpleKernel::Lowest,name, 0, false);//для обычной функции c с указанием имени
+	};
+
+	Thread(void(*method)(void), char* name,SimpleKernel::_taskPriority pr)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(method,256,pr,name, 0, false);//для обычной функции c с указанием имени и приоритета
+	};
+
+	Thread(void(*method)(void), char* name,SimpleKernel::_taskPriority pr,int stacksize)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(method,stacksize,pr,name, 0, false);//для обычной функции c с указанием имени и приоритета и размера стека
+	};
+
+
+	// конструкторы для делегатов
+	Thread(CDelegate0<void>* del)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(Task,256,SimpleKernel::Lowest,(char*)"Delegate thread", del, true); //для делегата
+	};
+
+	Thread(CDelegate0<void>* del,char* name)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(Task,256,SimpleKernel::Lowest,name, del, true); //для делегата с указанием имени
+	};
+
+	Thread(CDelegate0<void>* del,char* name, SimpleKernel::_taskPriority pr)
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(Task,256,pr,name, del, true); //для делегата с указанием имени и приоритета
+	};
+
+	Thread(CDelegate0<void>* del,char* name, SimpleKernel::_taskPriority pr, int stacksize )
+	{
+		handle =  SimpleKernel::KernelPointer->AddTask(Task,stacksize,pr,name, del, true); //для делегата с указанием имени и приоритета и размекра стека
+	};
+
+	virtual ~Thread()
+	{
+
+	};
+
+
+
+	static void Sleep(int ms)
+	{
+		SimpleKernel::KernelPointer->Delay(ms);
+	}
+	static void EnterCritical()
+	{
+		SimpleKernel::KernelPointer->EnterCritical();
+	}
+	static void ExitCritical()
+	{
+		SimpleKernel::KernelPointer->ExitCritical();
+	}
+
+	//точка входа в поток
+	static void Task()
+	{
+		//пробегаемся по всему списку всех слотов для потоков и смотрим какой поток нуждается в первом запуске
+		for(int i=1;i<SimpleKernel::KernelPointer->allTaskCount-1;i++)
+		{
+			if(!SimpleKernel::KernelPointer->_taskList[i].firstStart)
+			{
+				if(SimpleKernel::KernelPointer->_taskList[i].pointerobj!=0 && !SimpleKernel::KernelPointer->_taskList[i].Is_delegate)
+				{
+					Thread* po = (Thread*)SimpleKernel::KernelPointer->_taskList[i].pointerobj;
+					SimpleKernel::KernelPointer->_taskList[i].firstStart = true;
+					po->exec();
+				}
+
+				if(SimpleKernel::KernelPointer->_taskList[i].pointerobj!=0 && SimpleKernel::KernelPointer->_taskList[i].Is_delegate)
+				{
+					// возможно будет работать
+					//(*reinterpret_cast<void* (*)()>(SimpleKernel::KernelPointer->_taskList[i].pointTomethod))();
+					//или для лучшей читабельности
+//					typedef  void *  VoidFunc ();
+//					VoidFunc * ethodThreadFunc =  reinterpret_cast < VoidFunc *>( SimpleKernel::KernelPointer->_taskList[i].pointerobj );
+//					(* ethodThreadFunc )();
+
+					// работает
+					CDelegate0<void>* del = (CDelegate0<void>*)SimpleKernel::KernelPointer->_taskList[i].pointerobj;
+					if(!del->IsNull())
+					{
+						del->operator ()();
+					}
+
+
+				}
+			}
+		}
+
+
+	}
+
+public:
+	 virtual void exec(void)
+	 {
+
+	 }
+
+};
+
+
+
+/*
+ * Port.h
+ *
+ *  Created on: 24 мая 2016 г.
+ *      Author: hudienko_a
+ */
+
+#ifndef RTOS_PORT_PORT_H_
+#define RTOS_PORT_PORT_H_
+
+
+
+#define portNVIC_SYSPRI2_REG				( * ( ( volatile unsigned long * ) 0xe000ed20 ) )
+#define portNVIC_PENDSV_PRI					( ( ( unsigned long ) 255 ) << 16UL )
+#define portNVIC_SYSTICK_PRI				( ( ( unsigned long ) 255 ) << 24UL )
+
+#define __SVC()     asm volatile ("SVC 0")
+#define __PENDSV()  (SCB->ICSR = ( 1UL << 28UL ) )
+
+#define BASEPRI_SET    (PRIO_SVCALL << (8 - __NVIC_PRIO_BITS))
+#define BASEPRI_UNSET  (0x0)
+
+#define SCHEDULER_DISABLE() asm volatile \
+    ("mov r0, #0xe0     \n"\
+     "MSR basepri, r0   \n" : : "i" (BASEPRI_SET) : "memory", "r0")
+
+#define SCHEDULER_ENABLE()  asm volatile \
+    ("mov r0, #0x00     \n"\
+     "MSR basepri, r0   \n" : : "i" (BASEPRI_UNSET) : "memory", "r0")
+
+#define enterCritical()  asm volatile ("cpsid   i" : : : "memory")
+#define exitCritical()  asm volatile ("cpsie   i" : : : "memory")
+
+#define enable_interrupts() __asm__ __volatile__ ("cpsie i")
+#define disable_interrupts() __asm__ __volatile__ ("cpsid i")
+
+
+#define __SVC()     asm volatile ("SVC 0")
+#define IRQ_RETURN_PSP 0xFFFFFFFD
+#define IRQ_RETURN_MSP 0xFFFFFFF9
+#define IRQ_RETURN_ISR 0xFFFFFFF1
+
+#define portNVIC_INT_CTRL_REG		( * ( ( volatile unsigned long * ) 0xe000ed04 ) )
+#define portNVIC_PENDSVSET_BIT		( 1UL << 28UL )
+#define portNVIC_PENDSVCLEAR_BIT 			( 1UL << 27UL )
+
+#define PRIO_LEVELS     (1 << __NVIC_PRIO_BITS)
+#define PRIO_MINIMUM    (PRIO_LEVELS - 1)
+#define PRIO_MAXIMUM    (0)
+#define PRIO_PENDSV     (PRIO_MINIMUM)
+#define PRIO_SYSTICK    (PRIO_MINIMUM - 1)
+#define PRIO_SVCALL     (PRIO_MINIMUM)
+
+//указатель на ядро
+SimpleKernel *SimpleKernel::KernelPointer ;
+// адрес на стек задачи
+static uint32_t _sp;
+
+// номер текущей задачи
+unsigned int currentLoadTask;
+// номер загружаемой задачи
+unsigned int TaskToLoad;
+
+unsigned long ThreadTicks;
+unsigned long lastTick;
+
+		extern "C"
+		{
+
+		   // системный таймер
+				void __attribute__ ((section(".after_vectors")))
+				SysTick_Handler(void)
+				{
+					ThreadTicks++;
+
+					//if(!SimpleKernel::KernelPointer->Tick.IsNull()){SimpleKernel::KernelPointer->Tick(ThreadTicks);}
+					//if((ThreadTicks-lastTick)>1000 || (lastTick-ThreadTicks)>1000)
+					//{
+					//	lastTick=ThreadTicks;
+						SimpleKernel::KernelPointer->ChangeContext();
+					//}
+
+				}
+
+				//переключатор контекста
+				 __attribute__((naked))//__attribute__ ((section(".after_vectors")))
+				 void PendSV_Handler(void)
+				{
+					if(currentLoadTask==255)
+					{
+						currentLoadTask =0;
+					}
+
+					if(currentLoadTask ==TaskToLoad )  return;
+
+					asm volatile (
+							"MRS    r0, psp         \n" // get the user stack pointer
+							"STMDB  r0!, {r4-r11}   \n" // push r4-r11 on the user stack and dec r0
+							"MSR    psp, r0         \n" // update stack pointer
+							: : :
+							"r0", "r4", "r5", "r6", "r8", "r9", "r10", "r11", "memory");
+
+					SCHEDULER_DISABLE();
+
+					_sp = (unsigned int)&(SimpleKernel::KernelPointer->_taskList[currentLoadTask].sp_);
+					// Now save the stack pointer to THREAD(ACTIVE)->sp_
+					asm volatile (
+							"MRS    r0, psp     \n" // get the user stack pointer
+							"STR    r0, [%0]    \n" // save new sp value
+							: :
+							"r" (_sp) :
+							"r0", "memory");
+
+					currentLoadTask =TaskToLoad;// SimpleKernel::KernelPointer->_currenttask;
+
+					_sp = (unsigned int)&(SimpleKernel::KernelPointer->_taskList[TaskToLoad].sp_ );
+
+					asm volatile (
+							"LDR    r0, [%0]    \n" // load new sp for new thread
+							"MSR    psp, r0     \n" // set user stack pointer
+							: :
+							"r" (_sp) :
+							"r0", "memory");
+
+
+					SCHEDULER_ENABLE();
+
+					// Restore the stack and return to PSP (PendSV is lowest priority,
+					// so it can never preempt another interrupt or itself, only user code)
+					asm volatile (
+							"MRS    r0, psp             \n" // load new sp for new thread
+							"LDMIA  r0!, {r4-r11}       \n" // pop r4-r11 from stack, inc r0
+							"    TST       LR, #0x10         \n" // exc_return[4]=0? (it means that new process
+							"MSR    psp, r0             \n" // adjust user stack pointer
+							"BX     lr                  \n" // return
+							: : :
+							"r0", "r4", "r5", "r6", "r8", "r9", "r10", "r11", "memory"
+
+							);
+
+
+				}
+
+				 // for first start
+				 __attribute__ ((section(".after_vectors")))
+				 void SVC_Handler(void)
+				{
+					 asm volatile (
+					        "MOV    r0, lr  \n" // If SVC gets called from the main stack
+					        "CMP    r0, %0  \n" // return to the user stack.
+					        "ITT    eq      \n"
+					        "MOVEQ  r0, %1  \n"
+					        "BXEQ   r0      \n"
+					    : :
+					    "i" (IRQ_RETURN_MSP), "i" (IRQ_RETURN_PSP) :
+					    "r0", "cc");
+
+					    // Since PendSV is naked, lr is wrong now, so load the user return value
+					    asm volatile (
+					        "BL     PendSV_Handler  \n"
+					        "MOV    lr, %0          \n"
+					        "bx     lr              \n"
+					    : :
+					    "i" (IRQ_RETURN_PSP) :);
+				}
+
+		}
+
+		int SetupSysTick(int ticks)
+		{
+			while (SysTick_Config(SystemCoreClock / 1000) != 0) {
+			} // One SysTick interrupt now equals 1us
+			return (0);
+		}
+
+		void SetUpNvic()
+		{
+			portNVIC_SYSPRI2_REG |= portNVIC_PENDSV_PRI;
+			portNVIC_SYSPRI2_REG |= portNVIC_SYSTICK_PRI;
+		}
+
+		void PendSV()
+		{
+			__PENDSV();
+		}
+
+		void Svc()
+		{
+			__SVC();
+		}
+
+
+#endif /* RTOS_PORT_PORT_H_ */
+
+
+/*
+ * IThread.h
+ *
+ *  Created on: 17 окт. 2014 г.
+ *      Author: hudienko_a
+ */
+
+#pragma once
+
+class IThread
+{
+	public:
+	IThread(){};
+		virtual	~IThread(){};
+
+	virtual void StartScheduler()=0;
+	virtual void EnterCritical()=0;
+	virtual void ExitCritical()=0;
+	virtual bool AddTask(void (*method)(void), int stacksize, char* taskname)=0;
+	virtual void DeleteTask(char* taskname)=0;
+	 //virtual static void Delay(int tick)=0;
+
+};
+
+

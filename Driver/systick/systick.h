@@ -66,6 +66,7 @@ namespace Driver
 			bool  _enabled;
 			uint16_t _period;
 			uint8_t _currentPosition;
+			uint8_t _total_Callbacks;
 			SystemTimerCallback* _callpacks[CallbackCount];
 	};
 
