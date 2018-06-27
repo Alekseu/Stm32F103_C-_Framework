@@ -254,7 +254,8 @@ namespace Os
 		TaskList[currentLoadTask]._wait=del;
 		TaskList[currentLoadTask]._stamp=ThreadTicks;
 		ExitCritical();
-		SwitchContext();
+		//SwitchContext();
+		__SVC();
 	}
 
 	void Kernel::Yeld()

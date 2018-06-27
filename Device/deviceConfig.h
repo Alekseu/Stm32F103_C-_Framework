@@ -58,8 +58,8 @@ extern "C"
  * Lcd monitors
  *-------------------------
  */
-#define WIDTH 128
-#define HEIGHT 64
+#define WIDTH 84
+#define HEIGHT 48
 
 /*
  * Lcd N3310

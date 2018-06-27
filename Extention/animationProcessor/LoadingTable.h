@@ -835,7 +835,7 @@ const char * LoadingTable[]  =
 
 unsigned char loadingTable_counter=0;
 
-void ShowLoading(SSD1306* _monic)
+void ShowLoading(IDisplay* _monic)
 {
 
 

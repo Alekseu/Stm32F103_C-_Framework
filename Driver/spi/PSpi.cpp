@@ -33,6 +33,12 @@ namespace Driver
 
 		GPIO_Init(LCD_PORT, &GPIO_InitStruct);
 
+		GPIO_ResetBits(LCD_PORT,RES);
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		GPIO_SetBits(LCD_PORT,RES);
+
 	}
 
 	uint8_t PSpi::ReadByte()
@@ -95,7 +101,7 @@ namespace Driver
 	{
 		if (addr==0x00)GPIO_ResetBits(LCD_PORT,D_C); else GPIO_SetBits(LCD_PORT,D_C);
 
-		WriteByte(baddr);
+		//WriteByte(baddr);
 		for(int i=0;i<size;i++)
 		{
 			WriteByte(val[i]);

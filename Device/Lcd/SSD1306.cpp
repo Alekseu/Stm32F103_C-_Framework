@@ -106,11 +106,11 @@ namespace Device
 
 		unsigned short error = deltaX - deltaY;
 
-		SetPixel(x2, y2, 1);
+		SetPixel(x2, y2, 0);
 
 		while (x1 != x2 || y1 != y2)
 		{
-			SetPixel(x1, y1, 0);
+			SetPixel(x1, y1, 1);
 			const unsigned short error2 = error * 2;
 
 			if (error2 > -deltaY)

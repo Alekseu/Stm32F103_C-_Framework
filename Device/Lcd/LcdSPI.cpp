@@ -85,11 +85,11 @@ namespace Device
 
 		unsigned short error = deltaX - deltaY;
 
-		SetPixel(x2, y2, 1);
+		SetPixel(x2, y2, 0);
 
 		while (x1 != x2 || y1 != y2)
 		{
-			SetPixel(x1, y1, 0);
+			SetPixel(x1, y1, 1);
 			const unsigned short error2 = error * 2;
 
 			if (error2 > -deltaY)
@@ -220,6 +220,12 @@ namespace Device
 
 	void LcdSPI::Clear()  //очистить экран
 	{
+		if(_with_buffer)
+				{
+					memset(_buffer,0,(WIDTH*HEIGHT)/8);
+				}
+		else
+		{
 		char x,y;
 		x=0;y=0;
 		while(y<6)
@@ -232,6 +238,7 @@ namespace Device
 				x++;
 			}
 			y++;
+		}
 		}
 	}
 
@@ -278,11 +285,11 @@ namespace Device
 
 	void LcdSPI::WriteBytes(char* _buffer, int frame_size,int size)
 	{
-		int frame_count = size/frame_size;
+		int frame_count = size/frame_size -2;
 		GotoXY(0,0);
 		for(int i=0;i<frame_count;i++)
 		{
-			_obj->WriteBytes((unsigned char* )&_buffer[i*frame_size],frame_size,LCD_ADDR,0x40);
+			_obj->WriteBytes((unsigned char* )&_buffer[i*frame_size],WIDTH,LCD_ADDR,0x40);
 		}
 	}
 
