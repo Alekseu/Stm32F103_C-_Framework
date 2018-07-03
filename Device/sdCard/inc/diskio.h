@@ -28,16 +28,19 @@ typedef enum {
 } DRESULT;
 
 
+
 /*---------------------------------------*/
 /* Prototypes for disk control functions */
 void PowerOff();
 void PowerOn();
 
+int getSectorCount();
+
 DSTATUS disk_initialize (BYTE);
 DSTATUS disk_status (BYTE);
-DRESULT disk_read (BYTE, BYTE*, DWORD, BYTE);
+DRESULT disk_read (BYTE, BYTE*, DWORD, WORD);
 #if	_READONLY == 0
-DRESULT disk_write (BYTE, const BYTE*, DWORD, BYTE);
+DRESULT disk_write (BYTE, const BYTE*, DWORD, WORD);
 #endif
 DRESULT disk_ioctl (BYTE, BYTE, void*);
 

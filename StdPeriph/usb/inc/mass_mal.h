@@ -24,10 +24,10 @@
 #define MAL_FAIL 1
 #define MAX_LUN  1
 
-#define     FLASH_DISK_START_ADDRESS		          0x08010000     /* Flash start address */
-#define     FLASH_DISK_SIZE              				  456704
+#define     FLASH_DISK_START_ADDRESS		      0x00000000//    0x08010000     /* Flash start address */
+#define     FLASH_DISK_SIZE              				2048000000 // 456704
 #define     FLASH_PAGE_SIZE                       2048         /* 2K per page */
-#define     WAIT_TIMEOUT                		      100000 
+#define     WAIT_TIMEOUT                		      100000
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */

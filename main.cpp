@@ -33,6 +33,10 @@
 #include "Extention/animationProcessor/LoadingTable.h"
 
 #include "Os/kernel.h"
+#include "Device/sdCard/inc/ff.h"
+
+#include "Device/w5500/w5500.h"
+
 
 //#include "ow.h"
 
@@ -51,12 +55,12 @@ extern "C"
 {
 	void Led_RW_ON()
 	{
-		LedPort->BSRR = LedPin2;
+		LedPort->BSRR = LedPin1;
 	}
 
 	void  Led_RW_OFF()
 	{
-		LedPort->BRR = LedPin2;
+		LedPort->BRR = LedPin1;
 	}
 }
 
@@ -92,13 +96,35 @@ int main()
 	InterruptController::RemapToRam();
 	_leds.Init();
 
+	W5500 _w5500;
+
+	_w5500.init();
+
+
+//	FATFS	fs;
+//	FIL fp;
+//	UINT br; //счетчик прочитанных байт
+//	UINT bw; //счетчик прочитанных байт
+//	FRESULT res;
+//	BYTE buff[128]; //буфер для чтения / записи файла
+//
+//
+//	f_mount(0, &fs);
+//	res =f_open(&fp,"Test.txt",FA_READ|FA_WRITE);
+//	if(res!=FR_OK)
+//	{
+//	 res =f_open(&fp,"Test.txt",FA_READ|FA_WRITE|FA_CREATE_NEW);
+//	}
+//
+//	res = f_read( &fp, buff, sizeof(buff), (UINT *) &br );
+
 //	I2c _i2c(I2c::in_I2C1,LCD_ADDR,I2c::Master,I2c::s_400kHz);
 //	_i2c.Init();
 //	_lcd_.Init(&_i2c, true);
 //	_lcd_.Clear();
 //	_lcd_.PutInt(0,0,2,_ker.CpuLoad);
 //	_lcd_.Invalidate();
-
+//
 //	SystemTimer _systick(1000);
 //	_systick.Init();
 //	_systick.AddCallback(Kernel::OnTick);
@@ -115,15 +141,15 @@ int main()
 	//_enc_ = &_enc;
 
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 
-	PSpi _pspi(PSpi::Master);
-	_pspi.Init();
+//	PSpi _pspi(PSpi::Master);
+//	_pspi.Init();
 //
-	LcdSPI _lcdSpi;
-	_lcdSpi.Init(&_pspi);
-	_lcdSpi.Clear();
-	_lcdSpi.Invalidate();
+//	LcdSPI _lcdSpi;
+//	_lcdSpi.Init(&_pspi);
+//	_lcdSpi.Clear();
+//	_lcdSpi.Invalidate();
 
 //	SSD1306 _lcd_;
 //	I2c _i2c(I2c::in_I2C1,LCD_ADDR,I2c::Master,I2c::s_400kHz);
@@ -133,13 +159,11 @@ int main()
 //	_lcd_.Clear();
 //	//_lcd_.PutStr(0,0,1,"Типа русский текст");
 //	_lcd_.Invalidate();
-	for(int i=0;i<50;i++)
-	{
-		ShowLoading(&_lcdSpi);
-		_delay_ms(150);
-	}
-
-
+//	for(int i=0;i<50;i++)
+//	{
+//		ShowLoading(&_lcdSpi);
+//		_delay_ms(150);
+//	}
 
 
 //
@@ -171,11 +195,9 @@ int main()
 //	Usb _com;
 //	_com.RxBufferSize = 64;
 //	_com.TxBufferSize = 64;
-//	_com.TypeUsb = VirtualComPort;
+//	_com.TypeUsb = MassStorageDevice;
 //
 //	_com.Init();
-//
-//
 //	_com.OnRecived = OnUsbReceive;
 
 	int a=0;
@@ -187,41 +209,41 @@ int main()
 	while(1)
 	{
 		//_enc.Process();
-		if(a++>=1500 && a< 3000)
-			{
-				_leds.On(1);
+//		if(a++>=1500 && a< 3000)
+//			{
+//				_leds.On(1);
+//
+//			}
+//			else if(a>=3000)
+//			{
+//				a=0;
+//				_leds.Off(1);
+//			}
 
-			}
-			else if(a>=3000)
-			{
-				a=0;
-				_leds.Off(1);
-			}
-
-		if(change++==10)
-		{
-			//_com.KeyboardSend("hello");
-			//_com.MouseMove(rand(),rand());
-			//_com.WriteWord(_enc.GetEncoderData());
- 			_lcdSpi.Clear();
-			_lcdSpi.PutStr(index,0,3,"Тест ");
-
-			_lcdSpi.DrawLine(0,25,84,25);
-			if(index>= 120)
-			{
-				index=-65;
-			}
-			index+=5;
-			change=0;
-
-			_lcdSpi.PutInt(0,27,2,a);
-		}
-
-		if(invalidate++==10)
-		{
-			invalidate=0;
-			_lcdSpi.Invalidate();
-		}
+//		if(change++==10)
+//		{
+//			//_com.KeyboardSend("hello");
+//			//_com.MouseMove(rand(),rand());
+//			//_com.WriteWord(_enc.GetEncoderData());
+// 			_lcdSpi.Clear();
+//			_lcdSpi.PutStr(index,0,3,"Тест ");
+//
+//			_lcdSpi.DrawLine(0,25,84,25);
+//			if(index>= 120)
+//			{
+//				index=-65;
+//			}
+//			index+=5;
+//			change=0;
+//
+//			_lcdSpi.PutInt(0,27,2,a);
+//		}
+//
+//		if(invalidate++==10)
+//		{
+//			invalidate=0;
+//			_lcdSpi.Invalidate();
+//		}
 		 _delay_ms(5);
 	}
 

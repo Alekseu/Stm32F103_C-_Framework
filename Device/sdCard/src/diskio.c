@@ -21,12 +21,12 @@
  *   interface to SD card code
  */
 
-#define SD_MISO GPIO_Pin_14
-#define SD_MOSI GPIO_Pin_15
-#define SD_SCK GPIO_Pin_13
-#define SD_CS	GPIO_Pin_12
-#define SD_PORT GPIOB
-#define SD_SPI SPI2
+#define SD_MISO GPIO_Pin_6
+#define SD_MOSI GPIO_Pin_7
+#define SD_SCK GPIO_Pin_5
+#define SD_CS	GPIO_Pin_4
+#define SD_PORT GPIOA
+#define SD_SPI SPI1
 
 
 #define SD_POWER GPIO_Pin_8
@@ -67,8 +67,8 @@ static void spi_init(void)
 {
 	GPIO_InitTypeDef gpio;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD, ENABLE);
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOD, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
 	gpio.GPIO_Pin = SD_SCK | SD_MISO | SD_MOSI;
 	gpio.GPIO_Speed = GPIO_Speed_50MHz;
@@ -130,11 +130,11 @@ static void spi_set_speed(enum sd_speed speed)
 
 static char CheckCard()
 {
-	if(!GPIO_ReadInputDataBit(SD_PORT2, SD_CARDPRESENT))
-	{
-		return 1;
-	}
-	return 0;
+//	if(!GPIO_ReadInputDataBit(SD_PORT2, SD_CARDPRESENT))
+//	{
+//		return 1;
+//	}
+	return 1;
 }
 
 
@@ -772,7 +772,12 @@ void PowerOn()
 
 #include "../inc/diskio.h"
 
-hwif hw;
+volatile hwif hw;
+
+int getSectorCount()
+{
+	return hw.sectors;
+}
 
 DSTATUS disk_initialize(BYTE drv)
 {
@@ -800,11 +805,11 @@ DSTATUS disk_status(BYTE drv)
 }
 
 
-DRESULT disk_read(BYTE drv, BYTE *buff, DWORD sector, BYTE count)
+DRESULT disk_read(BYTE drv, BYTE *buff, DWORD sector, WORD count)
 {
 	int i;
 
-	for (i=0; i<count; i++)
+ 	for (i=0; i<count; i++)
 		if (sd_read(&hw, sector+i, buff+512*i) != 0)
 			return RES_ERROR;
 
@@ -813,7 +818,7 @@ DRESULT disk_read(BYTE drv, BYTE *buff, DWORD sector, BYTE count)
 
 
 #if _READONLY == 0
-DRESULT disk_write(BYTE drv, const BYTE *buff, DWORD sector, BYTE count)
+DRESULT disk_write(BYTE drv, const BYTE *buff, DWORD sector, WORD count)
 {
 	int i;
 
