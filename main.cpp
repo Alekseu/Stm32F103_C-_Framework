@@ -91,6 +91,7 @@ extern "C"
 //}
 
 
+
 int main()
 {
 	InterruptController::RemapToRam();
@@ -99,6 +100,10 @@ int main()
 	W5500 _w5500;
 
 	_w5500.init();
+
+	_w5500.init_socket();
+
+
 
 
 //	FATFS	fs;

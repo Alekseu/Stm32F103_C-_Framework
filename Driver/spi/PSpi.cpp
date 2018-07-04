@@ -21,7 +21,7 @@ namespace Driver
 	{
 		RCC_APB2PeriphClockCmd(LCD_RCC,ENABLE);
 
-		GPIO_InitStruct.GPIO_Pin = SCK | MOSI|D_C|CS|RES;
+		GPIO_InitStruct.GPIO_Pin = SCK | MOSI|D_C|PSpi_CS|RES;
 		GPIO_InitStruct.GPIO_Mode = GPIO_Mode_Out_PP;
 		GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
 
