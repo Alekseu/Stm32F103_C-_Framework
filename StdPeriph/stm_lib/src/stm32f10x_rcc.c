@@ -767,7 +767,7 @@ void RCC_ADCCLKConfig(uint32_t RCC_PCLK2)
 {
   uint32_t tmpreg = 0;
   /* Check the parameters */
-  assert_param(IS_RCC_ADCCLK(RCC_PCLK2));
+ // assert_param(IS_RCC_ADCCLK(RCC_PCLK2));
   tmpreg = RCC->CFGR;
   /* Clear ADCPRE[1:0] bits */
   tmpreg &= CFGR_ADCPRE_Reset_Mask;

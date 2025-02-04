@@ -13,8 +13,8 @@
 ///todo добавить юзер пароль для ftp в настройки
 extern "C"
 {
-#include "../Driver/Ethernet/W5500/w5500.h"
-#include "../Driver/Ethernet/socket.h"
+#include "../../Device/w5500/Ethernet/W5500/w5500.h"
+#include "../../Device/w5500/Ethernet/socket.h"
 #include "string.h"
 #include "stdio.h"
 #include "../SDCard/inc/ff.h"

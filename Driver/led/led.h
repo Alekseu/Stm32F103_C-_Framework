@@ -28,8 +28,11 @@ namespace Driver
 
 		void Off(unsigned char i);
 
+		void togle();
+
 	private:
 		GpioInit  GPIO_InitStructure;
+		bool state;
 	};
 
 }

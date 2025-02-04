@@ -37,6 +37,10 @@ extern "C"
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_dma.h"
 	#include "../StdPeriph/stm_lib/inc/stm32f10x_exti.h"
 	#include "../StdPeriph/stm_lib/inc/misc.h"
+
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_adc.h"
+
+	#include "../StdPeriph/stm_lib/inc/stm32f10x_fsmc.h"
 }
 
 /*
@@ -49,15 +53,15 @@ extern "C"
 /*
  * Leds
  */
-#define LedPin1 GPIO_Pin_13
-#define LedPin2 GPIO_Pin_5
-#define LedPin3 GPIO_Pin_4
-#define LedRCC  RCC_APB2Periph_GPIOC
-#define LedPort GPIOC
-//#define LedPin1 GPIO_Pin_5
+//#define LedPin1 GPIO_Pin_13
+//#define LedPin2 GPIO_Pin_5
+//#define LedPin3 GPIO_Pin_4
+//#define LedRCC  RCC_APB2Periph_GPIOC
+//#define LedPort GPIOC
+#define LedPin1 GPIO_Pin_0
 //#define LedPin2 GPIO_Pin_6
-//#define LedRCC  RCC_APB2Periph_GPIOA
-//#define LedPort GPIOA
+#define LedRCC  RCC_APB2Periph_GPIOA
+#define LedPort GPIOA
 
 
 
@@ -164,6 +168,11 @@ extern "C"
 	#define _UART 2
 	#define _I2C 3
 
+/*
+ * adc
+ */
+#define AdcInit ADC_InitTypeDef
+
 
 /*
  * sdio
@@ -227,5 +236,41 @@ extern "C"
 #define GPIO_Pin_W5500_INT GPIO_Pin_3
 
 #define SPI_BaudRatePrescaler_SPI_SD  SPI_BaudRatePrescaler_4
+
+
+/*
+ * fsmc sram
+ */
+
+#define RFsmcTiming FSMC_NORSRAMTimingInitTypeDef
+#define WFsmcTiming FSMC_NORSRAMTimingInitTypeDef
+
+#define AD0 GPIO_Pin_14
+#define AD1 GPIO_Pin_15
+#define AD2 GPIO_Pin_0
+#define AD3 GPIO_Pin_1
+#define AD4 GPIO_Pin_7
+#define AD5 GPIO_Pin_8
+#define AD6 GPIO_Pin_9
+#define AD7 GPIO_Pin_10
+#define AD8 GPIO_Pin_11
+#define AD9 GPIO_Pin_12
+#define AD10 GPIO_Pin_13
+#define AD11 GPIO_Pin_14
+#define AD12 GPIO_Pin_15
+#define AD13 GPIO_Pin_8
+#define AD14 GPIO_Pin_9
+#define AD15 GPIO_Pin_10
+#define A16  GPIO_Pin_11
+#define A17  GPIO_Pin_12
+#define A18  GPIO_Pin_13
+#define NL   GPIO_Pin_7
+#define NE1  GPIO_Pin_7
+#define NOE  GPIO_Pin_4
+#define NWE  GPIO_Pin_5
+#define NBL  GPIO_Pin_0
+#define NBH  GPIO_Pin_1
+
+
 
 #endif /* DRIVER_PLATFORM_H_ */

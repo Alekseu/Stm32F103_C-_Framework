@@ -1,6 +1,5 @@
+=\=\=\=\=\=\=
+<<<<<<<=HEAD
+>>>>>>>=branch 'master' of https\://github.com/Alekseu/Stm32F103_C-_Framework.git
 eclipse.preferences.version=1
-<<<<<<< HEAD
-toolchain.path.1287942917=D\:\\Distrib\\eclipse-java-luna-SR1-win32\\eclipse\\GCC\\bin
-=======
-toolchain.path.1287942917=C\:\\gcc\\bin
->>>>>>> branch 'master' of https://github.com/Alekseu/Stm32F103_C-_Framework.git
+toolchain.path.1287942917=E\:\\eclipse\\GCC\\bin
